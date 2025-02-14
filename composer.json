@@ -7,8 +7,9 @@
     "keywords": ["Extra Kernel","extra kernel","framework kernel", "kernel"],
     "autoload": {
         "psr-4": {
-            "Flytachi\\Kernel\\Console\\": "console/",
-            "Flytachi\\Kernel\\Src\\": "src/"
+            "Flytachi\\Kernel\\": "/",
+            "Flytachi\\Kernel\\Src\\": "src/",
+            "Flytachi\\Kernel\\Console\\": "console/"
         },
         "files": [
             "function/Dependencies.php"
