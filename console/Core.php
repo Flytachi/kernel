@@ -22,7 +22,7 @@ class Core extends CoreHandle
             } else {
                 $cmd = 'Help';
             }
-            ('Flytachi\Extra\Console\Command\\' . $cmd)::script(self::$arguments);
+            ('Flytachi\Kernel\Console\Command\\' . $cmd)::script(self::$arguments);
         } catch (\Throwable $exception) {
             self::printError($exception);
         }

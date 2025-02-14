@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Extra\Src\Factory\Http;
+namespace Flytachi\Kernel\Src\Factory\Http;
 
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Factory\Error\ExceptionWrapper;

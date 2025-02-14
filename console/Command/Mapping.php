@@ -48,7 +48,7 @@ class Mapping extends Cmd
     private function showArg(): void
     {
         try {
-            $declaration = \Flytachi\Extra\Src\Factory\Mapping\Mapping::scanningDeclaration();
+            $declaration = \Flytachi\Kernel\Src\Factory\Mapping\Mapping::scanningDeclaration();
             foreach ($declaration->getChildren() as $item) {
                 $method = str_pad($item->getMethod() ?: '?', 7);
                 $url = str_pad($item->getUrl(), 50);

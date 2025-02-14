@@ -83,7 +83,7 @@ abstract class ViewBase implements ViewInterface
                     <div class="extra_debug-accordion-body">
                         <?php
                         try {
-                            $declaration = \Flytachi\Extra\Src\Factory\Mapping\Mapping::scanningDeclaration();
+                            $declaration = \Flytachi\Kernel\Src\Factory\Mapping\Mapping::scanningDeclaration();
                             foreach ($declaration->getChildren() as $item) {
                                 if ($item->getMethod() == 'GET' || $item->getMethod() == '') {
                                     $classMethod = $item->getClassName() . '->' . $item->getClassMethod();

@@ -38,7 +38,7 @@ class Help extends Cmd
             $name = basename($cmdFile, '.php');
             self::printMessage(
                 strtolower($name)
-                . " - " .  ('Flytachi\Extra\Console\Command\\' . $name)::$title,
+                . " - " .  ('Flytachi\Kernel\Console\Command\\' . $name)::$title,
                 34
             );
         }
