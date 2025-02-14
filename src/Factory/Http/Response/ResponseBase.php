@@ -13,7 +13,7 @@ abstract class ResponseBase implements ResponseInterface
     protected mixed $content;
     protected HttpCode $httpCode;
 
-    public function __construct(mixed $content, mixed $httpCode = HttpCode::OK)
+    public function __construct(mixed $content, HttpCode $httpCode = HttpCode::OK)
     {
         $this->content = $content;
         $this->httpCode = $httpCode;

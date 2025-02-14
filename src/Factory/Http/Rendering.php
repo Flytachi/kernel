@@ -7,6 +7,7 @@ namespace Flytachi\Kernel\Src\Factory\Http;
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Factory\Error\ExceptionWrapper;
 use Flytachi\Kernel\Src\Factory\Error\ExtraThrowable;
+use Flytachi\Kernel\Src\Factory\Http\Response\ResponseFileContentInterface;
 use Flytachi\Kernel\Src\Factory\Http\Response\ResponseInterface;
 use Flytachi\Kernel\Src\Factory\Http\Response\ViewInterface;
 
@@ -17,6 +18,7 @@ final class Rendering
     private null|int|float|string|array $body;
     private ?string $resource = null;
     private ?string $handle = null;
+    private int $action = 0;
 
     public function setResource(mixed $resource): void
     {
@@ -24,12 +26,19 @@ final class Rendering
             $this->httpCode = $resource->getHttpCode();
             $this->header = $resource->getHeader();
             $this->body = $resource->getBody();
+        } elseif ($resource instanceof ResponseFileContentInterface) {
+            $this->httpCode = $resource->getHttpCode();
+            $this->header = $resource->getHeader();
+            $this->body = $resource->getBody();
+            $this->resource = $resource->getFileName();
+            $this->action = 2;
         } elseif ($resource instanceof ViewInterface) {
             $this->httpCode = $resource->getHttpCode();
             $this->header = $resource->getHeader();
             $this->resource = $resource->getResource();
             $this->body = $resource->getData();
             $this->handle = $resource->getHandle();
+            $this->action = 1;
         } elseif ($resource instanceof \Throwable) {
             $this->httpCode = HttpCode::tryFrom($resource->getCode()) ?: HttpCode::INTERNAL_SERVER_ERROR;
             $this->logging($resource);
@@ -54,10 +63,10 @@ final class Rendering
         foreach ($this->header as $name => $value) {
             header("{$name}: {$value}");
         }
-        if (!empty($this->handle)) {
-            echo $this->handle;
-        }
-        if (!empty($this->resource)) {
+        if ($this->action === 1) {
+            if (!empty($this->handle)) {
+                echo $this->handle;
+            }
             Extra::$logger->withName("Rendering")->debug(sprintf(
                 "HTTP [%d] %s -> %s",
                 $this->httpCode->value,
@@ -69,12 +78,20 @@ final class Rendering
                 extract($data);
             }
             include $this->resource;
+        } elseif ($this->action === 2) {
+            Extra::$logger->withName("Rendering")->debug(sprintf(
+                "HTTP [%d] %s -> %s",
+                $this->httpCode->value,
+                $this->httpCode->message(),
+                $this->resource
+            ));
+            file_put_contents('php://output', $this->body);
         } else {
             Extra::$logger->withName("Rendering")->debug(sprintf(
                 "HTTP [%d] %s -> %s",
                 $this->httpCode->value,
                 $this->httpCode->message(),
-                ($this->body) ? mb_substr($this->body, 0, 3000) : ''
+                $this->body ?: ''
             ));
             echo $this->body;
         }
