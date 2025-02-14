@@ -1,0 +1,16 @@
+<?php
+
+namespace __namespace__;
+
+use Flytachi\Kernel\Src\Factory\Mapping\Annotation\RequestMapping;
+use Flytachi\Kernel\Src\Stereotype\Response;
+use Flytachi\Kernel\Src\Stereotype\RestController;
+
+class __className__ extends RestController
+{
+    #[RequestMapping('__shortName__')]
+    public function hello(): Response
+    {
+        return new Response("hello");
+    }
+}

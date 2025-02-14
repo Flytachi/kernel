@@ -1,0 +1,35 @@
+<?php
+
+namespace App;
+
+use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Factory\Mapping\Annotation\GetMapping;
+use Flytachi\Kernel\Src\Factory\Mapping\OpenApi\OpenApi;
+use Flytachi\Kernel\Src\Factory\Mapping\OpenApi\Schema\SplOperation;
+use Flytachi\Kernel\Src\Factory\Mapping\OpenApi\Specification\Schema\ServerObject;
+use Flytachi\Kernel\Src\Stereotype\RestController;
+use Flytachi\Kernel\Src\Unit\File\JSON;
+
+class OpenApiController extends RestController
+{
+    #[GetMapping('/collection')]
+    #[SplOperation('Collection', 'Collection - OpenApi format 3.1.0 (json file)')]
+    public function index(): Response
+    {
+        $project = basename(Extra::$pathRoot) . ' API';
+        $spl = OpenApi::generate();
+        $spl->info = [
+            'title' => $project,
+            'version' => '1.0.0',
+            'description' => "# **{$project}**\n\n**Update Collection:**\n"
+                . $_SERVER['HTTP_HOST'] . '/api/postman/collection'
+        ];
+        $spl->servers[] = new ServerObject('http://localhost:8000', 'Dev Server');
+        JSON::write(
+            Extra::$pathStorage . '/' . basename(Extra::$pathRoot) . '.openApi-collection.json',
+            json_decode(json_encode($spl), true)
+        );
+        return new Response($spl);
+//        ResponseFile::json(json_encode($spl), basename(PATH_ROOT) . '.openApi-collection.json', true);
+    }
+}
