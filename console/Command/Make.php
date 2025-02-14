@@ -222,7 +222,7 @@ class Make extends Cmd
 
     private function ucWord(string $str): string
     {
-        return str_replace(" ", "", ucwords(str_replace("_", " ", $str)));
+        return implode('/', array_map(fn($word) => ucfirst($word), explode('/', $str)));
     }
 
     public static function help(): void
