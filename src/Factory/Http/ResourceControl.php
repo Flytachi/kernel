@@ -18,4 +18,9 @@ abstract class ResourceControl
     {
         ResourceTree::importResource();
     }
+
+    final public static function getData(?string $valueKey = null): mixed
+    {
+        return ResourceTree::getResourceData($valueKey);
+    }
 }

@@ -34,10 +34,16 @@ final class ResourceTree
         self::$resourceAdditional[] = $resource;
     }
 
+    final public static function getResourceData(?string $valueKey = null): mixed
+    {
+        return empty($valueKey)
+            ? self::$resourceData
+            : (self::$resourceData[$valueKey] ?? null);
+    }
+
     public static function render(array $resourceData): void
     {
         self::$resourceData = $resourceData;
-        extract(self::$resourceData);
         if (self::$template == null) {
             include self::$resource;
         } else {
