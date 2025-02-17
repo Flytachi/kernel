@@ -9,18 +9,32 @@ use Flytachi\Kernel\Src\Factory\Http\HttpCode;
 
 abstract class ViewBase implements ViewInterface
 {
+    protected ?string $callClass;
+    protected ?string $callClassMethod;
+    protected ?string $templateName;
     protected string $resourceName;
-    protected mixed $data;
+    protected array $data;
     protected HttpCode $httpCode;
 
-    public function __construct(string $resourceName, mixed $data = [], HttpCode $httpCode = HttpCode::OK)
+    public function __construct(?string $templateName, string $resourceName, array $data = [], HttpCode $httpCode = HttpCode::OK)
     {
+        if (empty($templateName)) {
+            $this->templateName = null;
+        } else {
+            $this->templateName = $templateName;
+            if (!file_exists($this->getTemplate())) {
+                throw new \Exception($this->getTemplate() . ' not found');
+            }
+        }
         $this->resourceName = $resourceName;
         if (!file_exists($this->getResource())) {
             throw new \Exception($this->getResource() . ' not found');
         }
         $this->data = $data;
         $this->httpCode = $httpCode;
+        $backtrace = debug_backtrace()[1] ?? [];
+        $this->callClass = $backtrace['class'] ?? null;
+        $this->callClassMethod = $backtrace['function'] ?? null;
     }
 
     final public function getHttpCode(): HttpCode
@@ -28,103 +42,36 @@ abstract class ViewBase implements ViewInterface
         return $this->httpCode;
     }
 
+    final public function getCallClass(): ?string
+    {
+        return $this->callClass;
+    }
+
+    final public function getCallClassMethod(): ?string
+    {
+        return $this->callClassMethod;
+    }
+
     public function getHeader(): array
     {
         return ['Content-Type' => 'text/html; charset=utf-8'];
     }
 
-    public function getResource(): string
+    final public function getTemplate(): ?string
+    {
+        if ($this->templateName == null) {
+            return null;
+        }
+        return Extra::$pathResource . '/' . $this->templateName . '.php';
+    }
+
+    final public function getResource(): string
     {
         return Extra::$pathResource . '/' . $this->resourceName . '.php';
     }
 
-    public function getData(): mixed
+    public function getData(): array
     {
         return $this->data;
-    }
-
-    public function getHandle(): ?string
-    {
-        return $this->debugger();
-    }
-
-    final protected function debugger(): ?string
-    {
-        if (env('DEBUG', false)) {
-            ob_start();
-            $delta = round(microtime(true) - EXTRA_STARTUP_TIME, 3);
-            ?>
-            <link rel="stylesheet" type="text/css" href="/static/extra/css/debug.css"/>
-            <script type="text/javascript" src="/static/extra/js/debug.js"></script>
-            <button id="extra_debug-btn" onclick="ExtraDebugBar()"><em>Debug</em></button>
-
-            <div id="extra_debug-bar">
-                <div id="extra_debug-bar_body-indicator">
-                    <b>Memory:</b> <?= bytes(memory_get_usage(), 'MiB')  ?> /
-                    <b>Time:</b> <?= ($delta < 0.001) ? 0.001 : $delta; ?> sec
-                </div>
-
-                <div id="extra_debug-bar_body-accordion-container">
-
-                    <input type="checkbox" id="debug-item_general">
-                    <label for="debug-item_general">GENERAL</label>
-                    <div class="extra_debug-accordion-body">
-                        <pre><?php print_r([
-                            'sapi' => PHP_SAPI,
-                            'timezone' => env('TIME_ZONE', 'UTC'),
-                            'date' => date(DATE_ATOM),
-                            'template' => str_replace(Extra::$pathRoot, '', $this->getResource()),
-                            'data' => $this->getData()
-                        ]) ?></pre>
-                    </div>
-
-                    <input type="checkbox" id="debug-item_mapping">
-                    <label for="debug-item_mapping">MAPPING</label>
-                    <div class="extra_debug-accordion-body">
-                        <?php
-                        try {
-                            $declaration = \Flytachi\Kernel\Src\Factory\Mapping\Mapping::scanningDeclaration();
-                            foreach ($declaration->getChildren() as $item) {
-                                if ($item->getMethod() == 'GET' || $item->getMethod() == '') {
-                                    $classMethod = $item->getClassName() . '->' . $item->getClassMethod();
-                                    echo sprintf(
-                                        "<div>"
-                                            . "<a href=\"/%s\" style='font-size: 1rem; color: cyan; "
-                                            . "text-decoration-color: cyan' target=\"_blank\">/%s</a> - "
-                                            .  " <em>(%s)<em>"
-                                            .  "</div>",
-                                        $item->getUrl(),
-                                        $item->getUrl(),
-                                        $classMethod
-                                    ) , "</br>";
-                                }
-                            }
-                        } catch (\Throwable $e) {
-                            echo $e->getMessage();
-                        }
-                        ?>
-                    </div>
-
-                    <hr>
-
-                    <?php foreach ($GLOBALS as $name => $INFO) : ?>
-                        <?php if (!empty($INFO)) : ?>
-                            <?php $name = ltrim($name, '_'); ?>
-                            <input type="checkbox" id="debug-item_<?= $name ?>">
-                            <label for="debug-item_<?= $name ?>"><?= $name ?></label>
-                            <div class="extra_debug-accordion-body">
-                                <pre><?php print_r($INFO) ?></pre>
-                            </div>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-
-                </div>
-
-            </div>
-            <?php
-            return ob_get_clean();
-        } else {
-            return null;
-        }
     }
 }

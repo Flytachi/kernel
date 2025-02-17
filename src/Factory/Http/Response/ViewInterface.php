@@ -10,7 +10,9 @@ interface ViewInterface
 {
     public function getHttpCode(): HttpCode;
     public function getHeader(): array;
+    public function getTemplate(): ?string;
+    public function getCallClass(): ?string;
+    public function getCallClassMethod(): ?string;
     public function getResource(): string;
-    public function getData(): mixed;
-    public function getHandle(): ?string;
+    public function getData(): array;
 }

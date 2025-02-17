@@ -17,7 +17,6 @@ final class Rendering
     private array $header = [];
     private null|int|float|string|array $body;
     private ?string $resource = null;
-    private ?string $handle = null;
     private int $action = 0;
 
     public function setResource(mixed $resource): void
@@ -37,8 +36,13 @@ final class Rendering
             $this->header = $resource->getHeader();
             $this->resource = $resource->getResource();
             $this->body = $resource->getData();
-            $this->handle = $resource->getHandle();
             $this->action = 1;
+            ResourceTree::init(
+                $resource->getCallClass(),
+                $resource->getCallClassMethod(),
+                $resource->getTemplate(),
+                $resource->getResource()
+            );
         } elseif ($resource instanceof \Throwable) {
             $this->httpCode = HttpCode::tryFrom($resource->getCode()) ?: HttpCode::INTERNAL_SERVER_ERROR;
             $this->logging($resource);
@@ -64,20 +68,13 @@ final class Rendering
             header("{$name}: {$value}");
         }
         if ($this->action === 1) {
-            if (!empty($this->handle)) {
-                echo $this->handle;
-            }
             Extra::$logger->withName("Rendering")->debug(sprintf(
                 "HTTP [%d] %s -> %s",
                 $this->httpCode->value,
                 $this->httpCode->message(),
                 $this->resource
             ));
-            $data = $this->body;
-            if (is_array($data)) {
-                extract($data);
-            }
-            include $this->resource;
+            ResourceTree::render($this->body);
         } elseif ($this->action === 2) {
             Extra::$logger->withName("Rendering")->debug(sprintf(
                 "HTTP [%d] %s -> %s",
