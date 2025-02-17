@@ -95,7 +95,7 @@ final class ResourceTree
                                         "<div>"
                                         . "<a href=\"/%s\" style='font-size: 1rem; color: cyan; "
                                         . "text-decoration-color: cyan' target=\"_blank\">/%s</a> - "
-                                        .  " <em>(%s)<em>"
+                                        .  " <em>(%s)</em>"
                                         .  "</div>",
                                         $item->getUrl(),
                                         $item->getUrl(),
