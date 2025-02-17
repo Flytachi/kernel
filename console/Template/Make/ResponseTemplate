@@ -1,0 +1,21 @@
+<?php
+
+namespace __namespace__;
+
+use Flytachi\Kernel\Src\Factory\Http\HttpCode;
+use Flytachi\Kernel\Src\Stereotype\Response;
+
+class __className__ extends Response
+{
+    public function __construct(mixed $content, HttpCode $httpCode = HttpCode::OK)
+    {
+        $content = [
+            'statusCode' => $httpCode->value,
+            'statusDescription' => $httpCode->message(),
+            'data' => json_decode(json_encode($content), true),
+            ...$this->debugger()
+        ];
+
+        parent::__construct($content, $httpCode);
+    }
+}

@@ -46,6 +46,9 @@ class Make extends Cmd
             if (in_array('s', $this->args['flags'])) {
                 $this->createService($templateName);
             }
+            if (in_array('l', $this->args['flags'])) {
+                $this->createMiddleware($templateName);
+            }
             if (in_array('r', $this->args['flags'])) {
                 $this->createRepository($templateName);
             }
@@ -60,6 +63,9 @@ class Make extends Cmd
             }
             if (in_array('q', $this->args['flags'])) {
                 $this->createRequest($templateName);
+            }
+            if (in_array('e', $this->args['flags'])) {
+                $this->createResponse($templateName);
             }
             if (in_array('j', $this->args['flags'])) {
                 $this->createJob($templateName);
@@ -103,6 +109,15 @@ class Make extends Cmd
         $code = str_replace("__namespace__", $info['namespace'], $code);
         $code = str_replace("__className__", $info['className'], $code);
         $this->createFile($info['className'], $info['path'], $code, 'service');
+    }
+
+    private function createMiddleware(string $name): void
+    {
+        $info = $this->getInfo($name, 'Middleware', 'MiddlewareTemplate');
+        $code = file_get_contents($info['template']);
+        $code = str_replace("__namespace__", $info['namespace'], $code);
+        $code = str_replace("__className__", $info['className'], $code);
+        $this->createFile($info['className'], $info['path'], $code, 'middleware');
     }
 
     private function createRepository(string $name): void
@@ -149,6 +164,15 @@ class Make extends Cmd
         $code = str_replace("__namespace__", $info['namespace'], $code);
         $code = str_replace("__className__", $info['className'], $code);
         $this->createFile($info['className'], $info['path'], $code, 'request');
+    }
+
+    private function createResponse(string $name): void
+    {
+        $info = $this->getInfo($name, '', 'ResponseTemplate');
+        $code = file_get_contents($info['template']);
+        $code = str_replace("__namespace__", $info['namespace'], $code);
+        $code = str_replace("__className__", $info['className'], $code);
+        $this->createFile($info['className'], $info['path'], $code, 'response');
     }
 
     private function createJob(string $name): void
@@ -238,8 +262,10 @@ class Make extends Cmd
         self::print("m - Template ModelBase, prefix Model", $cl);
         self::print("d - Template DtoObject, prefix Dto", $cl);
         self::print("q - Template RequestObject, prefix Request", $cl);
+        self::print("e - Template Custom Response", $cl);
         self::print("", $cl);
         self::print("s - Template Service, prefix Service", $cl);
+        self::print("l - Template Middleware, prefix Middleware", $cl);
         self::print("r - Template Repository, prefix Repository", $cl);
         self::print("t - Template Store, prefix Store", $cl);
         self::print("", $cl);

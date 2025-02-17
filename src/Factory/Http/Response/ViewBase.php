@@ -13,7 +13,7 @@ abstract class ViewBase implements ViewInterface
     protected mixed $data;
     protected HttpCode $httpCode;
 
-    public function __construct(string $resourceName, mixed $data, HttpCode $httpCode = HttpCode::OK)
+    public function __construct(string $resourceName, mixed $data = [], HttpCode $httpCode = HttpCode::OK)
     {
         $this->resourceName = $resourceName;
         if (!file_exists($this->getResource())) {
