@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Factory\Http;
 
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Stereotype\Controller;
 
 final class ResourceTree
 {
@@ -89,7 +90,7 @@ final class ResourceTree
                         try {
                             $declaration = \Flytachi\Kernel\Src\Factory\Mapping\Mapping::scanningDeclaration();
                             foreach ($declaration->getChildren() as $item) {
-                                if ($item->getMethod() == 'GET' || $item->getMethod() == '') {
+                                if (is_subclass_of($item->getClassName(), Controller::class) && ($item->getMethod() == 'GET' || $item->getMethod() == '')) {
                                     $classMethod = $item->getClassName() . '->' . $item->getClassMethod();
                                     echo sprintf(
                                         "<div>"
