@@ -6,7 +6,6 @@ namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Factory\Error\ExceptionWrapper;
-use Flytachi\Kernel\Src\Factory\Error\ExtraThrowable;
 use Flytachi\Kernel\Src\Http\Response\ResponseFileContentInterface;
 use Flytachi\Kernel\Src\Http\Response\ResponseInterface;
 use Flytachi\Kernel\Src\Http\Response\ViewInterface;
@@ -46,13 +45,8 @@ final class Rendering
         } elseif ($resource instanceof \Throwable) {
             $this->httpCode = HttpCode::tryFrom($resource->getCode()) ?: HttpCode::INTERNAL_SERVER_ERROR;
             $this->logging($resource);
-            if ($resource instanceof ExtraThrowable) {
-                $this->header = $resource->getHeader();
-                $this->body = $resource->getBody();
-            } else {
-                $this->header = ExceptionWrapper::wrapHeader();
-                $this->body = ExceptionWrapper::wrapBody($resource);
-            }
+            $this->header = ExceptionWrapper::wrapHeader();
+            $this->body = ExceptionWrapper::wrapBody($resource);
         } else {
             $this->httpCode = HttpCode::OK;
             $this->body = $resource;

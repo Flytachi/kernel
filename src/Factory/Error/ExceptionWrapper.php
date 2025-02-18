@@ -7,9 +7,11 @@ namespace Flytachi\Kernel\Src\Factory\Error;
 use Flytachi\Kernel\Src\Http\Header;
 use Flytachi\Kernel\Src\Unit\File\XML;
 
-class ExceptionWrapper
+abstract class ExceptionWrapper
 {
-    public static function wrapHeader(): array
+    private static $instance = self::class;
+
+    public static function getHeader(): array
     {
         $accept = Header::getHeader('Accept');
         if (str_contains($accept, 'text/html')) {
@@ -19,7 +21,7 @@ class ExceptionWrapper
         }
     }
 
-    public static function wrapBody(\Throwable $throwable): string
+    public static function getBody(\Throwable $throwable): string
     {
         return match (Header::getHeader('Accept')) {
             'application/json' => self::constructJson($throwable),
@@ -28,7 +30,21 @@ class ExceptionWrapper
         };
     }
 
-    public static function constructJson(\Throwable $throwable): string
+    final public static function wrapHeader(): array
+    {
+        /** @var ExceptionWrapper $newInstance */
+        $newInstance = self::wrapperInstance();
+        return $newInstance::getHeader();
+    }
+
+    final public static function wrapBody(\Throwable $throwable): string
+    {
+        /** @var ExceptionWrapper $newInstance */
+        $newInstance = self::wrapperInstance();
+        return $newInstance::getBody($throwable);
+    }
+
+    final protected static function constructJson(\Throwable $throwable): string
     {
         $context = [
             'code' => $throwable->getCode(),
@@ -57,7 +73,7 @@ class ExceptionWrapper
         return json_encode($context);
     }
 
-    public static function constructXml(\Throwable $throwable): string
+    final protected static function constructXml(\Throwable $throwable): string
     {
         $context = [
             'code' => $throwable->getCode(),
@@ -86,7 +102,7 @@ class ExceptionWrapper
         return XML::arrayToXml($context);
     }
 
-    public static function constructDefault(\Throwable $throwable): string
+    final protected static function constructDefault(\Throwable $throwable): string
     {
         if (env('DEBUG', false)) {
             $tColor = match ((int)($throwable->getCode() / 100)) {
@@ -179,5 +195,18 @@ class ExceptionWrapper
             }
             $message[] = $ms;
         }
+    }
+
+    private static function wrapperInstance(): string
+    {
+        if (self::$instance === self::class) {
+            foreach (get_declared_classes() as $class) {
+                if (is_subclass_of($class, self::class)) {
+                    self::$instance = $class;
+                    break;
+                }
+            }
+        }
+        return self::$instance;
     }
 }

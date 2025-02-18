@@ -16,6 +16,7 @@ RUN mkdir -p /var/run/ && touch /run/php8.3-fpm.pid
 
 # Настройка PHP и Nginx
 RUN test -f /usr/bin/php || ln -s /usr/bin/php83 /usr/bin/php
+RUN echo "variables_order = 'EGPCS'" > /etc/php83/conf.d/99-custom.ini
 
 COPY . /var/www/html
 COPY ./docker/php-fpm.conf /etc/php83/php-fpm.d/www.conf
