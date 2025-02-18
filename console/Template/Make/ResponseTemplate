@@ -7,15 +7,13 @@ use Flytachi\Kernel\Src\Stereotype\Response;
 
 class __className__ extends Response
 {
-    public function __construct(mixed $content, HttpCode $httpCode = HttpCode::OK)
+    public function getBody(): string
     {
-        $content = [
-            'statusCode' => $httpCode->value,
-            'statusDescription' => $httpCode->message(),
-            'data' => json_decode(json_encode($content), true),
+        $this->content = [
+            'code' => $this->httpCode->value,
+            'result' => $this->content,
             ...$this->debugger()
         ];
-
-        parent::__construct($content, $httpCode);
+        return parent::getBody();
     }
 }
