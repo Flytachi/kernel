@@ -2,20 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src\Factory\Routing;
+namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
-use Flytachi\Kernel\Src\Factory\Http\Header;
-use Flytachi\Kernel\Src\Factory\Http\HttpCode;
-use Flytachi\Kernel\Src\Factory\Http\Method;
-use Flytachi\Kernel\Src\Factory\Http\Rendering;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControl;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControlMiddleware;
 use Flytachi\Kernel\Src\Stereotype\ControllerInterface;
 use Psr\Log\LoggerInterface;
 
-class Router
+final class Router
 {
     /**
      * An array to store registered routes in a tree structure.
@@ -27,7 +23,7 @@ class Router
 
     final public static function run(bool $isDevelop = false): void
     {
-        self::$logger = Extra::$logger->withName("Router");
+        self::$logger = Extra::$logger->withName(self::class);
         Header::setHeaders();
         self::route($isDevelop);
     }

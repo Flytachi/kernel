@@ -3,7 +3,7 @@
     "description": "Extra Framework kernel",
     "type": "library",
     "license": "MIT",
-    "version": "5.0.4",
+    "version": "5.1.0",
     "keywords": ["Extra Kernel","extra kernel","framework kernel", "kernel"],
     "autoload": {
         "psr-4": {
@@ -12,7 +12,8 @@
             "Flytachi\\Kernel\\Console\\": "console/"
         },
         "files": [
-            "function/Dependencies.php"
+            "function/Dependencies.php",
+            "function/Tags.php"
         ]
     },
     "authors": [
@@ -30,6 +31,7 @@
         "ext-openssl": "*",
         "ext-pcntl": "*",
         "ext-redis": "*",
-        "ext-posix": "*"
+        "ext-posix": "*",
+        "ext-curl": "*"
     }
 }

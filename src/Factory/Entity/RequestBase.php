@@ -6,7 +6,7 @@ namespace Flytachi\Kernel\Src\Factory\Entity;
 
 use ArgumentCountError;
 use Error;
-use Flytachi\Kernel\Src\Factory\Http\HttpCode;
+use Flytachi\Kernel\Src\Http\HttpCode;
 use TypeError;
 
 abstract class RequestBase implements RequestInterface

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Factory\Error;
 
-use Flytachi\Kernel\Src\Factory\Http\Header;
+use Flytachi\Kernel\Src\Http\Header;
 use Flytachi\Kernel\Src\Unit\File\XML;
 
 class ExceptionWrapper

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src\Factory\Http;
+namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
 
 abstract class ResourceControl
 {
-    final public static function import(string $path): void
+    final public static function import(string $resourceName): void
     {
-        include Extra::$pathResource . "/$path.php";
-        ResourceTree::registerAdditionResource(Extra::$pathResource . "/$path.php");
+        include Extra::$pathResource . "/$resourceName.php";
+        ResourceTree::registerAdditionResource(Extra::$pathResource . "/$resourceName.php");
     }
 
     final public static function content(): void

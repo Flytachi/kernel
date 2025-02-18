@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Stereotype;
 
-use Flytachi\Kernel\Src\Factory\Http\HttpCode;
-use Flytachi\Kernel\Src\Factory\Http\Response\ResponseFileContent;
+use Flytachi\Kernel\Src\Http\HttpCode;
+use Flytachi\Kernel\Src\Http\Response\ResponseFileContent;
 
 class ResponseContent extends ResponseFileContent
 {

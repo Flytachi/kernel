@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src\Factory\Http\Response;
+namespace Flytachi\Kernel\Src\Http\Response;
 
-use Flytachi\Kernel\Src\Factory\Http\HttpCode;
+use Flytachi\Kernel\Src\Http\HttpCode;
 use Flytachi\Kernel\Src\Unit\File\XML;
 
 abstract class ResponseFileContent implements ResponseFileContentInterface

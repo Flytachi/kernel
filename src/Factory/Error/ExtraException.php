@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Factory\Error;
 
 use Flytachi\Kernel\Extra;
-use Flytachi\Kernel\Src\Factory\Http\Header;
-use Flytachi\Kernel\Src\Factory\Http\HttpCode;
+use Flytachi\Kernel\Src\Http\Header;
+use Flytachi\Kernel\Src\Http\HttpCode;
 
 abstract class ExtraException extends \Exception implements ExtraThrowable
 {

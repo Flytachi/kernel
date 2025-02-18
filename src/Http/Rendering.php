@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src\Factory\Http;
+namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Factory\Error\ExceptionWrapper;
 use Flytachi\Kernel\Src\Factory\Error\ExtraThrowable;
-use Flytachi\Kernel\Src\Factory\Http\Response\ResponseFileContentInterface;
-use Flytachi\Kernel\Src\Factory\Http\Response\ResponseInterface;
-use Flytachi\Kernel\Src\Factory\Http\Response\ViewInterface;
+use Flytachi\Kernel\Src\Http\Response\ResponseFileContentInterface;
+use Flytachi\Kernel\Src\Http\Response\ResponseInterface;
+use Flytachi\Kernel\Src\Http\Response\ViewInterface;
 
 final class Rendering
 {
@@ -68,7 +68,7 @@ final class Rendering
             header("{$name}: {$value}");
         }
         if ($this->action === 1) {
-            Extra::$logger->withName("Rendering")->debug(sprintf(
+            Extra::$logger->withName(self::class)->debug(sprintf(
                 "HTTP [%d] %s -> %s",
                 $this->httpCode->value,
                 $this->httpCode->message(),
@@ -76,7 +76,7 @@ final class Rendering
             ));
             ResourceTree::render($this->body);
         } elseif ($this->action === 2) {
-            Extra::$logger->withName("Rendering")->debug(sprintf(
+            Extra::$logger->withName(self::class)->debug(sprintf(
                 "HTTP [%d] %s -> %s",
                 $this->httpCode->value,
                 $this->httpCode->message(),
@@ -84,7 +84,7 @@ final class Rendering
             ));
             file_put_contents('php://output', $this->body);
         } else {
-            Extra::$logger->withName("Rendering")->debug(sprintf(
+            Extra::$logger->withName(self::class)->debug(sprintf(
                 "HTTP [%d] %s -> %s",
                 $this->httpCode->value,
                 $this->httpCode->message(),

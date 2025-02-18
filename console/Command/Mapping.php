@@ -6,7 +6,7 @@ namespace Flytachi\Kernel\Console\Command;
 
 use Flytachi\Kernel\Console\Inc\Cmd;
 use Flytachi\Kernel\Extra;
-use Flytachi\Kernel\Src\Factory\Routing\Router;
+use Flytachi\Kernel\Src\Http\Router;
 
 class Mapping extends Cmd
 {

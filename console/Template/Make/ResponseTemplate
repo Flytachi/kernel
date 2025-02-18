@@ -2,7 +2,7 @@
 
 namespace __namespace__;
 
-use Flytachi\Kernel\Src\Factory\Http\HttpCode;
+use Flytachi\Kernel\Src\Http\HttpCode;
 use Flytachi\Kernel\Src\Stereotype\Response;
 
 class __className__ extends Response

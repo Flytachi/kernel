@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Factory\Mapping\OpenApi\Schema;
 
 use Attribute;
-use Flytachi\Kernel\Src\Factory\Http\HttpCode;
+use Flytachi\Kernel\Src\Http\HttpCode;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class SplResponse implements Spl

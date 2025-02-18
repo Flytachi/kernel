@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Factory\Middleware\Cors;
 
-use Flytachi\Kernel\Src\Factory\Http\Method;
 use Flytachi\Kernel\Src\Factory\Middleware\AbstractMiddleware;
 use Flytachi\Kernel\Src\Factory\Middleware\MiddlewareInterface;
+use Flytachi\Kernel\Src\Http\Method;
 
 abstract class AccessControlMiddleware extends AbstractMiddleware implements MiddlewareInterface
 {
