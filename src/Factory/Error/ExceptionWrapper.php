@@ -164,9 +164,13 @@ abstract class ExceptionWrapper
             $_error['code'] = $throwable->getCode() ?: HttpCode::UNKNOWN_ERROR->value;
             $_error['message'] = $throwable->getMessage();
             if (file_exists(Extra::$pathResource . '/exception/' . $_error['code'] . '.php')) {
-                $result = include Extra::$pathResource . '/exception/' . $_error['code'] . '.php';
+                ob_start();
+                include Extra::$pathResource . '/exception/' . $_error['code'] . '.php';
+                $result = ob_get_clean();
             } elseif (file_exists(Extra::$pathResource . '/exception.php')) {
-                $result = include Extra::$pathResource . '/exception.php';
+                ob_start();
+                include Extra::$pathResource . '/exception.php';
+                $result = ob_get_clean();
             } else {
                 $httpMessage = HttpCode::from($_error['code'])->message();
                 $result = '<!DOCTYPE html><html lang="en">';
