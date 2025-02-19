@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Factory\Error;
 
+use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Http\Header;
+use Flytachi\Kernel\Src\Http\HttpCode;
 use Flytachi\Kernel\Src\Unit\File\XML;
 
 abstract class ExceptionWrapper
@@ -159,9 +161,30 @@ abstract class ExceptionWrapper
             $result .= '</div>';
             $result .= '</body>';
         } else {
-            $result = '<strong>Extra Error ' . $throwable->getCode() . ':</strong> ' . $throwable->getMessage();
+            $_error['code'] = $throwable->getCode() ?: HttpCode::UNKNOWN_ERROR->value;
+            $_error['message'] = $throwable->getMessage();
+            if (file_exists(Extra::$pathResource . '/exception/' . $_error['code'] . '.php')) {
+                $result = include Extra::$pathResource . '/exception/' . $_error['code'] . '.php';
+            } elseif (file_exists(Extra::$pathResource . '/exception.php')) {
+                $result = include Extra::$pathResource . '/exception.php';
+            } else {
+                $httpMessage = HttpCode::from($_error['code'])->message();
+                $result = '<!DOCTYPE html><html lang="en">';
+                $result .= '<head>';
+                $result .=      '<meta charset="utf-8">';
+                $result .=      '<meta http-equiv="X-UA-Compatible" content="IE=edge">';
+                $result .=      '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+                $result .=      "<title>{$_error['code']} {$httpMessage}</title>";
+                $result .= '</head>';
+                $result .= '<body style="background-color: #0a0f1f;color: #ffffff">';
+                $result .=      '<center>';
+                $result .=          '<strong style="font-size:21px;"><em>Extra ' . $_error['code'] . ' - ' . $httpMessage . '</em></strong>';
+                $result .=          '<hr width="50%">';
+                $result .=          "<h2 style=\"color:#676980FF\">{$_error['message']}</h2>";
+                $result .=      '</center>';
+                $result .= '</body>';
+            }
         }
-
         return $result;
     }
 

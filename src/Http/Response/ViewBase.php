@@ -32,7 +32,13 @@ abstract class ViewBase implements ViewInterface
         }
         $this->data = $data;
         $this->httpCode = $httpCode;
-        $backtrace = debug_backtrace()[1] ?? [];
+        $backtrace = debug_backtrace();
+        if (isset($backtrace[1]['class'])) {
+            $index = $backtrace[1]['class'] == static::class ? 2 : 1;
+            $backtrace = $backtrace[$index] ?? [];
+        } else {
+            $backtrace = [];
+        }
         $this->callClass = $backtrace['class'] ?? null;
         $this->callClassMethod = $backtrace['function'] ?? null;
     }
