@@ -36,13 +36,14 @@ use Flytachi\Kernel\Src\Factory\Stereotype;
  *  @method  self         headers(string ...$headers)
  *  @method  self         get(string $url, null|array $params = null)
  *  @method  self         put(string $url, null|array $params = null)
- *  @method  self         post(string $url, null|array $params = null, null|array $body = null)
+ *  @method  self         post(string $url, null|array $params = null)
  *  @method  self         delete(string $url, null|array $params = null)
  *  @method  self         patch(string $url, null|array $params = null)
  *  @method  self         request(string $method, string $url, null|array $params = null)
- *  @method  self         body(array $body, string $type = 'json')
+ *  @method  self         body(mixed $body)
+ *  @method  self         bodyJson(array|string $bodyJson)
  *
- *  @version 2.2
+ *  @version 2.5
  *  @author Flytachi
  */
 final class Blink extends Stereotype
@@ -144,13 +145,10 @@ final class Blink extends Stereotype
      * @param string $url The URL to send the POST request to.
      * @param null|array $params Optional. The parameters to include in the URL query string.
      *                          Defaults to null if no parameters are provided.
-     * @param null|array $body Optional. The body of the POST request.
-     *                          Defaults to null if no body is provided.
      * @return self Returns an instance of the class that this method belongs to.
      */
-    public static function post(string $url, null|array $params = null, null|array $body = null): self
+    public static function post(string $url, null|array $params = null): self
     {
-        if ($body) self::body($body);
         return self::request('POST', $url, $params);
     }
 
@@ -201,13 +199,24 @@ final class Blink extends Stereotype
      * Sets the request body for the HTTP request.
      *
      * @param array $body The data to be sent as the request body.
-     * @param string $type The type of data to be sent. Default is 'json'.
      * @return self Returns the current instance of the Blink class.
      */
-    public static function body(array $body, string $type = 'json'): self
+    public static function body(mixed $body): self
     {
-        if ($type == 'json') self::setOption(CURLOPT_POSTFIELDS, json_encode($body));
-        else self::setOption(CURLOPT_POSTFIELDS, $body);
+        self::setOption(CURLOPT_POSTFIELDS, $body);
+        return self::$blink;
+    }
+
+    /**
+     * Sets the request body for the HTTP request (json).
+     *
+     * @param array|string $bodyJson The data to be sent as the request body.
+     * @return self Returns the current instance of the Blink class.
+     */
+    public static function bodyJson(array|string $bodyJson): self
+    {
+        if (is_array($bodyJson)) self::setOption(CURLOPT_POSTFIELDS, json_encode($bodyJson));
+        else self::setOption(CURLOPT_POSTFIELDS, $bodyJson);
         return self::$blink;
     }
 
