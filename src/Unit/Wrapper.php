@@ -22,7 +22,7 @@ use TypeError;
  * - `urlToArray(string $url): array`: Converts the URL query string to an associative array.
  * - `arrayToUrl(array $get): string`: Converts an associative array of parameters to a URL query string.
  *
- * @version 2.4
+ * @version 3.0
  * @author Flytachi
  */
 final class Wrapper
@@ -36,7 +36,6 @@ final class Wrapper
     private static int $totalItem;
     private static int $currentPage;
     private static int $limitPage;
-    private static string $params;
 
     /**
      * Paginate the results of a repository query.
@@ -83,7 +82,7 @@ final class Wrapper
                     'totalItem' => self::$totalItem,
                     'totalPage' => self::$totalPages,
                 ],
-                'list' => $repo->findAll($modelClassName),
+                'list' => $repo->findAll($modelClassName) ?: [],
             ];
         } else {
             if (is_null($limit)) {
@@ -135,7 +134,7 @@ final class Wrapper
         }
         self::init($repo);
         return array(
-            'table' => $repo->findAll($modelClassName),
+            'table' => $repo->findAll($modelClassName) ?: [],
             'panel' => Wrapper::panel($repo)
         );
     }
@@ -149,43 +148,11 @@ final class Wrapper
         if (Wrapper::$totalPages <= 1) {
             return '';
         }
-        Wrapper::$params = Wrapper::arrayToUrl($_GET);
 
         return sprintf(
             "<ul class=\"pagination pagination-flat pagination-rounded align-self-center justify-content-center mt-3\" >%s</ul>",
             Wrapper::buildPanel()
         );
-    }
-
-    final public static function urlToArray(string $url): array
-    {
-        $code = explode('?', $url);
-        $result = [];
-        if (array_key_exists(1, $code)) {
-            foreach (explode('&', $code[1]) as $param) {
-                if ($param) {
-                    $value = explode('=', $param);
-                    $result[$value[0]] = $value[1];
-                }
-            }
-        }
-        return $result;
-    }
-
-    final public static function arrayToUrl(array $get): string
-    {
-        $str = "?";
-        foreach ($get as $key => $value) {
-            $str .= "$key=$value&";
-        }
-        return substr($str, 0, -1);
-    }
-
-    private static function pageSetter(int $number): string
-    {
-        $local = Wrapper::urlToArray(self::$params);
-        $local['CRD_page'] = $number;
-        return Wrapper::arrayToUrl($local);
     }
 
     private static function init(RepositoryInterface $repo): void
@@ -242,12 +209,12 @@ final class Wrapper
         if (self::$totalPages > self::$maxListValue) {
             if (self::$currentPage > 1) {
                 $panel .=
-                self::templateBtn(false, self::pageSetter(self::$currentPage - 1), "&larr; &nbsp; Prev");
+                self::templateBtn(false, self::$currentPage - 1, "&larr; &nbsp; Prev");
             }
 
             // Elements
             for ($i = 1; $i <= self::$prevElement; $i++) {
-                $panel .= self::templateBtn(self::$currentPage == $i, self::pageSetter($i), $i);
+                $panel .= self::templateBtn(self::$currentPage == $i, $i, (string) $i);
             }
         }
     }
@@ -257,12 +224,12 @@ final class Wrapper
         if (self::$totalPages > self::$maxListValue) {
             // Elements
             for ($i = self::$totalPages - self::$nextElement + 1; $i <= self::$totalPages; $i++) {
-                $panel .= self::templateBtn(self::$currentPage == $i, self::pageSetter($i), $i);
+                $panel .= self::templateBtn(self::$currentPage == $i, $i, (string) $i);
             }
 
             if (self::$currentPage < self::$totalPages) {
                 $panel .=
-                self::templateBtn(false, self::pageSetter(self::$currentPage + 1), "Next &nbsp; &rarr;");
+                self::templateBtn(false, self::$currentPage + 1, "Next &nbsp; &rarr;");
             }
         }
     }
@@ -271,7 +238,7 @@ final class Wrapper
     {
         if (self::$totalPages <= self::$maxListValue) {
             for ($i = 1; $i <= self::$totalPages; $i++) {
-                $panel .= self::templateBtn(self::$currentPage == $i, self::pageSetter($i), $i);
+                $panel .= self::templateBtn(self::$currentPage == $i, $i, (string) $i);
             }
         } else {
             $midTemp = (int) ceil((self::$midElement - 1) / 2);
@@ -292,7 +259,7 @@ final class Wrapper
             $panel .= self::capBtn();
         }
         if (self::$currentPage == self::$prevElement + $midTemp + 2) {
-            $panel .= self::templateBtn(false, self::pageSetter(self::$prevElement + 1), self::$prevElement + 1);
+            $panel .= self::templateBtn(false, self::$prevElement + 1, (string) (self::$prevElement + 1));
         }
     }
 
@@ -306,7 +273,7 @@ final class Wrapper
         ) {
             $startCenter = floor((self::$totalPages - self::$midElement) / 2) + 1;
             for ($i = $startCenter; $i < $startCenter + self::$midElement; $i++) {
-                $panel .= self::templateBtn(self::$currentPage == $i, self::pageSetter($i), $i);
+                $panel .= self::templateBtn(self::$currentPage == $i, $i, (string) $i);
             }
         } else {
             $startPage = self::$currentPage - $midTemp;
@@ -314,7 +281,7 @@ final class Wrapper
 
             for ($i = $startPage; $i <= $endPage; $i++) {
                 if ($i > self::$prevElement && $i <= $elementNext) {
-                    $panel .= self::templateBtn(self::$currentPage == $i, self::pageSetter($i), $i);
+                    $panel .= self::templateBtn(self::$currentPage == $i, $i, (string) $i);
                 }
             }
         }
@@ -335,16 +302,16 @@ final class Wrapper
         if (self::$currentPage == self::$totalPages - self::$nextElement - $midTemp - 1) {
             $panel .= self::templateBtn(
                 false,
-                self::pageSetter(self::$totalPages - self::$nextElement),
+                self::$totalPages - self::$nextElement,
                 (string) self::$totalPages - self::$nextElement
             );
         }
     }
 
-    private static function templateBtn(bool $status, string $url, string $text): string
+    private static function templateBtn(bool $status, int $page, string $text): string
     {
         return "<li class=\"page-item " . (($status) ? 'active' : '') . "\">"
-            . "<a onclick=\"credoSearch('{$url}')\" class=\"page-link\">{$text}</a>"
+            . "<a onclick=\"credoSearch({$page})\" class=\"page-link\">{$text}</a>"
             . "</li>";
     }
 
