@@ -66,22 +66,26 @@ class Run extends Cmd
 
     private function scriptArg(): void
     {
-        self::printMessage("Script currently in development");
-//        if (array_key_exists(2, $this->args['arguments'])) {
-//            $name = ucwords($this->args['arguments'][2]);
-//            $classname = "Command\\" . $name;
-//            if (!class_exists($classname)) {
-//                self::printMessage("Script named '{$name}' not found.");
-//            } else {
-//                $classname::script([
-//                    'arguments' => array_values(array_slice($this->args['arguments'], 2)),
-//                    'options' => $this->args['options'],
-//                    'flags' => $this->args['flags'],
-//                ]);
-//            }
-//        } else {
-//            self::printMessage("Script name not specified.");
-//        }
+        if (array_key_exists(2, $this->args['arguments'])) {
+            $classname = str_replace('/', '\\',
+                    implode('/', array_map(fn($word) => ucfirst($word), explode('/',
+                        str_replace('.', '/', ucwords($this->args['arguments'][2]))
+                    )))
+                ) . 'Cmd';
+            $name = explode('\\', $classname);
+            $name = $name[count($name) - 1];
+            if (!class_exists($classname)) {
+                self::printMessage("Script named '{$name}' not found ({$classname}).");
+            } else {
+                $classname::script([
+                    'arguments' => array_values(array_slice($this->args['arguments'], 2)),
+                    'options' => $this->args['options'],
+                    'flags' => $this->args['flags'],
+                ]);
+            }
+        } else {
+            self::printMessage("Script name not specified.");
+        }
     }
 
     private function threadArg(): void
