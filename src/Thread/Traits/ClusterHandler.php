@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Thread\Traits;
 
-trait ProcessHandler
+trait ClusterHandler
 {
     /**
      * Sends an interrupt signal to all child processes and terminates the current process.
@@ -15,9 +15,9 @@ trait ProcessHandler
     {
         if (!$this->iAmChild) {
             // Parent
-            foreach ($this->childrenPid as $childPid) {
-                posix_kill($childPid, SIGINT);
-                pcntl_waitpid($childPid, $status);
+            foreach (static::threadList() as $threadPid) {
+                posix_kill($threadPid, SIGINT);
+                pcntl_waitpid($threadPid, $status);
             }
             $this->asInterrupt();
             $this->endRun();
@@ -42,9 +42,9 @@ trait ProcessHandler
     {
         if (!$this->iAmChild) {
             // Parent
-            foreach ($this->childrenPid as $childPid) {
-                posix_kill($childPid, SIGTERM);
-                pcntl_waitpid($childPid, $status);
+            foreach (static::threadList() as $threadPid) {
+                posix_kill($threadPid, SIGTERM);
+                pcntl_waitpid($threadPid, $status);
             }
             $this->asTermination();
             $this->endRun();
@@ -69,9 +69,9 @@ trait ProcessHandler
     {
         if (!$this->iAmChild) {
             // Parent
-            foreach ($this->childrenPid as $childPid) {
-                posix_kill($childPid, SIGHUP);
-                pcntl_waitpid($childPid, $status);
+            foreach (static::threadList() as $threadPid) {
+                posix_kill($threadPid, SIGHUP);
+                pcntl_waitpid($threadPid, $status);
             }
             $this->asClose();
             $this->endRun();
@@ -99,16 +99,19 @@ trait ProcessHandler
 
     protected function asChildInterrupt(): void
     {
+        $this->preparationThreadAfter($this->pid);
         static::$logger->alert("INTERRUPTED CHILD");
     }
 
     protected function asChildTermination(): void
     {
+        $this->preparationThreadAfter($this->pid);
         static::$logger->critical("TERMINATION CHILD");
     }
 
     protected function asChildClose(): void
     {
+        $this->preparationThreadAfter($this->pid);
         static::$logger->alert("CLOSE CHILD");
     }
 }

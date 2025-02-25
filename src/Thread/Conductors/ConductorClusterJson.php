@@ -11,7 +11,7 @@ class ConductorClusterJson implements Conductor
     public function recordAdd(string $className, int $pid): void
     {
         JSON::write(
-            ($className)::$STM_PATH ?? base64_encode($className),
+            ($className)::stmPath() ?? base64_encode($className),
             [
                 'pid' => $pid,
                 'title' => $className,
@@ -25,6 +25,6 @@ class ConductorClusterJson implements Conductor
 
     public function recordRemove(string $className, int $pid): void
     {
-        unlink(($className)::$STM_PATH ?? base64_encode($className));
+        unlink(($className)::stmPath() ?? base64_encode($className));
     }
 }

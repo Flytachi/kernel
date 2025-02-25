@@ -7,7 +7,7 @@ namespace Flytachi\Kernel\Src\Thread\Traits;
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Thread\ThreadException;
 
-trait Thread
+trait ClusterThread
 {
     /**
      * Executes a function in a separate child process using forking.
@@ -44,9 +44,6 @@ trait Thread
                     }
                 } else {
                     // Parent process
-                    if ($this->childrenPidSave) {
-                        $this->childrenPid[] = $pid;
-                    }
                     return $pid;
                 }
             } else {
@@ -93,9 +90,6 @@ trait Thread
                     }
                 } else {
                     // Parent process
-                    if ($this->childrenPidSave) {
-                        $this->childrenPid[] = $pid;
-                    }
                     return $pid;
                 }
             } else {
@@ -112,12 +106,14 @@ trait Thread
         $this->iAmChild = true;
         static::$logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
         if (PHP_SAPI === 'cli') {
-            cli_set_process_title('extra thread ' . static::class);
+            cli_set_process_title('extra cluster-thread ' . static::class);
         }
+        $this->preparationThreadBefore($this->pid);
     }
 
     protected function threadEndRun(): void
     {
+        $this->preparationThreadAfter($this->pid);
     }
 
     public function proc(mixed $data = null): void
