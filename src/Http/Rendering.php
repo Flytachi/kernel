@@ -48,7 +48,7 @@ final class Rendering
             $this->header = ExceptionWrapper::wrapHeader();
             $this->body = ExceptionWrapper::wrapBody($resource);
         } else {
-            $this->httpCode = HttpCode::OK;
+            $this->httpCode = empty($resource) ? HttpCode::NO_CONTENT : HttpCode::OK;
             $this->body = $resource;
         }
     }
