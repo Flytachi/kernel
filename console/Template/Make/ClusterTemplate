@@ -1,0 +1,24 @@
+<?php
+
+namespace __namespace__;
+
+use Flytachi\Kernel\Src\Stereotype\Cluster;
+
+class __className__ extends Cluster
+{
+    public function run(mixed $data = null): void
+    {
+        self::$logger->info('START');
+        $this->prepare();
+        $pid = $this->threadProc();
+        $this->wait($pid, function ($pid, $status) {
+            static::$logger->info("PROC finally (status {$status})");
+        });
+        self::$logger->info('END');
+    }
+
+    public function proc(mixed $data = null): void
+    {
+        static::$logger->info("PROC running");
+    }
+}

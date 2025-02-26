@@ -73,6 +73,9 @@ class Make extends Cmd
             if (in_array('p', $this->args['flags'])) {
                 $this->createProcess($templateName);
             }
+            if (in_array('u', $this->args['flags'])) {
+                $this->createCluster($templateName);
+            }
             if (in_array('w', $this->args['flags'])) {
                 $this->createWebSocket($templateName);
             }
@@ -193,6 +196,15 @@ class Make extends Cmd
         $this->createFile($info['className'], $info['path'], $code, 'process');
     }
 
+    private function createCluster(string $name): void
+    {
+        $info = $this->getInfo($name, 'Cluster', 'ClusterTemplate');
+        $code = file_get_contents($info['template']);
+        $code = str_replace("__namespace__", $info['namespace'], $code);
+        $code = str_replace("__className__", $info['className'], $code);
+        $this->createFile($info['className'], $info['path'], $code, 'cluster');
+    }
+
     private function createWebSocket(string $name): void
     {
         $info = $this->getInfo($name, 'WebSocket', 'WebSocketTemplate');
@@ -271,6 +283,7 @@ class Make extends Cmd
         self::print("", $cl);
         self::print("j - Template Job, prefix Job", $cl);
         self::print("p - Template Process, prefix Process", $cl);
+        self::print("u - Template Cluster, prefix Cluster", $cl);
         self::print("w - Template WebSocket, prefix WebSocket", $cl);
         self::print("", $cl);
         self::print("n - Template CustomCmd, dont prefix", $cl);
