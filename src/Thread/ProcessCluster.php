@@ -23,8 +23,6 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     use ClusterThread;
     use ClusterHandler;
 
-    protected static string $STM_PATH;
-    protected static string $STM_THREADS_PATH;
     protected string $conductorClassName = ConductorClusterJson::class;
     private Conductor $conductor;
     /** @var int $pid System process id */
@@ -34,18 +32,12 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
 
     final public static function stmPath(): string
     {
-        if (!isset(static::$STM_PATH)) {
-            static::$STM_PATH = Extra::$pathStorageCache . '/' . hash('xxh64', static::class) . '__c.json';
-        }
-        return static::$STM_PATH;
+        return Extra::$pathStorageCache . '/' . hash('xxh64', static::class) . '__c.json';
     }
 
     final public static function stmThreadsPath(): string
     {
-        if (!isset(static::$STM_THREADS_PATH)) {
-            static::$STM_THREADS_PATH = Extra::$pathStorageCache . '/' . hash('xxh64', static::class) . '__t';
-        }
-        return static::$STM_THREADS_PATH;
+        return Extra::$pathStorageCache . '/' . hash('xxh64', static::class) . '__t';
     }
 
     protected final function streaming(callable $complianceCallable, ?callable $negationCallable = null): void
@@ -56,7 +48,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
             } else {
                 if ($negationCallable !== null) $negationCallable();
             }
-            usleep( ($this->balancer < 1000 ? ceil(1_000_000 / $this->balancer) : 1000) );
+            usleep( (int) ($this->balancer < 1000 ? ceil(1_000_000 / $this->balancer) : 1000) );
         }
     }
 
@@ -69,7 +61,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
             $process->startRun();
             $process->run($data);
         } catch (\Throwable $e) {
-            static::$logger->error($e->getMessage());
+            $process->logger?->error($e->getMessage());
         } finally {
             $process->endRun();
         }
@@ -88,7 +80,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     {
         $this->pid = getmypid();
         if (!is_dir(static::stmThreadsPath())) mkdir(static::stmThreadsPath(), recursive: true);
-        static::$logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
+        $this->logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
 
         if (PHP_SAPI === 'cli') {
             pcntl_signal(SIGHUP, function () {
@@ -170,7 +162,8 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     public static function status(): ?array
     {
         try {
-            return JSON::read(static::stmPath());
+            return file_exists(static::stmPath())
+                ? JSON::read(static::stmPath()) : null;
         } catch (FileException $e) {
             return null;
         }

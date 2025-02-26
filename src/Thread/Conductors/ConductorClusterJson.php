@@ -14,7 +14,6 @@ class ConductorClusterJson implements Conductor
             ($className)::stmPath() ?? base64_encode($className),
             [
                 'pid' => $pid,
-                'title' => $className,
                 'className' => $className,
                 'condition' => 'started',
                 'startedAt' => date('Y-m-d H:i:s P'),

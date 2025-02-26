@@ -28,13 +28,13 @@ trait ClusterThread
                         try {
                             $function();
                         } catch (\Throwable $exception) {
-                            static::$logger->error(
+                            $this->logger?->error(
                                 "[$this->pid] Thread Logic => " . $exception->getMessage()
                                 . "\n" . $exception->getTraceAsString()
                             );
                         }
                     } catch (\Throwable $exception) {
-                        static::$logger->error(
+                        $this->logger?->error(
                             "[$this->pid] Thread: " . $exception->getMessage()
                             . "\n" . $exception->getTraceAsString()
                         );
@@ -50,7 +50,7 @@ trait ClusterThread
                 throw new ThreadException("[{$this->pid}] Unable to fork process.");
             }
         } catch (\Throwable $e) {
-            static::$logger->critical($e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->logger?->critical($e->getMessage() . "\n" . $e->getTraceAsString());
             return 0;
         }
     }
@@ -74,13 +74,13 @@ trait ClusterThread
                         try {
                             $this->proc($data);
                         } catch (\Throwable $exception) {
-                            static::$logger->error(
+                            $this->logger?->error(
                                 "[$this->pid] Thread(proc) Logic => " . $exception->getMessage()
                                 . "\n" . $exception->getTraceAsString()
                             );
                         }
                     } catch (\Throwable $exception) {
-                        static::$logger->error(
+                        $this->logger?->error(
                             "[$this->pid] Thread(proc): " . $exception->getMessage()
                             . "\n" . $exception->getTraceAsString()
                         );
@@ -96,7 +96,7 @@ trait ClusterThread
                 throw new ThreadException("[{$this->pid}] Unable to fork process.");
             }
         } catch (\Throwable $e) {
-            static::$logger->critical($e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->logger?->critical($e->getMessage() . "\n" . $e->getTraceAsString());
             return 0;
         }
     }
@@ -104,7 +104,7 @@ trait ClusterThread
     protected function threadStartRun(): void
     {
         $this->iAmChild = true;
-        static::$logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
+        $this->logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
         if (PHP_SAPI === 'cli') {
             cli_set_process_title('extra cluster-thread ' . static::class);
         }
@@ -118,6 +118,6 @@ trait ClusterThread
 
     public function proc(mixed $data = null): void
     {
-        static::$logger->info("-proc- running");
+        $this->logger?->info("-proc- running");
     }
 }

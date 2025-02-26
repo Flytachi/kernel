@@ -49,7 +49,7 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
             $process->startRun();
             $process->run($data);
         } catch (\Throwable $e) {
-            static::$logger->error($e->getMessage());
+            $process->logger?->error($e->getMessage());
         } finally {
             $process->endRun();
         }
@@ -67,7 +67,7 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
     private function startRun(): void
     {
         $this->pid = getmypid();
-        static::$logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
+        $this->logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
 
         if (PHP_SAPI === 'cli') {
             pcntl_signal(SIGHUP, function () {
@@ -103,24 +103,24 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
 
     protected function handle(Resource &$resource, Msg $msg): void
     {
-        static::$logger->alert("handle: {$resource} => Send {$msg}");
+        $this->logger?->alert("handle: {$resource} => Send {$msg}");
     }
 
     protected function handleConnect(Resource &$resource): void
     {
-        static::$logger->alert("handleConnect: {$resource} => New connection accepted");
+        $this->logger?->alert("handleConnect: {$resource} => New connection accepted");
     }
 
     protected function handleDisconnect(Resource &$resource): void
     {
-        static::$logger->alert("handleDisconnect: {$resource} => Connection closing");
+        $this->logger?->alert("handleDisconnect: {$resource} => Connection closing");
     }
 
     final protected function socketStart(int $rps = 2, int $timeWorkLimit = 0): void
     {
         $this->timeWorkLimit = $timeWorkLimit;
-        static::$logger->info("Starting the Web Server...");
-        static::$logger->info("Stream: tcp://{$this->ip}:{$this->port}");
+        $this->logger?->info("Starting the Web Server...");
+        $this->logger?->info("Stream: tcp://{$this->ip}:{$this->port}");
 
         try {
             $this->resourceConnection = stream_socket_server(
@@ -133,11 +133,11 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
             }
             $this->connection = new Resource($this->resourceConnection);
 
-            static::$logger->debug("Server is running...");
+            $this->logger?->debug("Server is running...");
             $this->startTime = time();
             $this->listen($rps);
         } catch (\Throwable $exception) {
-            static::$logger->error($exception->getMessage());
+            $this->logger?->error($exception->getMessage());
         }
     }
 
@@ -195,7 +195,7 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
                     try {
                         $this->handleConnect($this->connects[(string) $connect]);
                     } catch (\Throwable $exception) {
-                        static::$logger->error('handlerConnect: ' . $exception->getMessage());
+                        $this->logger?->error('handlerConnect: ' . $exception->getMessage());
                     }
                 }
                 unset($read[array_search($this->resourceConnection, $read)]);
@@ -210,13 +210,13 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
                     try {
                         $this->handleDisconnect($this->connects[(string) $connect]);
                     } catch (\Throwable $exception) {
-                        static::$logger->error('handlerDisconnect: ' . $exception->getMessage());
+                        $this->logger?->error('handlerDisconnect: ' . $exception->getMessage());
                     }
                     try {
                         fwrite($connect, self::encode('  Closed on client demand', 'close'));
                         fclose($connect);
                     } catch (\Throwable $exception) {
-                        static::$logger->error('handlerDisconnect: ' . $exception->getMessage());
+                        $this->logger?->error('handlerDisconnect: ' . $exception->getMessage());
                     }
                     unset($this->resourceConnects[(string) $connect]);
                     unset($this->connects[(string) $connect]);
@@ -226,13 +226,13 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
                 try {
                     $this->handle($this->connects[(string) $connect], $decoded);
                 } catch (\Throwable $exception) {
-                    static::$logger->error('handler: ' . $exception->getMessage());
+                    $this->logger?->error('handler: ' . $exception->getMessage());
                 }
             }
 
             // close by time work limit
             if ($this->timeWorkLimit && time() - $this->startTime > $this->timeWorkLimit) {
-                static::$logger->debug('Time limit. Stopping server');
+                $this->logger?->debug('Time limit. Stopping server');
                 $this->socketClose();
             }
         }

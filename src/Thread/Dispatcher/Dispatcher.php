@@ -19,12 +19,12 @@ use Psr\Log\LoggerInterface;
  * - `runnable(mixed $data = null): int`: Executes a new process by the class from which this method is called.
  *   It takes data as a parameter if any, and returns the process ID of the created process.
  *
- * @version 3.0
+ * @version 3.5
  * @author Flytachi
  */
 abstract class Dispatcher
 {
-    protected static ?LoggerInterface $logger = null;
+    protected ?LoggerInterface $logger = null;
 
     public function __construct()
     {
@@ -45,17 +45,14 @@ abstract class Dispatcher
     final protected static function runnable(mixed $data = null): int
     {
         try {
-            static::$logger = Extra::$logger->withName(static::class);
             if ($data) {
                 $fileName = uniqid("process-cache-");
                 $filePath = Extra::$pathStorageCache . '/' . $fileName;
                 $serializeData = serialize($data);
                 file_put_contents($filePath, $serializeData);
                 chmod($filePath, 0777);
-                self::$logger->debug('serialized => ' . $serializeData);
             }
 
-            self::$logger->debug('DISPATCH');
             $selfDirectory = getcwd();
             chdir(Extra::$pathRoot);
             $pid = (int) exec(sprintf(

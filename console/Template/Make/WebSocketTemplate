@@ -13,7 +13,7 @@ class __className__ extends WebSocket
 
     public function run(mixed $data = null): void
     {
-        self::$logger->info('START');
+        $this->logger?->info('START');
         $this->socketStart(10);
     }
 

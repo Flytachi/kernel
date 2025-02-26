@@ -28,13 +28,13 @@ trait Thread
                         try {
                             $function();
                         } catch (\Throwable $exception) {
-                            static::$logger->error(
+                            $this->logger?->error(
                                 "[$this->pid] Thread Logic => " . $exception->getMessage()
                                 . "\n" . $exception->getTraceAsString()
                             );
                         }
                     } catch (\Throwable $exception) {
-                        static::$logger->error(
+                        $this->logger?->error(
                             "[$this->pid] Thread: " . $exception->getMessage()
                             . "\n" . $exception->getTraceAsString()
                         );
@@ -53,7 +53,7 @@ trait Thread
                 throw new ThreadException("[{$this->pid}] Unable to fork process.");
             }
         } catch (\Throwable $e) {
-            static::$logger->critical($e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->logger?->critical($e->getMessage() . "\n" . $e->getTraceAsString());
             return 0;
         }
     }
@@ -77,13 +77,13 @@ trait Thread
                         try {
                             $this->proc($data);
                         } catch (\Throwable $exception) {
-                            static::$logger->error(
+                            $this->logger?->error(
                                 "[$this->pid] Thread(proc) Logic => " . $exception->getMessage()
                                 . "\n" . $exception->getTraceAsString()
                             );
                         }
                     } catch (\Throwable $exception) {
-                        static::$logger->error(
+                        $this->logger?->error(
                             "[$this->pid] Thread(proc): " . $exception->getMessage()
                             . "\n" . $exception->getTraceAsString()
                         );
@@ -102,7 +102,7 @@ trait Thread
                 throw new ThreadException("[{$this->pid}] Unable to fork process.");
             }
         } catch (\Throwable $e) {
-            static::$logger->critical($e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->logger?->critical($e->getMessage() . "\n" . $e->getTraceAsString());
             return 0;
         }
     }
@@ -110,7 +110,7 @@ trait Thread
     protected function threadStartRun(): void
     {
         $this->iAmChild = true;
-        static::$logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
+        $this->logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
         if (PHP_SAPI === 'cli') {
             cli_set_process_title('extra thread ' . static::class);
         }
@@ -122,6 +122,6 @@ trait Thread
 
     public function proc(mixed $data = null): void
     {
-        static::$logger->info("-proc- running");
+        $this->logger?->info("-proc- running");
     }
 }

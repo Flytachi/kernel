@@ -29,7 +29,7 @@ abstract class ProcessEasy extends Dispatcher implements DispatcherInterface
             $process->startRun();
             $process->run($data);
         } catch (\Throwable $e) {
-            static::$logger->error($e->getMessage());
+            $process->logger?->error($e->getMessage());
         } finally {
             $process->endRun();
         }
@@ -47,7 +47,7 @@ abstract class ProcessEasy extends Dispatcher implements DispatcherInterface
     private function startRun(): void
     {
         $this->pid = getmypid();
-        static::$logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
+        $this->logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
 
         if (PHP_SAPI === 'cli') {
             pcntl_signal(SIGHUP, function () {

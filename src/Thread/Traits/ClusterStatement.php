@@ -34,7 +34,7 @@ trait ClusterStatement
         $data = JSON::read(static::stmPath());
         $data['condition'] = 'preparation';
         JSON::write(static::stmPath(), $data);
-        static::$logger->debug("set condition => preparation");
+        $this->logger?->debug("set condition => preparation");
 
         // preparation
         $pathThreads = static::stmThreadsPath();
@@ -49,7 +49,7 @@ trait ClusterStatement
         $data = JSON::read(static::stmPath());
         $data['condition'] = 'active';
         JSON::write(static::stmPath(), $data);
-        static::$logger->debug("set condition => active");
+        $this->logger?->debug("set condition => active");
     }
 
     final protected function setCondition(string $newCondition): void
@@ -57,7 +57,7 @@ trait ClusterStatement
         $data = JSON::read(static::stmPath());
         $data['condition'] = $newCondition;
         JSON::write(static::stmPath(), $data);
-        static::$logger->debug("set condition => " . $newCondition);
+        $this->logger?->debug("set condition => " . $newCondition);
     }
 
     final protected function setInfo(array $newInfo): void
@@ -65,7 +65,7 @@ trait ClusterStatement
         $data = JSON::read(static::stmPath());
         $data['info'] = $newInfo;
         JSON::write(static::stmPath(), $data);
-        static::$logger->debug("set info => " . json_encode($data));
+        $this->logger?->debug("set info => " . json_encode($data));
     }
 
     protected function preparationThreadBefore(int $pid): void
@@ -73,12 +73,12 @@ trait ClusterStatement
         JSON::write(static::stmThreadsPath() . "/{$pid}.json", [
             'pid' => $pid,
         ]);
-        static::$logger->debug("started");
+        $this->logger?->debug("started");
     }
 
     protected function preparationThreadAfter(int $pid): void
     {
         unlink(static::stmThreadsPath() . "/{$pid}.json");
-        static::$logger->debug("finished");
+        $this->logger?->debug("finished");
     }
 }
