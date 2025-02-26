@@ -3,7 +3,7 @@
     "description": "Extra Framework kernel",
     "type": "library",
     "license": "MIT",
-    "version": "5.1.7",
+    "version": "5.1.8",
     "keywords": ["Extra Kernel","extra kernel","framework kernel", "kernel"],
     "autoload": {
         "psr-4": {
