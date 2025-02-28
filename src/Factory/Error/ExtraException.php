@@ -26,11 +26,6 @@ abstract class ExtraException extends \Exception
         ));
     }
 
-//    public static function throw(HttpCode $httpCode, string $message, ?\Throwable $previous = null)
-//    {
-//        throw new static($message, $httpCode->value, $previous);
-//    }
-
     public function getLogLevel(): string
     {
         return $this->logLevel;

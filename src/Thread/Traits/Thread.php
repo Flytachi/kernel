@@ -50,7 +50,7 @@ trait Thread
                     return $pid;
                 }
             } else {
-                throw new ThreadException("[{$this->pid}] Unable to fork process.");
+                ThreadException::throw("[{$this->pid}] Unable to fork process.");
             }
         } catch (\Throwable $e) {
             $this->logger?->critical($e->getMessage() . "\n" . $e->getTraceAsString());
@@ -99,7 +99,7 @@ trait Thread
                     return $pid;
                 }
             } else {
-                throw new ThreadException("[{$this->pid}] Unable to fork process.");
+                ThreadException::throw("[{$this->pid}] Unable to fork process.");
             }
         } catch (\Throwable $e) {
             $this->logger?->critical($e->getMessage() . "\n" . $e->getTraceAsString());

@@ -29,7 +29,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
     {
         parent::__construct();
         if (!isset($this->dbConfigClassName)) {
-            throw new RepositoryException(static::class . ' $dbConfigClassName must be set by the child class');
+            RepositoryException::throw(static::class . ' $dbConfigClassName must be set by the child class');
         }
         $config = ConnectionPool::getConfigDb($this->dbConfigClassName);
         if ($this->schema == null) {

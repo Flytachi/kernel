@@ -12,20 +12,21 @@ trait RepositoryCrudTrait
 {
     /**
      * @throws RepositoryException
-     * @throws CDOException
      */
     public function insert(object|array $model): mixed
     {
         if ($this->isReadonly) {
             throw new RepositoryException('No write access (action insert)');
         }
-
-        return $this->db()->insert(($this->schema ? $this->schema . '.' : '') . $this::$table, $model);
+        try {
+            return $this->db()->insert(($this->schema ? $this->schema . '.' : '') . $this::$table, $model);
+        } catch (CDOException $exception) {
+            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+        }
     }
 
     /**
      * @throws RepositoryException
-     * @throws CDOException
      */
     public function insertGroup(object ...$models): void
     {
@@ -33,30 +34,40 @@ trait RepositoryCrudTrait
             throw new RepositoryException('No write access (action insert)');
         }
 
-        $this->db()->insertGroup(($this->schema ? $this->schema . '.' : '') . $this::$table, ...$models);
+        try {
+            $this->db()->insertGroup(($this->schema ? $this->schema . '.' : '') . $this::$table, ...$models);
+        } catch (CDOException $exception) {
+            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+        }
     }
 
     /**
      * @throws RepositoryException
-     * @throws CDOException
      */
     public function update(object|array $model, Qb $qb): int|string
     {
         if ($this->isReadonly) {
             throw new RepositoryException('No write access (action update)');
         }
-        return $this->db()->update(($this->schema ? $this->schema . '.' : '') . $this::$table, $model, $qb);
+        try {
+            return $this->db()->update(($this->schema ? $this->schema . '.' : '') . $this::$table, $model, $qb);
+        } catch (CDOException $exception) {
+            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+        }
     }
 
     /**
      * @throws RepositoryException
-     * @throws CDOException
      */
     public function delete(Qb $qb): int|string
     {
         if ($this->isReadonly) {
             throw new RepositoryException('No write access (action delete)');
         }
-        return $this->db()->delete(($this->schema ? $this->schema . '.' : '') . $this::$table, $qb);
+        try {
+            return $this->db()->delete(($this->schema ? $this->schema . '.' : '') . $this::$table, $qb);
+        } catch (CDOException $exception) {
+            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+        }
     }
 }

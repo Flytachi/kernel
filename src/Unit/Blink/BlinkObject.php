@@ -42,7 +42,7 @@ class BlinkObject extends \stdClass
                 }
             }
         } catch (\Throwable $exception) {
-            throw new BlinkException($exception->getMessage());
+            throw new BlinkException($exception->getMessage(), previous: $exception);
         }
     }
 

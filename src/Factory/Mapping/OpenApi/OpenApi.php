@@ -7,6 +7,7 @@ namespace Flytachi\Kernel\Src\Factory\Mapping\OpenApi;
 use Flytachi\Kernel\Src\Factory\Mapping\Declaration\MappingDeclaration;
 use Flytachi\Kernel\Src\Factory\Mapping\Declaration\MappingDeclarationItem;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
+use Flytachi\Kernel\Src\Factory\Mapping\OpenApi\Schema\Spl;
 use Flytachi\Kernel\Src\Factory\Mapping\OpenApi\Specification\SplObject;
 use SplObjectStorage;
 

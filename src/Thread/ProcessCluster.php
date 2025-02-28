@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Thread;
 
 use Flytachi\Kernel\Extra;
-use Flytachi\Kernel\Src\Factory\Error\ExtraException;
 use Flytachi\Kernel\Src\Http\HttpCode;
 use Flytachi\Kernel\Src\Thread\Conductors\Conductor;
 use Flytachi\Kernel\Src\Thread\Conductors\ConductorClusterJson;
@@ -61,7 +60,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
             $process->startRun();
             $process->run($data);
         } catch (\Throwable $e) {
-            $process->logger?->error($e->getMessage());
+            $process->logger?->critical($e->getMessage());
         } finally {
             $process->endRun();
         }
@@ -148,13 +147,13 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
 
     /**
      * @throws ThreadException
-     * @throws ExtraException
      */
     final public static function dispatch(mixed $data = null): int
     {
         $status = static::status();
         if ($status) {
-            ThreadException::throw(HttpCode::LOCKED, "Cluster process already exist [PID:{$status['pid']}] ({$status['startedAt']})");
+            throw new ThreadException("Cluster process already exist [PID:{$status['pid']}] ({$status['startedAt']})",
+                HttpCode::LOCKED->value);
         }
         else return self::runnable($data);
     }
@@ -170,14 +169,14 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     }
 
     /**
-     * @throws ExtraException
+     * @throws ThreadException
      */
     public static function stop(): bool
     {
         $status = static::status();
         if ($status) return Signal::interrupt($status['pid']);
         else {
-            ThreadException::throw(HttpCode::LOCKED, "Cluster process has not started");
+            throw new ThreadException('Cluster process has not started', HttpCode::LOCKED->value);
         }
     }
 }

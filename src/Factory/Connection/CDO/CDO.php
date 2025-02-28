@@ -37,7 +37,7 @@ class CDO extends PDO
             }
             self::$logger->debug('connection:' . $config->getDns());
         } catch (PDOException $e) {
-            throw new CDOException($e->getMessage(), (int) $e->getCode(), $e);
+            throw new CDOException($e->getMessage(), previous: $e);
         }
     }
 
@@ -107,7 +107,7 @@ class CDO extends PDO
             }
             return $result;
         } catch (PDOException $ex) {
-            throw new CDOException('Error when creating a record in the database (' . $ex->getMessage() . ')');
+            throw new CDOException('Error when creating a record in the database (' . $ex->getMessage() . ')', previous: $ex);
         }
     }
 
@@ -187,7 +187,7 @@ class CDO extends PDO
             }
             $stmt->getStmt()->execute();
         } catch (PDOException $ex) {
-            throw new CDOException('Error when creating a records in the database (' . $ex->getMessage() . ')');
+            throw new CDOException('Error when creating a records in the database (' . $ex->getMessage() . ')', previous: $ex);
         }
     }
 
@@ -234,7 +234,7 @@ class CDO extends PDO
                     case 'object':
                         if ($paramVal instanceof Type) {
                             $stmt->updateStm($this->prepare(str_replace(
-                                $keyVal,
+                                (string) $keyVal,
                                 sprintf($paramVal::prepairing(), $keyVal),
                                 $query
                             )));
@@ -256,7 +256,7 @@ class CDO extends PDO
             }
             return $result;
         } catch (PDOException $ex) {
-            throw new CDOException('Error when changing a record in the database (' . $ex->getMessage() . ')');
+            throw new CDOException('Error when changing a record in the database (' . $ex->getMessage() . ')', previous: $ex);
         }
     }
 
@@ -300,7 +300,7 @@ class CDO extends PDO
             }
             return $result;
         } catch (PDOException $ex) {
-            throw new CDOException('Error deleting a record in the database (' . $ex->getMessage() . ')');
+            throw new CDOException('Error deleting a record in the database (' . $ex->getMessage() . ')', previous: $ex);
         }
     }
 }

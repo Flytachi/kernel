@@ -28,7 +28,7 @@ class MappingDeclaration
                 $child->getUrl() == $newChild->getUrl()
                 && $child->getMethod() == $newChild->getMethod()
             ) {
-                throw new MappingException(
+                 MappingException::throw(
                     "Duplicate mapping declaration {$newChild->getReflectionMethod()->getFileName()}"
                     . " ({$newChild->getReflectionMethod()->getStartLine()})"
                 );

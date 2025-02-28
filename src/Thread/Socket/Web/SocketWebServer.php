@@ -49,7 +49,7 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
             $process->startRun();
             $process->run($data);
         } catch (\Throwable $e) {
-            $process->logger?->error($e->getMessage());
+            $process->logger?->critical($e->getMessage());
         } finally {
             $process->endRun();
         }

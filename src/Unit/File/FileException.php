@@ -9,5 +9,5 @@ use Psr\Log\LogLevel;
 
 class FileException extends ExtraException
 {
-    protected string $logLevel = LogLevel::ERROR;
+    protected string $logLevel = LogLevel::CRITICAL;
 }
