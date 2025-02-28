@@ -13,10 +13,10 @@ trait RepositoryViewTrait
 {
     /**
      * @param string|null $modelClassName
-     * @return mixed
+     * @return null|object
      * @throws RepositoryException
      */
-    final public function find(?string $modelClassName = null): mixed
+    final public function find(?string $modelClassName = null): ?object
     {
         try {
             if ($modelClassName) {
@@ -64,10 +64,10 @@ trait RepositoryViewTrait
 
     /**
      * @param string|null $modelClassName
-     * @return array<object|stdClass>|null
+     * @return array<object|stdClass>
      * @throws RepositoryException
      */
-    final public function findAll(?string $modelClassName = null): ?array
+    final public function findAll(?string $modelClassName = null): array
     {
         try {
             if ($modelClassName) {
@@ -82,7 +82,7 @@ trait RepositoryViewTrait
             }
             $stmt->execute();
             $this->cleanCache();
-            return $stmt->fetchAll(PDO::FETCH_CLASS, $modelClassName ?: $this->modelClassName) ?: null;
+            return $stmt->fetchAll(PDO::FETCH_CLASS, $modelClassName ?: $this->modelClassName);
         } catch (\Throwable $th) {
             throw new RepositoryException($th->getMessage(), previous: $th);
         }
@@ -94,9 +94,9 @@ trait RepositoryViewTrait
      * @param int|string $id The ID of the record to find.
      * @param string|null $modelClassName The class name of the model to use for the find operation. Defaults to null.
      *
-     * @return mixed Returns the found record if it exists, or null if it does not.
+     * @return object|null Returns the found record if it exists, or null if it does not.
      */
-    final public static function findById(int|string $id, ?string $modelClassName = null): mixed
+    final public static function findById(int|string $id, ?string $modelClassName = null): ?object
     {
         return (new static())
             ->where(Qb::eq('id', $id))
@@ -110,14 +110,14 @@ trait RepositoryViewTrait
      * @param string|null $modelClassName The class name of the model to use for the find operation. Defaults to null.
      * @param string $message The error message to be thrown if the record is not found. Defaults to 'Object not found'.
      *
-     * @return mixed Returns the found record if it exists.
+     * @return object|null Returns the found record if it exists.
      * @throws RepositoryException
      */
     final public static function findByIdOrThrow(
         int|string $id,
         ?string $modelClassName = null,
         string $message = 'Object not found'
-    ): mixed {
+    ): ?object {
         $obj = static::findById($id);
         if (!$obj) {
             throw new RepositoryException($message);
@@ -131,10 +131,10 @@ trait RepositoryViewTrait
      * @param Qb $qb The Qb object containing the conditions for the find operation.
      * @param string|null $modelClassName The class name of the model to use for the find operation. Defaults to null.
      *
-     * @return mixed    Returns the found records if any exist, or null if none are found.
+     * @return object|null Returns the found records if any exist, or null if none are found.
      * @throws RepositoryException
      */
-    final public static function findBy(Qb $qb, ?string $modelClassName = null): mixed
+    final public static function findBy(Qb $qb, ?string $modelClassName = null): ?object
     {
         return (new self())->where($qb)->find($modelClassName);
     }
@@ -146,14 +146,14 @@ trait RepositoryViewTrait
      * @param string|null $modelClassName The class name of the model to use for the find operation. Defaults to null.
      * @param string $message The error message to throw if the record is not found. Defaults to 'Object not found'.
      *
-     * @return mixed Returns the found record if it exists, or throws
+     * @return object|null Returns the found record if it exists, or throws
      * @throws RepositoryException
      */
     final public static function findByOrThrow(
         Qb $qb,
         ?string $modelClassName = null,
         string $message = 'Object not found'
-    ): mixed {
+    ): ?object {
         $obj = self::findBy($qb);
         if (!$obj) {
             throw new RepositoryException($message);
@@ -167,10 +167,10 @@ trait RepositoryViewTrait
      * @param null|Qb $qb The conditions to use for finding the records. Defaults to null.
      * @param string|null $modelClassName The class name of the model to use for the find operation. Defaults to null.
      *
-     * @return array|false    Returns an array of found records if they exist, or false if no records are found.
+     * @return array<object|stdClass> Returns an array of found records if they exist, or false if no records are found.
      * @throws RepositoryException
      */
-    final public static function findAllBy(?Qb $qb = null, ?string $modelClassName = null): array|false
+    final public static function findAllBy(?Qb $qb = null, ?string $modelClassName = null): array
     {
         return (new self())->where($qb)->findAll($modelClassName);
     }
