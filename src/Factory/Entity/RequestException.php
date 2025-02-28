@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src\Factory\Middleware;
+namespace Flytachi\Kernel\Src\Factory\Entity;
 
 use Flytachi\Kernel\Src\Factory\Error\ExtraException;
 use Flytachi\Kernel\Src\Http\HttpCode;
 use Psr\Log\LogLevel;
 
-class MiddlewareException extends ExtraException
+class RequestException extends ExtraException
 {
-    protected $code = HttpCode::UNAUTHORIZED->value;
+    protected $code = HttpCode::BAD_REQUEST->value;
     protected string $logLevel = LogLevel::WARNING;
 }

@@ -27,13 +27,13 @@ trait RequestValidatorTrait
     {
         try {
             if(!isset($this->$fieldName))
-                EntityException::throw(HttpCode::BAD_REQUEST,"Required field '{$fieldName}' not found");
+                RequestException::throw("Required field '{$fieldName}' not found");
             if ($validateFunc !== null) {
                 if (!$validateFunc($this->$fieldName))
-                    EntityException::throw(HttpCode::BAD_REQUEST, "{$fieldName} - " . ($message ?? "field has the wrong data type"));
+                    RequestException::throw("{$fieldName} - " . ($message ?? "field has the wrong data type"));
             }
         } catch (\Throwable $exception) {
-            EntityException::throw(HttpCode::BAD_REQUEST, $exception->getMessage());
+            RequestException::throw($exception->getMessage());
         }
         return $this;
     }
@@ -51,11 +51,11 @@ trait RequestValidatorTrait
     {
         try {
             if(!isset($this->$fieldName))
-                EntityException::throw(HttpCode::BAD_REQUEST,"Required field '{$fieldName}' not found");
+                RequestException::throw("Required field '{$fieldName}' not found");
             if (!filter_var($this->$fieldName, $filter))
-                EntityException::throw(HttpCode::BAD_REQUEST, "{$fieldName} - " . ($message ?? "field has the wrong data type"));
+                RequestException::throw("{$fieldName} - " . ($message ?? "field has the wrong data type"));
         } catch (\Throwable $exception) {
-            EntityException::throw(HttpCode::BAD_REQUEST, $exception->getMessage());
+            RequestException::throw($exception->getMessage());
         }
         return $this;
     }

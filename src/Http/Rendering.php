@@ -6,6 +6,7 @@ namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Factory\Error\ExceptionWrapper;
+use Flytachi\Kernel\Src\Factory\Error\ExtraException;
 use Flytachi\Kernel\Src\Http\Response\ResponseFileContentInterface;
 use Flytachi\Kernel\Src\Http\Response\ResponseInterface;
 use Flytachi\Kernel\Src\Http\Response\ViewInterface;
@@ -91,10 +92,10 @@ final class Rendering
 
     private function logging(\Throwable $resource): void
     {
-        $typeError = $this->httpCode->isServerError()
-            ? 'error'
-            : ($this->httpCode->isClientError() ? 'warning' : 'emergency');
-        Extra::$logger->withName($resource::class)->{$typeError}(sprintf(
+        $logType = $resource instanceof ExtraException
+            ? $resource->getLogLevel()
+            : 'alert';
+        Extra::$logger->withName($resource::class)->{$logType}(sprintf(
             "%d: %s\n# %s(%d) -> Stack trace:\n%s",
             $resource->getCode(),
             $resource->getMessage(),

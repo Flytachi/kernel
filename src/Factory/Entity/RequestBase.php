@@ -19,12 +19,11 @@ abstract class RequestBase implements RequestInterface
      * @param bool $required (Optional) Specifies whether the GET data is required. Default is true.
      *
      * @return static A new instance of the class representing the GET data from the request.
-     * @throws EntityException
      */
     final public static function params(bool $required = true): static
     {
         if ($required && !$_GET) {
-            throw new EntityException("Missing required data for request", HttpCode::BAD_REQUEST->value);
+            RequestException::throw("Missing required data for request");
         }
         return self::from($_GET);
     }
@@ -35,12 +34,11 @@ abstract class RequestBase implements RequestInterface
      * @param bool $required (Optional) Specifies whether the POST data is required. Default is true.
      *
      * @return static A new instance of the class representing the POST data from the request.
-     * @throws EntityException
      */
     final public static function formData(bool $required = true): static
     {
         if ($required && !$_POST) {
-            throw new EntityException("Missing required data for request", HttpCode::BAD_REQUEST->value);
+            RequestException::throw("Missing required data for request");
         }
         return self::from($_POST);
     }
@@ -51,13 +49,12 @@ abstract class RequestBase implements RequestInterface
      * @param bool $required (Optional) Specifies whether the JSON data is required. Default is true.
      *
      * @return static A new instance of the class representing the JSON data from the request.
-     * @throws EntityException
      */
     final public static function json(bool $required = true): static
     {
         $data = file_get_contents('php://input');
         if ($required && (!$data || !json_validate($data))) {
-            throw new EntityException("Missing required data for request", HttpCode::BAD_REQUEST->value);
+            RequestException::throw("Missing required data for request");
         }
         return self::from(json_decode($data, true));
     }
@@ -65,7 +62,6 @@ abstract class RequestBase implements RequestInterface
     /**
      * @param mixed $data
      * @return static
-     * @throws EntityException
      */
     private static function from(mixed $data): static
     {
@@ -87,21 +83,21 @@ abstract class RequestBase implements RequestInterface
                 $errorMessage
             );
 
-            throw new EntityException($errorMessage, HttpCode::BAD_REQUEST->value, $e);
+            RequestException::throw($errorMessage, previous: $e);
         } catch (TypeError $e) {
             $errorMessage = preg_replace(
                 '/.*Argument #\d+ \(\$(\w+)\) must be of type (\w+), (\w+) given.*/',
                 "Invalid type field '$1' (required: '$2', given: '$3')",
                 $e->getMessage()
             );
-            throw new EntityException($errorMessage, HttpCode::BAD_REQUEST->value, $e);
+            RequestException::throw($errorMessage, previous: $e);
         } catch (Error $e) {
             $errorMessage = preg_replace(
                 '/Unknown named parameter \$(\w+)/',
                 "Undefined field '$1'",
                 $e->getMessage()
             );
-            throw new EntityException($errorMessage, HttpCode::BAD_REQUEST->value, $e);
+            RequestException::throw($errorMessage, previous: $e);
         }
     }
 }
