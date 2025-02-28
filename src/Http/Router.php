@@ -46,7 +46,7 @@ final class Router
 
             $resolve = self::resolveActions($data['url']);
             if (!$resolve) {
-                throw new RouterException(
+                throw new ClientError(
                     "{$_SERVER['REQUEST_METHOD']} '{$data['url']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
