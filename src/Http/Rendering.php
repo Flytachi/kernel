@@ -43,7 +43,7 @@ final class Rendering
                 $resource->getResource()
             );
         } elseif ($resource instanceof \Throwable) {
-            $this->httpCode = HttpCode::tryFrom($resource->getCode()) ?: HttpCode::UNKNOWN_ERROR;
+            $this->httpCode = HttpCode::tryFrom((int) $resource->getCode()) ?: HttpCode::UNKNOWN_ERROR;
             $this->logging($resource);
             $this->header = ExceptionWrapper::wrapHeader();
             $this->body = ExceptionWrapper::wrapBody($resource);
