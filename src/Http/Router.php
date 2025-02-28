@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControl;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControlMiddleware;
@@ -58,7 +59,7 @@ final class Router
 
             $resolve = self::resolveActionSelect($resolve, $_SERVER['REQUEST_METHOD']);
             if (!$resolve) {
-                throw new RouterException(
+                throw new ClientError(
                     "{$_SERVER['REQUEST_METHOD']} '{$data['url']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
