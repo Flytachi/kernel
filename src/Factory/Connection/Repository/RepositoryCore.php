@@ -38,6 +38,13 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
         $config->connect();
     }
 
+    public static function entity(?string $as = null): static
+    {
+        $repository = new static();
+        if (!empty($as)) $repository->as($as);
+        return $repository;
+    }
+
     /**
      * @return CDO
      */
