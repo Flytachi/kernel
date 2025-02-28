@@ -11,6 +11,8 @@ use TypeError;
 
 abstract class RequestBase implements RequestInterface
 {
+    use RequestValidatorTrait;
+
     /**
      * Retrieves the GET data from the request.
      *
