@@ -20,7 +20,9 @@ class Mapping
      */
     public static function scanningDeclaration(): MappingDeclaration
     {
-        $resources = scanFindAllFile(Extra::$pathApp);
+        $resources = scanFindAllFile(Extra::$pathRoot, 'php', [
+            Extra::$pathRoot . '/vendor'
+        ]);
         $reflectionClasses = self::scanReflectionFilter($resources);
         return self::scanDeclarationFilter($reflectionClasses);
     }
@@ -33,10 +35,12 @@ class Mapping
     {
         $reflectionClasses = [];
         foreach ($resources as $resource) {
-            $className = 'App\\' . str_replace(
-                '.php',
-                '',
-                str_replace('/', '\\', str_replace(Extra::$pathApp . '/', '', $resource))
+            $className = ucwords(
+                str_replace(
+                    '.php',
+                    '',
+                    str_replace('/', '\\', str_replace(Extra::$pathRoot . '/', '', $resource))
+                )
             );
 
             try {

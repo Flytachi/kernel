@@ -114,7 +114,7 @@ if (!function_exists('dd')) {
 }
 
 if (!function_exists('scanFindAllFile')) {
-    function scanFindAllFile(string $rootDir, ?string $extension = null): array
+    function scanFindAllFile(string $rootDir, ?string $extension = null, array $ignoreFolder = []): array
     {
         $files = [];
 
@@ -124,9 +124,13 @@ if (!function_exists('scanFindAllFile')) {
         foreach ($items as $item) {
             if (is_dir($item)) {
                 // Рекурсивный вызов для поддиректорий
-                $files = array_merge($files, scanFindAllFile($item));
+                if ( empty($ignoreFolder) ||
+                    !in_array($item, $ignoreFolder)
+                ) {
+                    $files = array_merge($files, scanFindAllFile($item, $extension, $ignoreFolder));
+                }
             } else {
-                if ($extension != null && pathinfo($item, PATHINFO_EXTENSION) === 'php') {
+                if ($extension != null && pathinfo($item, PATHINFO_EXTENSION) === $extension) {
                     $files[] = $item;
                 } elseif ($extension == null) {
                     $files[] = $item;
