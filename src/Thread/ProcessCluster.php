@@ -161,8 +161,14 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     public static function status(): ?array
     {
         try {
-            return file_exists(static::stmPath())
-                ? JSON::read(static::stmPath()) : null;
+            $path = static::stmPath();
+            if (!file_exists($path)) return null;
+            $status = JSON::read($path);
+            if (!posix_getpgid($status['pid'])) {
+                unlink($path);
+                return null;
+            }
+            return $status;
         } catch (FileException $e) {
             return null;
         }
