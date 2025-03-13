@@ -12,7 +12,7 @@ interface RepositoryInterface
     public function db(): CDO;
     public function getSchema(): ?string;
     public function buildSql(): string;
-    public function getSql(string $param = null): mixed;
+    public function getSql(?string $param = null): mixed;
     public function select(string $option): static;
     public function as(string $alias): static;
     public function join(RepositoryInterface $repository, string $on): static;

@@ -98,7 +98,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
     /**
      * @throws RepositoryException
      */
-    final public function getSql(string $param = null): mixed
+    final public function getSql(?string $param = null): mixed
     {
         if ($param) {
             return (isset($this->sqlParts[$param])) ? $this->sqlParts[$param] : null;

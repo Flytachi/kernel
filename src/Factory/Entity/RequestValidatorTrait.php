@@ -23,7 +23,7 @@ trait RequestValidatorTrait
      *
      * @return self
      */
-    final public function valid(string $fieldName, callable $validateFunc = null, string $message = null): static
+    final public function valid(string $fieldName, ?callable $validateFunc = null, ?string $message = null): static
     {
         try {
             if(!isset($this->$fieldName))
@@ -47,7 +47,7 @@ trait RequestValidatorTrait
      *
      * @return static The current instance of the class.
      */
-    public final function validByFilter(string $fieldName, int $filter = FILTER_DEFAULT, string $message = null): static
+    public final function validByFilter(string $fieldName, int $filter = FILTER_DEFAULT, ?string $message = null): static
     {
         try {
             if(!isset($this->$fieldName))
