@@ -104,7 +104,7 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
     final protected function constructCsv(array $data): void
     {
         $fileBody = fopen('php://temp', 'r+b');
-        foreach ($data as $line) fputcsv($fileBody, (array) $line);
+        foreach ($data as $line) fputcsv($fileBody, (array) $line, ",", '"', "\\");
         rewind($fileBody);
         $this->data = stream_get_contents($fileBody);
         fclose($fileBody);
