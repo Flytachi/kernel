@@ -160,9 +160,9 @@ class Cfg extends Cmd
 
     private function openapiArg(): void
     {
-        if (!file_exists(Extra::$pathApp . '/OpenApiController.php')) {
+        if (!file_exists(Extra::$pathMain . '/OpenApiController.php')) {
             $code = file_get_contents($this->templatePath . '/Packages/OpenApiTemplate');
-            $fp = fopen(Extra::$pathApp . '/OpenApiController.php', "x");
+            $fp = fopen(Extra::$pathMain . '/OpenApiController.php', "x");
             fwrite($fp, $code);
             fclose($fp);
             self::printMessage("File 'OpenApiController' is created.", 32);

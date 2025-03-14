@@ -20,21 +20,21 @@ final class Extra extends ExtraConfig
     public static LoggerInterface $logger;
 
     public static function init(
-        ?string $pathRoot = null,
-        ?string $pathApp = null,
-        ?string $pathEnv = null,
-        ?string $pathPublic = null,
-        ?string $pathResource = null,
-        ?string $pathStorage = null,
-        ?string $pathStorageCache = null,
-        ?string $pathStorageLog = null,
-        ?string $pathFileMapping = null,
+        ?string          $pathRoot = null,
+        ?string          $pathMain = null,
+        ?string          $pathEnv = null,
+        ?string          $pathPublic = null,
+        ?string          $pathResource = null,
+        ?string          $pathStorage = null,
+        ?string          $pathStorageCache = null,
+        ?string          $pathStorageLog = null,
+        ?string          $pathFileMapping = null,
         ?LoggerInterface $logger = null
     ): void {
         define('EXTRA_STARTUP_TIME', microtime(true));
         parent::init(
             $pathRoot,
-            $pathApp,
+            $pathMain,
             $pathEnv,
             $pathPublic,
             $pathResource,

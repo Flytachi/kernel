@@ -8,7 +8,7 @@ abstract class ExtraConfig
 {
     public static string $pathRoot;
     public static string $pathEnv;
-    public static string $pathApp;
+    public static string $pathMain;
     public static string $pathPublic;
     public static string $pathResource;
     public static string $pathStorage;
@@ -18,7 +18,7 @@ abstract class ExtraConfig
 
     /**
      * @param string|null $pathRoot
-     * @param string|null $pathApp
+     * @param string|null $pathMain
      * @param string|null $pathEnv
      * @param string|null $pathPublic
      * @param string|null $pathResource
@@ -30,7 +30,7 @@ abstract class ExtraConfig
      */
     public static function init(
         ?string $pathRoot = null,
-        ?string $pathApp = null,
+        ?string $pathMain = null,
         ?string $pathEnv = null,
         ?string $pathPublic = null,
         ?string $pathResource = null,
@@ -45,8 +45,8 @@ abstract class ExtraConfig
         }
 
         // app
-        if ($pathApp === null) {
-            $pathApp = $pathRoot . '/app';
+        if ($pathMain === null) {
+            $pathMain = $pathRoot . '/main';
         }
 
         // env
@@ -85,7 +85,7 @@ abstract class ExtraConfig
         }
 
         self::$pathRoot = $pathRoot;
-        self::$pathApp = $pathApp;
+        self::$pathMain = $pathMain;
         self::$pathEnv = $pathEnv;
         self::$pathPublic = $pathPublic;
         self::$pathResource = $pathResource;

@@ -10,6 +10,7 @@ use Flytachi\Kernel\Extra;
 class Make extends Cmd
 {
     public static string $title = "command for creating templates";
+    private string $createPath;
     private string $templatePath;
 
     public function handle(): void
@@ -37,6 +38,12 @@ class Make extends Cmd
     {
         foreach ($this->args['arguments'] as $templateName) {
             $templateName = str_replace('.', '/', $templateName);
+            if (str_starts_with($templateName, '/')) {
+                $this->createPath = Extra::$pathRoot;
+            } else {
+                $this->createPath = Extra::$pathMain;
+            }
+            // ---
             if (in_array('a', $this->args['flags'])) {
                 $this->createRestController($templateName);
             }
@@ -226,7 +233,7 @@ class Make extends Cmd
 
     private function createFile(string $fName, string $path, string $code = "", ?string $prefix = null): void
     {
-        $path = Extra::$pathApp . $path;
+        $path = rtrim($this->createPath . $path, '/');
         $prefix = ($prefix) ? " ({$prefix})" : '';
         if (!is_dir($path)) {
             mkdir($path, 0777, true);
@@ -236,7 +243,7 @@ class Make extends Cmd
             $fp = fopen($fileName, "x");
             fwrite($fp, $code);
             fclose($fp);
-            self::printMessage("{$fName} file created successfully.{$prefix}", 32);
+            self::printMessage("{$fName} file created successfully.{$prefix} [file://{$fileName}]", 32);
         } else {
             self::printMessage("The {$fName} file already exist.{$prefix}");
         }
@@ -244,14 +251,18 @@ class Make extends Cmd
 
     private function getInfo(string $way, string $prefix, string $templateName): array
     {
-        $root = ucwords(basename(Extra::$pathApp));
-        $way = $this->ucWord($way) . $prefix;
+        $root = ($this->createPath != Extra::$pathRoot)
+            ? ucwords(basename($this->createPath))
+            : '';
+        $way = ltrim($this->ucWord($way) . $prefix, '/');
         $className = basename($way);
         $way = str_replace($className, '', $way);
         return [
             'namespace' => str_replace('/', '\\', trim($root . '/' . $way, " \t\n\r\0\x0B/")),
             'className' => $className,
-            'path' => '/' . $way,
+            'path' => '/' . ($this->createPath != Extra::$pathRoot
+                    ? $way : lcfirst($way)
+                ),
             'template' => $this->templatePath . '/' . $templateName,
         ];
     }
