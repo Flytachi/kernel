@@ -288,6 +288,11 @@ final class Router
             . PHP_EOL . " */" . PHP_EOL . PHP_EOL
             . "return {$mapString};";
         file_put_contents(Extra::$pathFileMapping, $fileData);
+        if (function_exists('opcache_reset')) {
+            try {
+                opcache_reset();
+            } catch (\Throwable $e) {}
+        }
     }
 
 
