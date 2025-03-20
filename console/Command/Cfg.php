@@ -154,7 +154,6 @@ class Cfg extends Cmd
     {
         multiCopy($this->templatePath . '/Docker', Extra::$pathRoot);
         self::printMessage("Folder 'docker' is created.", 32);
-        self::printMessage("File '.dockerignore' is created.", 32);
         self::printMessage("File 'docker-compose' is created.", 32);
         self::printMessage("File 'Dockerfile' is created.", 32);
     }
