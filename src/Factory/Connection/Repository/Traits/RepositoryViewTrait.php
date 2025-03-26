@@ -110,14 +110,14 @@ trait RepositoryViewTrait
      * @param string|null $modelClassName The class name of the model to use for the find operation. Defaults to null.
      * @param string $message The error message to be thrown if the record is not found. Defaults to 'Object not found'.
      *
-     * @return object|null Returns the found record if it exists.
+     * @return object Returns the found record if it exists.
      * @throws RepositoryException
      */
     final public static function findByIdOrThrow(
         int|string $id,
         ?string $modelClassName = null,
         string $message = 'Object not found'
-    ): ?object {
+    ): object {
         $obj = static::findById($id);
         if (!$obj) {
             throw new RepositoryException($message);
@@ -146,14 +146,14 @@ trait RepositoryViewTrait
      * @param string|null $modelClassName The class name of the model to use for the find operation. Defaults to null.
      * @param string $message The error message to throw if the record is not found. Defaults to 'Object not found'.
      *
-     * @return object|null Returns the found record if it exists, or throws
+     * @return object Returns the found record if it exists, or throws
      * @throws RepositoryException
      */
     final public static function findByOrThrow(
         Qb $qb,
         ?string $modelClassName = null,
         string $message = 'Object not found'
-    ): ?object {
+    ): object {
         $obj = self::findBy($qb);
         if (!$obj) {
             throw new RepositoryException($message);
