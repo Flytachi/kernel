@@ -11,7 +11,7 @@ use Monolog\Handler\FilterHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\StreamHandler;
 
-class ExtraLogger extends \Monolog\Logger
+final class ExtraLogger extends \Monolog\Logger
 {
     public function __construct(
         string $name,
@@ -33,9 +33,8 @@ class ExtraLogger extends \Monolog\Logger
         ));
 
         $allowedLevels = env('LOGGER_LEVEL_ALLOW');
-        if ($allowedLevels === null) {
-            $allowedLevels = 'DEBUG,INFO,NOTICE,WARNING,ERROR,CRITICAL,ALERT,EMERGENCY';
-        }
+        if ($allowedLevels === null || trim($allowedLevels) === '') return;
+
         $allowedLevels = array_map('trim', explode(',', $allowedLevels));
         $levelMap = [
             'DEBUG' => \Monolog\Logger::DEBUG,
@@ -51,8 +50,9 @@ class ExtraLogger extends \Monolog\Logger
         $allowedLevels = array_map(fn($level) => $levelMap[strtoupper($level)] ?? null, $allowedLevels);
         $allowedLevels = array_filter($allowedLevels);
 
-        $filterHandler = new FilterHandler($loggerStreamHandler, $allowedLevels, \Monolog\Logger::DEBUG);
-
-        $this->pushHandler($filterHandler);
+        if (!empty($allowedLevels)) {
+            $filterHandler = new FilterHandler($loggerStreamHandler, $allowedLevels, \Monolog\Logger::DEBUG);
+            $this->pushHandler($filterHandler);
+        }
     }
 }
