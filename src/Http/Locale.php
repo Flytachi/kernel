@@ -43,7 +43,37 @@ final class Locale
         self::$locale->lang = trim($lang, '/');
     }
 
-    public static function trans(string $key, ?array $params = null): string
+    /**
+     * Translates a given key using the loaded dictionary.
+     *
+     * This method retrieves the translation string from the dictionary using a dot-separated key.
+     * If parameters are provided, they will be inserted into the translated string using `sprintf()`.
+     * If the key is not found, it returns the key as is.
+     *
+     * @param string $key The translation key, using dot notation for nested values.
+     * @param array|null $params Optional parameters to replace placeholders in the translation string.
+     *
+     * @return string The translated string or the key if no translation is found.
+     *
+     * @example
+     * // Dictionary file (en.php):
+     * return [
+     *     'error' => [
+     *         'not_found' => 'Page not found',
+     *         'server' => 'Server error: %s',
+     *     ],
+     *     'user' => [
+     *         'welcome' => 'Welcome, %s!',
+     *     ],
+     * ];
+     *
+     * // Usage:
+     * echo Locale::translate('error.not_found');         // Output: "Page not found"
+     * echo Locale::translate('error.server', ['500']);  // Output: "Server error: 500"
+     * echo Locale::translate('user.welcome', ['John']); // Output: "Welcome, John!"
+     * echo Locale::translate('unknown.key');            // Output: "unknown.key"
+     */
+    public static function translate(string $key, ?array $params = null): string
     {
         self::init();
         // include
