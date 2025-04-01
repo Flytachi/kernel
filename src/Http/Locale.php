@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Unit\Tool;
 
 final class Locale
 {
@@ -45,14 +46,16 @@ final class Locale
     public static function trans(string $key, ?array $params = null): string
     {
         self::init();
+        // include
         if (!isset($GLOBALS['DICTIONARY'])) {
             $path = self::$locale->path . '/'. self::$locale->lang .'.php';
             $GLOBALS['DICTIONARY'] = file_exists($path) ? include $path : [];
         }
-        if (isset($GLOBALS['DICTIONARY'][$key]) && $GLOBALS['DICTIONARY'][$key])
-            return empty($params)
-                ? $GLOBALS['DICTIONARY'][$key]
-                : sprintf($GLOBALS['DICTIONARY'][$key], ...$params);
-        else return $key;
+        // return
+        $value = Tool::arrayNestedValue($GLOBALS['DICTIONARY'], explode('.', $key));
+
+        if (is_string($value)) {
+            return empty($params) ? $value : sprintf($value, ...$params);
+        } else return $key;
     }
 }
