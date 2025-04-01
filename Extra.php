@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Class Extra
  *
- * @version 1.0
+ * @version 1.1
  * @author Flytachi
  */
 final class Extra extends ExtraConfig
@@ -59,7 +59,7 @@ final class Extra extends ExtraConfig
 
         // logger
         if ($logger === null) {
-            self::$logger = new ExtraLogger(static::class);
+            self::$logger = new ExtraLogger('Extra');
         } else {
             self::$logger = $logger;
         }

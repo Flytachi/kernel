@@ -132,6 +132,43 @@ final class Tool
     }
 
     /**
+     * Retrieves a nested value from a multidimensional array using a sequence of keys.
+     *
+     * This function navigates through the array hierarchy following the given keys
+     * and returns the corresponding value if found. If any key in the path is missing,
+     * it returns `null`.
+     *
+     * @param array $array The associative array to search in.
+     * @param array<string> $keys An array representing the sequence of keys to access the nested value.
+     *
+     * @return mixed The value found at the given path or `null` if any key is missing.
+     *
+     * @example
+     * ```php
+     * $data = [
+     *     'user' => [
+     *         'profile' => [
+     *             'name' => 'John Doe'
+     *         ]
+     *     ]
+     * ];
+     *
+     * $name = arrayNestedValue($data, ['user', 'profile', 'name']); // Returns 'John Doe'
+     * $age = arrayNestedValue($data, ['user', 'profile', 'age']); // Returns null
+     * ```
+     */
+    public static function arrayNestedValue(array $array, array $keys): mixed
+    {
+        foreach ($keys as $key) {
+            if (!isset($array[$key])) {
+                return null;
+            }
+            $array = $array[$key];
+        }
+        return $array;
+    }
+
+    /**
      * Calculates the factorial of a given value.
      *
      * @param int $value The value for which to calculate the factorial.

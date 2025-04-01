@@ -16,8 +16,6 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
     protected string $dbConfigClassName;
     /** @var class-string $modelClassName object class name (default => \stdClass::class) */
     protected string $modelClassName = \stdClass::class;
-    /** @var bool $isReadonly readonly status (block writing permission) */
-    protected bool $isReadonly = false;
     /** @var string|null $schema schema in database */
     protected ?string $schema = null;
     /** @var string $table name of the table in the database */
