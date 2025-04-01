@@ -30,13 +30,13 @@ final class Locale
         }
     }
 
-    private static function setPath(string $path): void
+    public static function setPath(string $path): void
     {
         self::init();
         self::$locale->path = trim($path, '/');
     }
 
-    private static function setLang(string $lang): void
+    public static function setLang(string $lang): void
     {
         self::init();
         self::$locale->lang = trim($lang, '/');
