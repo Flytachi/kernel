@@ -31,8 +31,8 @@ final class JWT
      */
     public static function encode(
         array $payload,
-        int $expireTimeInMinutes = null,
-        int $notBeforeInMinutes = null,
+        ?int $expireTimeInMinutes = null,
+        ?int $notBeforeInMinutes = null,
         string $algorithm = 'HS256'
     ): string {
         if (!isset(self::$algorithms[$algorithm])) {
