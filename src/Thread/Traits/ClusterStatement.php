@@ -8,12 +8,16 @@ use Flytachi\Kernel\Src\Unit\File\JSON;
 
 trait ClusterStatement
 {
-    protected function preparation(): void {}
+    protected function preparation(): void
+    {
+    }
 
     public static function threadList(): array
     {
         $files = glob(static::stmThreadsPath() . '/*.json');
-        foreach ($files as $key => $path) $files[$key] = (int) basename($path, '.json');
+        foreach ($files as $key => $path) {
+            $files[$key] = (int) basename($path, '.json');
+        }
         return $files;
     }
 
@@ -38,7 +42,9 @@ trait ClusterStatement
 
         // preparation
         $pathThreads = static::stmThreadsPath();
-        if (!is_dir($pathThreads)) mkdir($pathThreads, recursive: true);
+        if (!is_dir($pathThreads)) {
+            mkdir($pathThreads, recursive: true);
+        }
         $data['balancer'] = $balancer;
         $this->balancer = $balancer;
         JSON::write(static::stmPath(), $data);

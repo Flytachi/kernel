@@ -9,7 +9,8 @@ use Flytachi\Kernel\Src\Factory\Stereotype;
 /**
  * Class Blink
  *
- * `Blink` is a class for abstracting interactions with a cURL session. It simplifies HTTP request operations such as GET, POST, PUT, DELETE, and PATCH.
+ * `Blink` is a class for abstracting interactions with a cURL session.
+ * It simplifies HTTP request operations such as GET, POST, PUT, DELETE, and PATCH.
  *
  * The methods provided by `Blink` include:
  *
@@ -48,8 +49,8 @@ use Flytachi\Kernel\Src\Factory\Stereotype;
  */
 final class Blink extends Stereotype
 {
-    const string ACCEPT_JSON = 'Accept: application/json';
-    const string CONTENT_JSON = 'Content-Type: application/json';
+    public const string ACCEPT_JSON = 'Accept: application/json';
+    public const string CONTENT_JSON = 'Content-Type: application/json';
 
     private static null|self $blink = null;
     private \CurlHandle $curl;
@@ -104,7 +105,8 @@ final class Blink extends Stereotype
     /**
      * Sets the headers for the HTTP request.
      *
-     * @param string ...$headers The headers to be set for the HTTP request. Multiple headers can be passed as separate string arguments.
+     * @param string ...$headers The headers to be set for the HTTP request.
+     * Multiple headers can be passed as separate string arguments.
      * @return self Returns an instance of the class that this method belongs to.
      */
     public static function headers(string ...$headers): self
@@ -190,8 +192,11 @@ final class Blink extends Stereotype
     public static function request(string $method, string $url, null|array $params = null): self
     {
         self::setOption(CURLOPT_CUSTOMREQUEST, $method);
-        if ($params == null) self::setOption(CURLOPT_URL, $url);
-        else self::setOption(CURLOPT_URL, $url . '?' . http_build_query($params));
+        if ($params == null) {
+            self::setOption(CURLOPT_URL, $url);
+        } else {
+            self::setOption(CURLOPT_URL, $url . '?' . http_build_query($params));
+        }
         return self::$blink;
     }
 
@@ -215,15 +220,19 @@ final class Blink extends Stereotype
      */
     public static function bodyJson(array|string $bodyJson): self
     {
-        if (is_array($bodyJson)) self::setOption(CURLOPT_POSTFIELDS, json_encode($bodyJson));
-        else self::setOption(CURLOPT_POSTFIELDS, $bodyJson);
+        if (is_array($bodyJson)) {
+            self::setOption(CURLOPT_POSTFIELDS, json_encode($bodyJson));
+        } else {
+            self::setOption(CURLOPT_POSTFIELDS, $bodyJson);
+        }
         return self::$blink;
     }
 
     /**
      * Send a request using cURL and return the response.
      *
-     * @param bool $isThrowable Optional. Flag indicating whether to throw an exception on request failure. Default is true.
+     * @param bool $isThrowable Optional. Flag indicating whether to throw
+     * an exception on request failure. Default is true.
      * @return BlinkObject The response object containing the cURL information and the response content.
      * @throws BlinkException
      */
@@ -233,12 +242,16 @@ final class Blink extends Stereotype
         $response = null;
 
         while (true) {
-            if ($this->maxRetry == 0) break;
+            if ($this->maxRetry == 0) {
+                break;
+            }
 
             $this->logger->debug("Blink Send Request: {$info['url']}");
             $response = curl_exec($this->curl);
             $info = curl_getinfo($this->curl);
-            if ($info['http_code'] === 0) $info['http_code'] = 504;
+            if ($info['http_code'] === 0) {
+                $info['http_code'] = 504;
+            }
 
             if ($info['http_code'] >= 400) {
                 if ($this->maxRetry > 1 && $info['http_code'] == 504) {

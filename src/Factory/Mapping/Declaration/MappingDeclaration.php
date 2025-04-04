@@ -21,6 +21,9 @@ class MappingDeclaration
         $this->children = $children;
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function push(MappingDeclarationItem $newChild): void
     {
         foreach ($this->children as $child) {
@@ -29,9 +32,9 @@ class MappingDeclaration
                 && $child->getMethod() == $newChild->getMethod()
             ) {
                  MappingException::throw(
-                    "Duplicate mapping declaration {$newChild->getReflectionMethod()->getFileName()}"
-                    . " ({$newChild->getReflectionMethod()->getStartLine()})"
-                );
+                     "Duplicate mapping declaration {$newChild->getReflectionMethod()->getFileName()}"
+                     . " ({$newChild->getReflectionMethod()->getStartLine()})"
+                 );
             }
         }
         $this->children[] = $newChild;

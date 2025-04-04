@@ -34,13 +34,12 @@ if (!function_exists('bytes')) {
         // Format string
         $format = ($format === null) ? '%01.2f %s' : (string) $format;
 
-        // IEC prefixes (binary)
         if (!$si or str_contains($force_unit, 'i')) {
+            // IEC prefixes (binary)
             $units = array('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB');
             $mod   = 1024;
-        }
-        // SI prefixes (decimal)
-        else {
+        } else {
+            // SI prefixes (decimal)
             $units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
             $mod   = 1000;
         }
@@ -124,7 +123,8 @@ if (!function_exists('scanFindAllFile')) {
         foreach ($items as $item) {
             if (is_dir($item)) {
                 // Рекурсивный вызов для поддиректорий
-                if ( empty($ignoreFolder) ||
+                if (
+                    empty($ignoreFolder) ||
                     !in_array($item, $ignoreFolder)
                 ) {
                     $files = array_merge($files, scanFindAllFile($item, $extension, $ignoreFolder));

@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Class Extra
  *
- * @version 1.1
+ * @version 1.3
  * @author Flytachi
  */
 final class Extra extends ExtraConfig
@@ -20,18 +20,18 @@ final class Extra extends ExtraConfig
     public static LoggerInterface $logger;
 
     public static function init(
-        ?string          $pathRoot = null,
-        ?string          $pathMain = null,
-        ?string          $pathEnv = null,
-        ?string          $pathPublic = null,
-        ?string          $pathResource = null,
-        ?string          $pathStorage = null,
-        ?string          $pathStorageCache = null,
-        ?string          $pathStorageLog = null,
-        ?string          $pathFileMapping = null,
+        ?string $pathRoot = null,
+        ?string $pathMain = null,
+        ?string $pathEnv = null,
+        ?string $pathPublic = null,
+        ?string $pathResource = null,
+        ?string $pathStorage = null,
+        ?string $pathStorageCache = null,
+        ?string $pathStorageLog = null,
+        ?string $pathFileMapping = null,
         ?LoggerInterface $logger = null
     ): void {
-        define('EXTRA_STARTUP_TIME', microtime(true));
+        defined('EXTRA_STARTUP_TIME') or define('EXTRA_STARTUP_TIME', microtime(true));
         parent::init(
             $pathRoot,
             $pathMain,
@@ -47,7 +47,7 @@ final class Extra extends ExtraConfig
         Dotenv::createImmutable(self::$pathRoot)
             ->safeLoad();
 
-        define('SERVER_SCHEME', (
+        defined('SERVER_SCHEME') or define('SERVER_SCHEME', (
                 $_SERVER['REQUEST_SCHEME'] ?? 'http') . "://" . ($_SERVER['SERVER_NAME'] ?? 'localhost'));
         date_default_timezone_set(env('TIME_ZONE', 'UTC'));
 

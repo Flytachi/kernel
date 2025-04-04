@@ -107,7 +107,10 @@ class CDO extends PDO
             }
             return $result;
         } catch (PDOException $ex) {
-            throw new CDOException('Error when creating a record in the database (' . $ex->getMessage() . ')', previous: $ex);
+            throw new CDOException(
+                'Error when creating a record in the database (' . $ex->getMessage() . ')',
+                previous: $ex
+            );
         }
     }
 
@@ -187,7 +190,10 @@ class CDO extends PDO
             }
             $stmt->getStmt()->execute();
         } catch (PDOException $ex) {
-            throw new CDOException('Error when creating a records in the database (' . $ex->getMessage() . ')', previous: $ex);
+            throw new CDOException(
+                'Error when creating a records in the database (' . $ex->getMessage() . ')',
+                previous: $ex
+            );
         }
     }
 
@@ -232,17 +238,16 @@ class CDO extends PDO
                         $stmt->bindValue($keyVal, json_encode($paramVal));
                         break;
                     case 'object':
-                        if ($paramVal instanceof Type) {
-                            $stmt->updateStm($this->prepare(str_replace(
-                                (string) $keyVal,
-                                sprintf($paramVal::prepairing(), $keyVal),
-                                $query
-                            )));
-                            $stmt->bindValue($keyVal, (string) $paramVal);
-                        } else {
+//                        if ($paramVal instanceof Type) {
+//                            $stmt->updateStm($this->prepare(str_replace(
+//                                (string) $keyVal,
+//                                sprintf($paramVal::prepairing(), $keyVal),
+//                                $query
+//                            )));
+//                            $stmt->bindValue($keyVal, (string) $paramVal);
+//                        } else {
                             $stmt->bindValue($keyVal, serialize($paramVal));
-                        }
-                        $stmt->bindValue($keyVal, serialize($paramVal));
+//                        }
                         break;
                     default:
                         $stmt->bindValue($keyVal, $paramVal);
@@ -256,7 +261,10 @@ class CDO extends PDO
             }
             return $result;
         } catch (PDOException $ex) {
-            throw new CDOException('Error when changing a record in the database (' . $ex->getMessage() . ')', previous: $ex);
+            throw new CDOException(
+                'Error when changing a record in the database (' . $ex->getMessage() . ')',
+                previous: $ex
+            );
         }
     }
 
@@ -300,7 +308,10 @@ class CDO extends PDO
             }
             return $result;
         } catch (PDOException $ex) {
-            throw new CDOException('Error deleting a record in the database (' . $ex->getMessage() . ')', previous: $ex);
+            throw new CDOException(
+                'Error deleting a record in the database (' . $ex->getMessage() . ')',
+                previous: $ex
+            );
         }
     }
 }

@@ -148,11 +148,11 @@ final class Wrapper
         if (Wrapper::$totalPages <= 1) {
             return '';
         }
+        $classes = "pagination pagination-flat pagination-rounded align-self-center justify-content-center mt-3";
 
-        return sprintf(
-            "<ul class=\"pagination pagination-flat pagination-rounded align-self-center justify-content-center mt-3\" >%s</ul>",
-            Wrapper::buildPanel()
-        );
+        return "<ul class=\"$classes\">"
+            . Wrapper::buildPanel()
+            . "</ul>";
     }
 
     private static function init(RepositoryInterface $repo): void

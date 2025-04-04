@@ -18,7 +18,7 @@ trait RepositoryCrudTrait
         try {
             return $this->db()->insert(($this->schema ? $this->schema . '.' : '') . $this::$table, $model);
         } catch (CDOException $exception) {
-            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+            throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
@@ -30,7 +30,7 @@ trait RepositoryCrudTrait
         try {
             $this->db()->insertGroup(($this->schema ? $this->schema . '.' : '') . $this::$table, ...$models);
         } catch (CDOException $exception) {
-            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+            throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
@@ -42,7 +42,7 @@ trait RepositoryCrudTrait
         try {
             return $this->db()->update(($this->schema ? $this->schema . '.' : '') . $this::$table, $model, $qb);
         } catch (CDOException $exception) {
-            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+            throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
@@ -54,7 +54,7 @@ trait RepositoryCrudTrait
         try {
             return $this->db()->delete(($this->schema ? $this->schema . '.' : '') . $this::$table, $qb);
         } catch (CDOException $exception) {
-            throw new RepositoryException($exception->getMessage(),  $exception->getCode(), $exception);
+            throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }
