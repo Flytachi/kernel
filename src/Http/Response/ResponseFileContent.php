@@ -36,9 +36,9 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
         try {
             if ($this->resourceType == 'json') {
                 $this->constructJson($data);
-            } else if ($this->resourceType == 'xml') {
+            } elseif ($this->resourceType == 'xml') {
                 $this->constructXml($data);
-            } else if ($this->resourceType == 'csv') {
+            } elseif ($this->resourceType == 'csv') {
                 $this->constructCsv($data);
             } else {
                 $this->data = print_r($data, true);
@@ -58,7 +58,8 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
         $extension = $this->resourceType == 'binary' ? '' : '.' . $this->resourceType;
         return [
             'Content-Type' => $this->mimeType,
-            'Content-Disposition' => ($this->isAttachment ? 'attachment' : 'inline') . '; filename=' . basename($this->fileName, $extension) . $extension,
+            'Content-Disposition' => ($this->isAttachment ? 'attachment' : 'inline')
+                . '; filename=' . basename($this->fileName, $extension) . $extension,
             'Expires' => '0',
             'Pragma' => 'public',
             'Cache-Control' => 'must-revalidate',
@@ -94,7 +95,7 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
             $this->data = XML::arrayToXml(
                 json_decode(json_encode($data), true)
             );
-        } else if (is_array($data)){
+        } elseif (is_array($data)) {
             $this->data = XML::arrayToXml($data);
         } else {
             $this->data = XML::arrayToXml([$data]);
@@ -104,7 +105,9 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
     final protected function constructCsv(array $data): void
     {
         $fileBody = fopen('php://temp', 'r+b');
-        foreach ($data as $line) fputcsv($fileBody, (array) $line, ",", "\"", "\\");
+        foreach ($data as $line) {
+            fputcsv($fileBody, (array) $line, ",", "\"", "\\");
+        }
         rewind($fileBody);
         $this->data = stream_get_contents($fileBody);
         fclose($fileBody);

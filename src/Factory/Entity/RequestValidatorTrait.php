@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Factory\Entity;
 
-use Flytachi\Kernel\Src\Http\HttpCode;
-
 trait RequestValidatorTrait
 {
     /**
@@ -26,11 +24,13 @@ trait RequestValidatorTrait
     final public function valid(string $fieldName, ?callable $validateFunc = null, ?string $message = null): static
     {
         try {
-            if(!isset($this->$fieldName))
+            if (!isset($this->$fieldName)) {
                 RequestException::throw("Required field '{$fieldName}' not found");
+            }
             if ($validateFunc !== null) {
-                if (!$validateFunc($this->$fieldName))
+                if (!$validateFunc($this->$fieldName)) {
                     RequestException::throw("{$fieldName} - " . ($message ?? "field has the wrong data type"));
+                }
             }
         } catch (\Throwable $exception) {
             RequestException::throw($exception->getMessage());
@@ -47,13 +47,18 @@ trait RequestValidatorTrait
      *
      * @return static The current instance of the class.
      */
-    public final function validByFilter(string $fieldName, int $filter = FILTER_DEFAULT, ?string $message = null): static
-    {
+    final public function validByFilter(
+        string $fieldName,
+        int $filter = FILTER_DEFAULT,
+        ?string $message = null
+    ): static {
         try {
-            if(!isset($this->$fieldName))
+            if (!isset($this->$fieldName)) {
                 RequestException::throw("Required field '{$fieldName}' not found");
-            if (!filter_var($this->$fieldName, $filter))
+            }
+            if (!filter_var($this->$fieldName, $filter)) {
                 RequestException::throw("{$fieldName} - " . ($message ?? "field has the wrong data type"));
+            }
         } catch (\Throwable $exception) {
             RequestException::throw($exception->getMessage());
         }

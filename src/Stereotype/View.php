@@ -9,8 +9,12 @@ use Flytachi\Kernel\Src\Http\Response\ViewBase;
 
 class View extends ViewBase
 {
-    public static function render(?string $templateName, string $resourceName, array $data = [], HttpCode $httpCode = HttpCode::OK): static
-    {
+    public static function render(
+        ?string $templateName,
+        string $resourceName,
+        array $data = [],
+        HttpCode $httpCode = HttpCode::OK
+    ): static {
         return new static($templateName, $resourceName, $data, $httpCode);
     }
 

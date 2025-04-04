@@ -291,7 +291,8 @@ final class Router
         if (function_exists('opcache_reset')) {
             try {
                 opcache_reset();
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
         }
     }
 

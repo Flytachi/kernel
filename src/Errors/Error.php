@@ -14,8 +14,9 @@ class Error extends ExtraException
     public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null)
     {
         $httpCode = HttpCode::tryFrom($code);
-        if ($httpCode == null) $this->logLevel = LogLevel::ALERT;
-        else {
+        if ($httpCode == null) {
+            $this->logLevel = LogLevel::ALERT;
+        } else {
             if ($httpCode->isServerError()) {
                 $this->logLevel = LogLevel::ERROR;
             } elseif ($httpCode->isClientError()) {

@@ -39,15 +39,17 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
         return Extra::$pathStorageCache . '/' . hash('xxh64', static::class) . '__t';
     }
 
-    protected final function streaming(callable $complianceCallable, ?callable $negationCallable = null): void
+    final protected function streaming(callable $complianceCallable, ?callable $negationCallable = null): void
     {
         while (true) {
             if ($this->threadCount() < $this->balancer) {
                 $complianceCallable();
             } else {
-                if ($negationCallable !== null) $negationCallable();
+                if ($negationCallable !== null) {
+                    $negationCallable();
+                }
             }
-            usleep( (int) ($this->balancer < 1000 ? ceil(1_000_000 / $this->balancer) : 1000) );
+            usleep((int) ($this->balancer < 1000 ? ceil(1_000_000 / $this->balancer) : 1000));
         }
     }
 
@@ -78,7 +80,9 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     private function startRun(): void
     {
         $this->pid = getmypid();
-        if (!is_dir(static::stmThreadsPath())) mkdir(static::stmThreadsPath(), recursive: true);
+        if (!is_dir(static::stmThreadsPath())) {
+            mkdir(static::stmThreadsPath(), recursive: true);
+        }
         $this->logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
 
         if (PHP_SAPI === 'cli') {
@@ -152,17 +156,22 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     {
         $status = static::status();
         if ($status) {
-            throw new ThreadException("Cluster process already exist [PID:{$status['pid']}] ({$status['startedAt']})",
-                HttpCode::LOCKED->value);
+            throw new ThreadException(
+                "Cluster process already exist [PID:{$status['pid']}] ({$status['startedAt']})",
+                HttpCode::LOCKED->value
+            );
+        } else {
+            return self::runnable($data);
         }
-        else return self::runnable($data);
     }
 
     public static function status(): ?array
     {
         try {
             $path = static::stmPath();
-            if (!file_exists($path)) return null;
+            if (!file_exists($path)) {
+                return null;
+            }
             $status = JSON::read($path);
             if (!posix_getpgid($status['pid'])) {
                 unlink($path);
@@ -180,8 +189,9 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     public static function stop(): bool
     {
         $status = static::status();
-        if ($status) return Signal::interrupt($status['pid']);
-        else {
+        if ($status) {
+            return Signal::interrupt($status['pid']);
+        } else {
             throw new ThreadException('Cluster process has not started', HttpCode::LOCKED->value);
         }
     }

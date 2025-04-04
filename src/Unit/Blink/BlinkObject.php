@@ -11,7 +11,8 @@ use ReflectionProperty;
  * Class BlinkObject
  *
  * `BlinkObject` is a standard class object with additional methods.
- * It is used to hold data and provide specific functionalities tied with its stored properties like converting them into different formats.
+ * It is used to hold data and provide specific functionalities tied with
+ * its stored properties like converting them into different formats.
  *
  * The methods provided by `BlinkObject` include:
  *
@@ -27,13 +28,14 @@ use ReflectionProperty;
  */
 class BlinkObject extends \stdClass
 {
-    public final function __construct(array $data)
+    final public function __construct(array $data)
     {
         try {
             $reflection = new \ReflectionClass($this);
             $property1 = [];
-            foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $reflectionProperty)
+            foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $reflectionProperty) {
                 $property1[$reflectionProperty->getName()] = (string)$reflectionProperty->getType();
+            }
             $properties = $property1;
             if ($data) {
                 foreach ($data as $key => $value) {
@@ -91,7 +93,7 @@ class BlinkObject extends \stdClass
      * Convert the response to XML format.
      *
      * @return false|\SimpleXMLElement False if the response cannot be converted to XML or the response is empty.
-     *                                \SimpleXMLElement object representing the response if the XML conversion was successful.
+     * \SimpleXMLElement object representing the response if the XML conversion was successful.
      */
     public function responseAsXML(): false|\SimpleXMLElement
     {

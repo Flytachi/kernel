@@ -16,8 +16,12 @@ final class ResourceTree
     private static array $resourceData;
     private static array $resourceAdditional = [];
 
-    public static function init(string $controllerClass, string $controllerClassMethod, ?string $template, string $resource): void
-    {
+    public static function init(
+        string $controllerClass,
+        string $controllerClassMethod,
+        ?string $template,
+        string $resource
+    ): void {
         self::$controllerClass = $controllerClass;
         self::$controllerClassMethod = $controllerClassMethod;
         self::$template = $template;
@@ -79,13 +83,15 @@ final class ResourceTree
                                 'date' => date(DATE_ATOM),
                                 'controllerClass' => self::$controllerClass,
                                 'controllerClassMethod' => self::$controllerClassMethod,
-                                'template' => self::$template ? str_replace(Extra::$pathRoot, '', self::$template) : null,
+                                'template' => self::$template
+                                    ? str_replace(Extra::$pathRoot, '', self::$template)
+                                    : null,
                                 'resource' => str_replace(Extra::$pathRoot, '', self::$resource),
                                 'resourceAdditional' => array_map(
                                     fn($resource) => str_replace(Extra::$pathRoot, '', $resource),
                                     self::$resourceAdditional
                                 ),
-                                'resourceData' => self::$resourceData
+                                 'resourceData' => self::$resourceData
                             ]) ?></pre>
                     </div>
 
@@ -96,7 +102,11 @@ final class ResourceTree
                         try {
                             $declaration = \Flytachi\Kernel\Src\Factory\Mapping\Mapping::scanningDeclaration();
                             foreach ($declaration->getChildren() as $item) {
-                                if (is_subclass_of($item->getClassName(), Controller::class) && ($item->getMethod() == 'GET' || $item->getMethod() == '')) {
+                                if (
+                                    is_subclass_of($item->getClassName(), Controller::class)
+                                    && ($item->getMethod() == 'GET'
+                                    || $item->getMethod() == '')
+                                ) {
                                     $classMethod = $item->getClassName() . '->' . $item->getClassMethod();
                                     echo sprintf(
                                         "<div>"

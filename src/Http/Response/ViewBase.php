@@ -16,8 +16,12 @@ abstract class ViewBase implements ViewInterface
     protected array $data;
     protected HttpCode $httpCode;
 
-    public function __construct(?string $templateName, string $resourceName, array $data = [], HttpCode $httpCode = HttpCode::OK)
-    {
+    public function __construct(
+        ?string $templateName,
+        string $resourceName,
+        array $data = [],
+        HttpCode $httpCode = HttpCode::OK
+    ) {
         if (empty($templateName)) {
             $this->templateName = null;
         } else {

@@ -78,7 +78,7 @@ final class Locale
         self::init();
         // include
         if (!isset($GLOBALS['DICTIONARY'])) {
-            $path = self::$locale->path . '/'. self::$locale->lang .'.php';
+            $path = self::$locale->path . '/' . self::$locale->lang . '.php';
             $GLOBALS['DICTIONARY'] = file_exists($path) ? include $path : [];
         }
         // return
@@ -86,6 +86,8 @@ final class Locale
 
         if (is_string($value)) {
             return empty($params) ? $value : sprintf($value, ...$params);
-        } else return $key;
+        } else {
+            return $key;
+        }
     }
 }

@@ -8,12 +8,19 @@ use Flytachi\Kernel\Src\Http\ResourceControl;
 
 abstract class Resource extends ResourceControl
 {
-    public static function isActiveLink(array|string $link, string $classNameSuccess = 'active', string $classNameNone = ''): string
-    {
+    public static function isActiveLink(
+        array|string $link,
+        string $classNameSuccess = 'active',
+        string $classNameNone = ''
+    ): string {
         if (is_array($link)) {
-            if (in_array($_SERVER['REQUEST_URI'], $link)) return $classNameSuccess;
+            if (in_array($_SERVER['REQUEST_URI'], $link)) {
+                return $classNameSuccess;
+            }
         } else {
-            if($_SERVER['REQUEST_URI'] == $link) return $classNameSuccess;
+            if ($_SERVER['REQUEST_URI'] == $link) {
+                return $classNameSuccess;
+            }
         }
         return $classNameNone;
     }

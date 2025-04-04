@@ -182,7 +182,8 @@ abstract class ExceptionWrapper
                 $result .= '</head>';
                 $result .= '<body style="background-color: #0a0f1f;color: #ffffff">';
                 $result .=      '<center>';
-                $result .=          '<strong style="font-size:21px;"><em>Extra ' . $_error['code'] . ' - ' . $httpMessage . '</em></strong>';
+                $result .=          '<strong style="font-size:21px;"><em>Extra ' . $_error['code'] . ' - '
+                    . $httpMessage . '</em></strong>';
                 $result .=          '<hr width="50%">';
                 $result .=          "<h2 style=\"color:#676980FF\">{$_error['message']}</h2>";
                 $result .=      '</center>';

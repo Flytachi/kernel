@@ -9,7 +9,6 @@ use Flytachi\Kernel\Extra;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\FilterHandler;
 use Monolog\Handler\RotatingFileHandler;
-use Monolog\Handler\StreamHandler;
 
 final class ExtraLogger extends \Monolog\Logger
 {
@@ -33,7 +32,9 @@ final class ExtraLogger extends \Monolog\Logger
         ));
 
         $allowedLevels = env('LOGGER_LEVEL_ALLOW');
-        if ($allowedLevels === null || trim($allowedLevels) === '') return;
+        if ($allowedLevels === null || trim($allowedLevels) === '') {
+            return;
+        }
 
         $allowedLevels = array_map('trim', explode(',', $allowedLevels));
         $levelMap = [
