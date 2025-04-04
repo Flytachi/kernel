@@ -8,6 +8,7 @@ use Flytachi\Kernel\Src\Factory\Connection\CDO\CDO;
 use Flytachi\Kernel\Src\Factory\Connection\ConnectionPool;
 use Flytachi\Kernel\Src\Factory\Connection\Qb;
 use Flytachi\Kernel\Src\Factory\Connection\Repository\Interfaces\RepositoryInterface;
+use Flytachi\Kernel\Src\Factory\Entity\ModelInterface;
 use Flytachi\Kernel\Src\Factory\Stereotype;
 
 abstract class RepositoryCore extends Stereotype implements RepositoryInterface
@@ -114,11 +115,23 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
 
     private function prepareSelect(): string
     {
-        if (isset($this->sqlParts['option'])) {
+        if (is_subclass_of($this->modelClassName, \stdClass::class)) {
+            return '*';
+        } elseif (isset($this->sqlParts['option'])) {
             $this->modelClassName = \stdClass::class;
             return $this->sqlParts['option'];
         } else {
-            return '*';
+            $prefix = $this->sqlParts['as'] ?? '';
+            $values = [];
+            if (is_subclass_of($this->modelClassName, ModelInterface::class)) {
+                $selection = $this->modelClassName::selection();
+            }
+
+            foreach (get_class_vars($this->modelClassName) as $name => $val) {
+                $values[] = $selection[$name] ?? ($prefix . $name);
+            }
+
+            return implode(', ', $values);
         }
     }
 
