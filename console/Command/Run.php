@@ -67,11 +67,14 @@ class Run extends Cmd
     private function scriptArg(): void
     {
         if (array_key_exists(2, $this->args['arguments'])) {
-            $classname = str_replace('/', '\\',
-                    implode('/', array_map(fn($word) => ucfirst($word), explode('/',
-                        str_replace('.', '/', ucwords($this->args['arguments'][2]))
-                    )))
-                ) . 'Cmd';
+            $classname = str_replace(
+                '/',
+                '\\',
+                implode('/', array_map(fn($word) => ucfirst($word), explode(
+                    '/',
+                    str_replace('.', '/', ucwords($this->args['arguments'][2]))
+                )))
+            ) . 'Cmd';
             $name = explode('\\', $classname);
             $name = $name[count($name) - 1];
             if (!class_exists($classname)) {
