@@ -15,6 +15,7 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
     protected string $mimeType;
     protected bool $isAttachment;
     protected HttpCode $httpCode;
+    protected int $maxAge;
 
     public function __construct(
         string $resourceType,
@@ -22,7 +23,8 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
         string $fileName,
         string $mimeType = 'application/octet-stream',
         bool $isAttachment = false,
-        HttpCode $httpCode = HttpCode::OK
+        HttpCode $httpCode = HttpCode::OK,
+        int $maxAgeSeconds = 0,
     ) {
         if (!in_array($resourceType, ['binary', 'txt', 'csv', 'xml', 'json'])) {
             throw new ResponseException("Unsupported resource type: {$resourceType}");
@@ -32,6 +34,7 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
         $this->isAttachment = $isAttachment;
         $this->fileName = $fileName;
         $this->mimeType = $mimeType;
+        $this->maxAge = $maxAgeSeconds;
 
         try {
             if ($this->resourceType == 'json') {
@@ -60,9 +63,7 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
             'Content-Type' => $this->mimeType,
             'Content-Disposition' => ($this->isAttachment ? 'attachment' : 'inline')
                 . '; filename=' . basename($this->fileName, $extension) . $extension,
-            'Expires' => '0',
-            'Pragma' => 'public',
-            'Cache-Control' => 'must-revalidate',
+            'Cache-Control' => 'public, max-age=' . $this->maxAge . ', must-revalidate',
             'Content-Length' => strlen($this->data),
         ];
     }
