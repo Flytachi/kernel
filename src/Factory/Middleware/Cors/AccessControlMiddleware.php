@@ -45,6 +45,8 @@ abstract class AccessControlMiddleware extends AbstractMiddleware implements Mid
         }
         if (!empty($this->headers)) {
             header('Access-Control-Allow-Headers: ' . implode(', ', $this->headers));
+        } else {
+            header('Access-Control-Allow-Headers: *');
         }
         if ($this->credentials) {
             header('Access-Control-Allow-Credentials: ' . $this->credentials);
