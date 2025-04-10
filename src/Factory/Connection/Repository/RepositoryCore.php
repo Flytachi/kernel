@@ -115,11 +115,11 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
 
     private function prepareSelect(): string
     {
-        if ($this->modelClassName === 'stdClass' || is_subclass_of($this->modelClassName, \stdClass::class)) {
-            return '*';
-        } elseif (isset($this->sqlParts['option'])) {
+        if (isset($this->sqlParts['option'])) {
             $this->modelClassName = \stdClass::class;
             return $this->sqlParts['option'];
+        } elseif ($this->modelClassName === 'stdClass' || is_subclass_of($this->modelClassName, \stdClass::class)) {
+            return '*';
         } else {
             $prefix = $this->sqlParts['as'] ?? '';
             $values = [];
