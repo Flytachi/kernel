@@ -6,6 +6,7 @@ namespace Flytachi\Kernel\Src\Factory\Connection\Config\Common;
 
 use Flytachi\Kernel\Src\Factory\Connection\CDO\CDO;
 use Flytachi\Kernel\Src\Factory\Connection\CDO\CDOException;
+use Flytachi\Kernel\Src\Factory\Connection\ConnectionPool;
 
 abstract class BaseDbConfig implements DbConfigInterface
 {
@@ -73,5 +74,13 @@ abstract class BaseDbConfig implements DbConfigInterface
     public function getSchema(): ?string
     {
         return null;
+    }
+
+    /**
+     * @return CDO
+     */
+    final public static function entity(): CDO
+    {
+        return ConnectionPool::db(static::class);
     }
 }
