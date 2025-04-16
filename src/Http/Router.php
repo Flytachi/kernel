@@ -317,7 +317,7 @@ final class Router
      * @param array<int, string> $params
      * @param string $stringUrl
      * @return mixed
-     * @throws RouterException
+     * @throws RouterException|ClientError
      */
     final protected static function callResolveAction(array $action, array $params = [], string $stringUrl = ''): mixed
     {
@@ -329,6 +329,7 @@ final class Router
                 "{$_SERVER['REQUEST_METHOD']} '{$stringUrl}' url realization '{$action['method']}' not found"
             );
         }
+
         try {
             $middlewares = [];
             foreach ($action['middlewares'] as $middlewareName) {
@@ -346,11 +347,18 @@ final class Router
                 $middleware->optionAfter();
             }
             return $result;
-        } catch (\TypeError $exception) {
-            $temp = $controller::class . "::" . $action['method'] . '():';
-            if (str_starts_with($exception->getMessage(), $temp)) {
-                throw new RouterException(
-                    str_replace($temp . " ", '', $exception->getMessage())
+        } catch (\ArgumentCountError | \TypeError $exception) {
+            $trace = $exception->getTrace();
+
+            if (
+                isset($trace[1]['function'], $trace[1]['file']) &&
+                $trace[1]['function'] === 'call_user_func_array' &&
+                $trace[1]['file'] === __FILE__
+            ) {
+                $temp = $controller::class . "::" . $action['method'] . '()';
+                throw new ClientError(
+                    str_replace($temp, '', $exception->getMessage()),
+                    HttpCode::BAD_REQUEST->value
                 );
             } else {
                 throw $exception;
