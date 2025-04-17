@@ -18,22 +18,11 @@ final class AccessControl
 
     public static function processed(array $options): never
     {
-        $router = new static();
+        $router = new self();
         foreach ($options['actions'] as $httpMethod => $action) {
             $router->pushMethod($httpMethod);
             foreach ($action['middlewares'] as $middlewareClass) {
-                if (
-                    $middlewareClass == AccessControlMiddleware::class ||
-                    is_subclass_of($middlewareClass, AccessControlMiddleware::class)
-                ) {
-                    $data = $middlewareClass::passport();
-                    $router->pushOrigin($data['origin']);
-                    $router->pushAllowHeaders($data['allowHeaders']);
-                    $router->pushExposeHeaders($data['exposeHeaders']);
-                    $router->pushCredentials($data['credentials']);
-                    $router->pushMaxAge($data['maxAge']);
-                    $router->pushVary($data['vary']);
-                }
+                self::configureRouter($router, $middlewareClass);
             }
         }
         if (isset($options['defaultAction'])) {
@@ -43,18 +32,7 @@ final class AccessControl
             $router->pushMethod(Method::PATCH->name);
             $router->pushMethod(Method::PUT->name);
             foreach ($options['defaultAction']['middlewares'] as $middlewareClass) {
-                if (
-                    $middlewareClass == AccessControlMiddleware::class ||
-                    is_subclass_of($middlewareClass, AccessControlMiddleware::class)
-                ) {
-                    $data = $middlewareClass::passport();
-                    $router->pushOrigin($data['origin']);
-                    $router->pushAllowHeaders($data['allowHeaders']);
-                    $router->pushExposeHeaders($data['exposeHeaders']);
-                    $router->pushCredentials($data['credentials']);
-                    $router->pushMaxAge($data['maxAge']);
-                    $router->pushVary($data['vary']);
-                }
+                self::configureRouter($router, $middlewareClass);
             }
         }
         $router->using();
@@ -117,6 +95,27 @@ final class AccessControl
             if (!in_array($vary, $this->vary)) {
                 $this->vary[] = $vary;
             }
+        }
+    }
+
+    /**
+     * @param AccessControl &$router
+     * @param mixed $middlewareClass
+     * @return void
+     */
+    private static function configureRouter(AccessControl &$router, string $middlewareClass): void
+    {
+        if (
+            $middlewareClass == AccessControlMiddleware::class ||
+            is_subclass_of($middlewareClass, AccessControlMiddleware::class)
+        ) {
+            $data = $middlewareClass::passport();
+            $router->pushOrigin($data['origin']);
+            $router->pushAllowHeaders($data['allowHeaders']);
+            $router->pushExposeHeaders($data['exposeHeaders']);
+            $router->pushCredentials($data['credentials']);
+            $router->pushMaxAge($data['maxAge']);
+            $router->pushVary($data['vary']);
         }
     }
 
