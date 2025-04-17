@@ -10,9 +10,11 @@ final class AccessControl
 {
     protected array $origin = [];
     protected array $methods = [Method::OPTIONS->name];
-    protected array $headers = [];
+    protected array $allowHeaders = [];
+    protected array $exposeHeaders = [];
     protected bool $credentials = false;
     protected int $maxAge = 0;
+    protected array $vary = [];
 
     public static function processed(array $options): never
     {
@@ -26,9 +28,11 @@ final class AccessControl
                 ) {
                     $data = $middlewareClass::passport();
                     $router->pushOrigin($data['origin']);
-                    $router->pushHeaders($data['headers']);
+                    $router->pushAllowHeaders($data['allowHeaders']);
+                    $router->pushExposeHeaders($data['exposeHeaders']);
                     $router->pushCredentials($data['credentials']);
                     $router->pushMaxAge($data['maxAge']);
+                    $router->pushVary($data['vary']);
                 }
             }
         }
@@ -45,9 +49,11 @@ final class AccessControl
                 ) {
                     $data = $middlewareClass::passport();
                     $router->pushOrigin($data['origin']);
-                    $router->pushHeaders($data['headers']);
+                    $router->pushAllowHeaders($data['allowHeaders']);
+                    $router->pushExposeHeaders($data['exposeHeaders']);
                     $router->pushCredentials($data['credentials']);
                     $router->pushMaxAge($data['maxAge']);
+                    $router->pushVary($data['vary']);
                 }
             }
         }
@@ -71,11 +77,20 @@ final class AccessControl
         }
     }
 
-    final protected function pushHeaders(array $headers): void
+    final protected function pushAllowHeaders(array $headers): void
     {
         foreach ($headers as $header) {
-            if (!in_array($header, $this->headers)) {
-                $this->headers[] = $header;
+            if (!in_array($header, $this->allowHeaders)) {
+                $this->allowHeaders[] = $header;
+            }
+        }
+    }
+
+    final protected function pushExposeHeaders(array $headers): void
+    {
+        foreach ($headers as $header) {
+            if (!in_array($header, $this->exposeHeaders)) {
+                $this->exposeHeaders[] = $header;
             }
         }
     }
@@ -96,11 +111,19 @@ final class AccessControl
         }
     }
 
+    final protected function pushVary(array $varies): void
+    {
+        foreach ($varies as $vary) {
+            if (!in_array($vary, $this->vary)) {
+                $this->vary[] = $vary;
+            }
+        }
+    }
+
     final protected function using(): void
     {
         header_remove("X-Powered-By");
         header("HTTP/1.1 200 OK");
-        header("Status: 200 OK");
         if (!empty($this->origin)) {
             if (count($this->origin) == 1) {
                 header('Access-Control-Allow-Origin: ' . $this->origin[0]);
@@ -113,16 +136,20 @@ final class AccessControl
         if (!empty($this->methods)) {
             header('Access-Control-Allow-Methods: ' . implode(', ', $this->methods));
         }
-        if (!empty($this->headers)) {
-            header('Access-Control-Allow-Headers: ' . implode(', ', $this->headers));
-        } else {
-            header('Access-Control-Allow-Headers: *');
+        if (!empty($this->allowHeaders)) {
+            header('Access-Control-Allow-Headers: ' . implode(', ', $this->allowHeaders));
         }
-        if ($this->credentials) {
+        if (!empty($this->exposeHeaders)) {
+            header('Access-Control-Expose-Headers: ' . implode(', ', $this->exposeHeaders));
+        }
+        if ($this->credentials && empty($this->origin)) {
             header('Access-Control-Allow-Credentials: ' . $this->credentials);
         }
         if ($this->maxAge > 0) {
             header('Access-Control-Max-Age: ' . $this->maxAge);
+        }
+        if (!empty($this->vary)) {
+            header('Vary: ' . implode(', ', $this->vary));
         }
     }
 }

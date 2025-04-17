@@ -11,48 +11,52 @@ use Flytachi\Kernel\Src\Http\Method;
 abstract class AccessControlMiddleware extends AbstractMiddleware implements MiddlewareInterface
 {
     protected array $origin = [];
-    protected array $headers = [];
+    protected array $allowHeaders = [];
+    protected array $exposeHeaders = [];
     protected bool $credentials = false;
     protected int $maxAge = 0;
+    protected array $vary = [];
 
     final public static function passport(): array
     {
         $self = new static();
         return [
             'origin' => $self->origin,
-            'headers' => $self->headers,
+            'allowHeaders' => $self->allowHeaders,
+            'exposeHeaders' => $self->exposeHeaders,
             'credentials' => $self->credentials,
             'maxAge' => $self->maxAge,
+            'vary' => $self->vary,
         ];
     }
 
-    final public function using(): void
-    {
-        header_remove("X-Powered-By");
-        header("HTTP/1.1 200 OK");
-        header("Status: 200 OK");
-        if (!empty($this->origin)) {
-            if (count($this->origin) == 1) {
-                header('Access-Control-Allow-Origin: ' . $this->origin[0]);
-            } elseif (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $this->origin)) {
-                header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-            }
-        } else {
-            header('Access-Control-Allow-Origin: *');
-        }
-        if (!empty($this->methods)) {
-            header('Access-Control-Allow-Methods: ' . Method::OPTIONS->name . ', ' . $_SERVER['REQUEST_METHOD']);
-        }
-        if (!empty($this->headers)) {
-            header('Access-Control-Allow-Headers: ' . implode(', ', $this->headers));
-        } else {
-            header('Access-Control-Allow-Headers: *');
-        }
-        if ($this->credentials) {
-            header('Access-Control-Allow-Credentials: ' . $this->credentials);
-        }
-        if ($this->maxAge > 0) {
-            header('Access-Control-Max-Age: ' . $this->maxAge);
-        }
-    }
+//    final public function using(): void
+//    {
+//        header_remove("X-Powered-By");
+//        header("HTTP/1.1 200 OK");
+//        if (!empty($this->origin)) {
+//            if (count($this->origin) == 1) {
+//                header('Access-Control-Allow-Origin: ' . $this->origin[0]);
+//            } elseif (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $this->origin)) {
+//                header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+//            }
+//        } else {
+//            header('Access-Control-Allow-Origin: *');
+//        }
+//        if (!empty($this->methods)) {
+//            header('Access-Control-Allow-Methods: ' . Method::OPTIONS->name . ', ' . $_SERVER['REQUEST_METHOD']);
+//        }
+//        if (!empty($this->headers)) {
+//            header('Access-Control-Allow-Headers: ' . implode(', ', $this->headers));
+//        }
+//        if (!empty($this->exposeHeaders)) {
+//            header('Access-Control-Expose-Headers: ' . implode(', ', $this->exposeHeaders));
+//        }
+//        if ($this->credentials) {
+//            header('Access-Control-Allow-Credentials: ' . $this->credentials);
+//        }
+//        if ($this->maxAge > 0) {
+//            header('Access-Control-Max-Age: ' . $this->maxAge);
+//        }
+//    }
 }

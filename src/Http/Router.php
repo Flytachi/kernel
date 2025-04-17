@@ -334,9 +334,9 @@ final class Router
             $middlewares = [];
             foreach ($action['middlewares'] as $middlewareName) {
                 $middleware = new $middlewareName();
-                if ($middleware instanceof AccessControlMiddleware) {
-                    $middleware->using();
-                }
+//                if ($middleware instanceof AccessControlMiddleware) {
+//                    $middleware->using();
+//                }
                 $middleware->optionBefore();
                 $middlewares[] = $middleware;
             }
