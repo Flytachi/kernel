@@ -9,6 +9,7 @@ use Flytachi\Kernel\Extra;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\FilterHandler;
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Handler\StreamHandler;
 
 final class ExtraLogger extends \Monolog\Logger
 {
@@ -54,6 +55,16 @@ final class ExtraLogger extends \Monolog\Logger
         if (!empty($allowedLevels)) {
             $filterHandler = new FilterHandler($loggerStreamHandler, $allowedLevels, \Monolog\Logger::DEBUG);
             $this->pushHandler($filterHandler);
+            // --- stdout
+            if (PHP_SAPI === 'cli-server') {
+                $stdoutHandler = new StreamHandler('php://stdout');
+                $stdoutHandler->setFormatter(new LineFormatter(
+                    dateFormat: env('LOGGER_LINE_DATE_FORMAT', 'Y-m-d H:i:s P'),
+                    allowInlineLineBreaks: true,
+                    ignoreEmptyContextAndExtra: true
+                ));
+                $this->pushHandler($stdoutHandler);
+            }
         }
     }
 }
