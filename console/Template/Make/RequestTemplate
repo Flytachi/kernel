@@ -2,9 +2,9 @@
 
 namespace __namespace__;
 
-use Flytachi\Kernel\Src\Stereotype\Request;
+use Flytachi\Kernel\Src\Stereotype\RequestObject;
 
-class __className__ extends Request
+class __className__ extends RequestObject
 {
     public function __construct(
         public int $page = 1,

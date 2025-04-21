@@ -6,6 +6,6 @@ namespace Flytachi\Kernel\Src\Stereotype;
 
 use Flytachi\Kernel\Src\Factory\Entity\RequestBase;
 
-abstract class Request extends RequestBase
+abstract class RequestObject extends RequestBase
 {
 }

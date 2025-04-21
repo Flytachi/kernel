@@ -7,7 +7,7 @@ namespace Flytachi\Kernel\Src\Factory\Entity;
 use Flytachi\Kernel\Src\Factory\Error\ExtraException;
 use Flytachi\Kernel\Src\Http\HttpCode;
 
-class RequestDefault extends \stdClass implements RequestInterface
+class Request extends \stdClass implements RequestInterface
 {
     use RequestValidatorTrait;
 
