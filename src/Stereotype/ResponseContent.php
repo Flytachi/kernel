@@ -14,9 +14,10 @@ class ResponseContent extends ResponseFileContent
         string $fileName,
         string $mimeType = 'application/octet-stream',
         bool $isAttachment = false,
-        HttpCode $httpCode = HttpCode::OK
+        HttpCode $httpCode = HttpCode::OK,
+        int $maxAgeSeconds = 0
     ): static {
-        return new static('binary', $data, $fileName, $mimeType, $isAttachment, $httpCode);
+        return new static('binary', $data, $fileName, $mimeType, $isAttachment, $httpCode, $maxAgeSeconds);
     }
 
     public static function txt(
@@ -24,9 +25,10 @@ class ResponseContent extends ResponseFileContent
         string $fileName,
         string $mimeType = 'text/plain',
         bool $isAttachment = false,
-        HttpCode $httpCode = HttpCode::OK
+        HttpCode $httpCode = HttpCode::OK,
+        int $maxAgeSeconds = 0
     ): static {
-        return new static('txt', $data, $fileName, $mimeType, $isAttachment, $httpCode);
+        return new static('txt', $data, $fileName, $mimeType, $isAttachment, $httpCode, $maxAgeSeconds);
     }
 
     public static function csv(
@@ -34,9 +36,10 @@ class ResponseContent extends ResponseFileContent
         string $fileName,
         string $mimeType = 'text/csv',
         bool $isAttachment = false,
-        HttpCode $httpCode = HttpCode::OK
+        HttpCode $httpCode = HttpCode::OK,
+        int $maxAgeSeconds = 0
     ): static {
-        return new static('csv', $data, $fileName, $mimeType, $isAttachment, $httpCode);
+        return new static('csv', $data, $fileName, $mimeType, $isAttachment, $httpCode, $maxAgeSeconds);
     }
 
     public static function json(
@@ -44,9 +47,10 @@ class ResponseContent extends ResponseFileContent
         string $fileName,
         string $mimeType = 'application/json',
         bool $isAttachment = false,
-        HttpCode $httpCode = HttpCode::OK
+        HttpCode $httpCode = HttpCode::OK,
+        int $maxAgeSeconds = 0
     ): static {
-        return new static('json', $data, $fileName, $mimeType, $isAttachment, $httpCode);
+        return new static('json', $data, $fileName, $mimeType, $isAttachment, $httpCode, $maxAgeSeconds);
     }
 
     public static function xml(
@@ -54,8 +58,22 @@ class ResponseContent extends ResponseFileContent
         string $fileName,
         string $mimeType = 'application/xml',
         bool $isAttachment = false,
-        HttpCode $httpCode = HttpCode::OK
+        HttpCode $httpCode = HttpCode::OK,
+        int $maxAgeSeconds = 0
     ): static {
-        return new static('xml', $data, $fileName, $mimeType, $isAttachment, $httpCode);
+        return new static('xml', $data, $fileName, $mimeType, $isAttachment, $httpCode, $maxAgeSeconds);
+    }
+
+    public static function file(
+        string $filePath,
+        bool $isAttachment = false,
+        HttpCode $httpCode = HttpCode::OK,
+        int $maxAgeSeconds = 0
+    ): static {
+        $fileName = basename($filePath);
+        $mime = getimagesize($filePath);
+        $mimeType = $mime['mime'] ?: 'application/octet-stream';
+        $data = file_get_contents($filePath);
+        return new static('binary', $data, $fileName, $mimeType, $isAttachment, $httpCode, $maxAgeSeconds);
     }
 }

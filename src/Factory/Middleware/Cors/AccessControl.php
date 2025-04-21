@@ -10,26 +10,19 @@ final class AccessControl
 {
     protected array $origin = [];
     protected array $methods = [Method::OPTIONS->name];
-    protected array $headers = [];
+    protected array $allowHeaders = [];
+    protected array $exposeHeaders = [];
     protected bool $credentials = false;
     protected int $maxAge = 0;
+    protected array $vary = [];
 
     public static function processed(array $options): never
     {
-        $router = new static();
+        $router = new self();
         foreach ($options['actions'] as $httpMethod => $action) {
             $router->pushMethod($httpMethod);
             foreach ($action['middlewares'] as $middlewareClass) {
-                if (
-                    $middlewareClass == AccessControlMiddleware::class ||
-                    is_subclass_of($middlewareClass, AccessControlMiddleware::class)
-                ) {
-                    $data = $middlewareClass::passport();
-                    $router->pushOrigin($data['origin']);
-                    $router->pushHeaders($data['headers']);
-                    $router->pushCredentials($data['credentials']);
-                    $router->pushMaxAge($data['maxAge']);
-                }
+                self::configureRouter($router, $middlewareClass);
             }
         }
         if (isset($options['defaultAction'])) {
@@ -39,16 +32,7 @@ final class AccessControl
             $router->pushMethod(Method::PATCH->name);
             $router->pushMethod(Method::PUT->name);
             foreach ($options['defaultAction']['middlewares'] as $middlewareClass) {
-                if (
-                    $middlewareClass == AccessControlMiddleware::class ||
-                    is_subclass_of($middlewareClass, AccessControlMiddleware::class)
-                ) {
-                    $data = $middlewareClass::passport();
-                    $router->pushOrigin($data['origin']);
-                    $router->pushHeaders($data['headers']);
-                    $router->pushCredentials($data['credentials']);
-                    $router->pushMaxAge($data['maxAge']);
-                }
+                self::configureRouter($router, $middlewareClass);
             }
         }
         $router->using();
@@ -71,11 +55,20 @@ final class AccessControl
         }
     }
 
-    final protected function pushHeaders(array $headers): void
+    final protected function pushAllowHeaders(array $headers): void
     {
         foreach ($headers as $header) {
-            if (!in_array($header, $this->headers)) {
-                $this->headers[] = $header;
+            if (!in_array($header, $this->allowHeaders)) {
+                $this->allowHeaders[] = $header;
+            }
+        }
+    }
+
+    final protected function pushExposeHeaders(array $headers): void
+    {
+        foreach ($headers as $header) {
+            if (!in_array($header, $this->exposeHeaders)) {
+                $this->exposeHeaders[] = $header;
             }
         }
     }
@@ -96,11 +89,40 @@ final class AccessControl
         }
     }
 
+    final protected function pushVary(array $varies): void
+    {
+        foreach ($varies as $vary) {
+            if (!in_array($vary, $this->vary)) {
+                $this->vary[] = $vary;
+            }
+        }
+    }
+
+    /**
+     * @param AccessControl &$router
+     * @param mixed $middlewareClass
+     * @return void
+     */
+    private static function configureRouter(AccessControl &$router, string $middlewareClass): void
+    {
+        if (
+            $middlewareClass == AccessControlMiddleware::class ||
+            is_subclass_of($middlewareClass, AccessControlMiddleware::class)
+        ) {
+            $data = $middlewareClass::passport();
+            $router->pushOrigin($data['origin']);
+            $router->pushAllowHeaders($data['allowHeaders']);
+            $router->pushExposeHeaders($data['exposeHeaders']);
+            $router->pushCredentials($data['credentials']);
+            $router->pushMaxAge($data['maxAge']);
+            $router->pushVary($data['vary']);
+        }
+    }
+
     final protected function using(): void
     {
         header_remove("X-Powered-By");
         header("HTTP/1.1 200 OK");
-        header("Status: 200 OK");
         if (!empty($this->origin)) {
             if (count($this->origin) == 1) {
                 header('Access-Control-Allow-Origin: ' . $this->origin[0]);
@@ -113,14 +135,20 @@ final class AccessControl
         if (!empty($this->methods)) {
             header('Access-Control-Allow-Methods: ' . implode(', ', $this->methods));
         }
-        if (!empty($this->headers)) {
-            header('Access-Control-Allow-Headers: ' . implode(', ', $this->headers));
+        if (!empty($this->allowHeaders)) {
+            header('Access-Control-Allow-Headers: ' . implode(', ', $this->allowHeaders));
         }
-        if ($this->credentials) {
+        if (!empty($this->exposeHeaders)) {
+            header('Access-Control-Expose-Headers: ' . implode(', ', $this->exposeHeaders));
+        }
+        if ($this->credentials && empty($this->origin)) {
             header('Access-Control-Allow-Credentials: ' . $this->credentials);
         }
         if ($this->maxAge > 0) {
             header('Access-Control-Max-Age: ' . $this->maxAge);
+        }
+        if (!empty($this->vary)) {
+            header('Vary: ' . implode(', ', $this->vary));
         }
     }
 }

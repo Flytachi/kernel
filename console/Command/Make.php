@@ -257,6 +257,48 @@ class Make extends Cmd
         $way = ltrim($this->ucWord($way) . $prefix, '/');
         $className = basename($way);
         $way = str_replace($className, '', $way);
+        if (isset($this->args['options']['mvc'])) {
+            switch ($prefix) {
+                case "Controller":
+                    $way .= 'Controllers';
+                    break;
+                case "Service":
+                    $way .= 'Services';
+                    break;
+                case "Middleware":
+                    $way .= 'Middlewares';
+                    break;
+                case "Store":
+                case "Repository":
+                    $way .= 'Repositories';
+                    break;
+                case "Model":
+                    $way .= 'Models';
+                    break;
+                case "Dto":
+                    $way .= 'Entity';
+                    break;
+                case "Request":
+                    $way .= 'Requests';
+                    break;
+                case "Job":
+                    $way .= 'Jobs';
+                    break;
+                case "Cluster":
+                case "Process":
+                    $way .= 'Processes';
+                    break;
+                case "WebSocket":
+                    $way .= 'Sockets';
+                    break;
+                case "Cmd":
+                    $way .= 'Commands';
+                    break;
+                default:
+                    $way .= 'Utils';
+            }
+        }
+
         return [
             'namespace' => str_replace('/', '\\', trim($root . '/' . $way, " \t\n\r\0\x0B/")),
             'className' => $className,
@@ -279,6 +321,9 @@ class Make extends Cmd
         self::printLabel("extra make [args...] -[flags...] --[options...]", $cl);
         self::printMessage("args - names of generated templates", $cl);
         self::printMessage("flags - selection of templates to be created", $cl);
+
+        // flags
+        self::printLabel("-[flags...]", $cl);
         self::print("a - Template RestController, prefix RestController", $cl);
         self::print("c - Template Controller, prefix Controller", $cl);
         self::print("", $cl);
@@ -298,6 +343,13 @@ class Make extends Cmd
         self::print("w - Template WebSocket, prefix WebSocket", $cl);
         self::print("", $cl);
         self::print("n - Template CustomCmd, dont prefix", $cl);
+        self::printLabel("-[flags...]", $cl);
+
+        // options
+        self::printLabel("-[options...]", $cl);
+        self::print("mvc - structure", $cl);
+        self::printLabel("-[options...]", $cl);
+
         self::printTitle("Make Help", $cl);
     }
 }
