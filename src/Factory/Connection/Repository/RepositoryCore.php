@@ -121,7 +121,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
         } elseif ($this->modelClassName === 'stdClass' || is_subclass_of($this->modelClassName, \stdClass::class)) {
             return '*';
         } else {
-            $prefix = $this->sqlParts['as'] ?? '';
+            $prefix = isset($this->sqlParts['as']) ? $this->sqlParts['as'] . '.' : '';
             $values = [];
             if (is_subclass_of($this->modelClassName, ModelInterface::class)) {
                 $selection = $this->modelClassName::selection();
