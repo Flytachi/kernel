@@ -34,7 +34,7 @@ final class Locale
     public static function setPath(string $path): void
     {
         self::init();
-        self::$locale->path = trim($path, '/');
+        self::$locale->path = rtrim($path, '/');
     }
 
     public static function setLang(string $lang): void
