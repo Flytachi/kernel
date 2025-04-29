@@ -136,7 +136,7 @@ trait RepositoryViewTrait
      */
     final public static function findBy(Qb $qb, ?string $modelClassName = null): ?object
     {
-        return (new self())->where($qb)->find($modelClassName);
+        return (new static())->where($qb)->find($modelClassName);
     }
 
     /**
@@ -154,7 +154,7 @@ trait RepositoryViewTrait
         ?string $modelClassName = null,
         string $message = 'Object not found'
     ): object {
-        $obj = self::findBy($qb);
+        $obj = static::findBy($qb);
         if (!$obj) {
             throw new RepositoryException($message);
         }
@@ -172,6 +172,6 @@ trait RepositoryViewTrait
      */
     final public static function findAllBy(?Qb $qb = null, ?string $modelClassName = null): array
     {
-        return (new self())->where($qb)->findAll($modelClassName);
+        return (new static())->where($qb)->findAll($modelClassName);
     }
 }
