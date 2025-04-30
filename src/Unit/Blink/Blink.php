@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Unit\Blink;
 
 use Flytachi\Kernel\Src\Factory\Stereotype;
+use Flytachi\Kernel\Src\Unit\TimeTool;
 
 /**
  * Class Blink
@@ -44,7 +45,7 @@ use Flytachi\Kernel\Src\Factory\Stereotype;
  *  @method  self         body(mixed $body)
  *  @method  self         bodyJson(array|string $bodyJson)
  *
- *  @version 2.5
+ *  @version 2.6
  *  @author Flytachi
  */
 final class Blink extends Stereotype
@@ -75,7 +76,7 @@ final class Blink extends Stereotype
 
     private static function setOption(int $option, mixed $value): void
     {
-        if (self::$blink == null) {
+        if (self::$blink === null) {
             self::$blink = new Blink();
             self::setOption(CURLOPT_RETURNTRANSFER, true);
             self::setOption(CURLOPT_ENCODING, '');
@@ -256,6 +257,7 @@ final class Blink extends Stereotype
             if ($info['http_code'] >= 400) {
                 if ($this->maxRetry > 1 && $info['http_code'] == 504) {
                     --$this->maxRetry;
+                    TimeTool::sleepMil(500);
                     continue;
                 }
                 if ($isThrowable) {

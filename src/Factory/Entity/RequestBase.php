@@ -69,6 +69,13 @@ abstract class RequestBase implements RequestInterface
             if (empty($data)) {
                 return new static();
             } else {
+                foreach ($data as $key => $value) {
+                    $newKey = dashAsciiToCamelCase($key);
+                    if ($newKey !== $key) {
+                        $data[$newKey] = $value;
+                        unset($data[$key]);
+                    }
+                }
                 return new static(...$data);
             }
         } catch (ArgumentCountError $e) {
