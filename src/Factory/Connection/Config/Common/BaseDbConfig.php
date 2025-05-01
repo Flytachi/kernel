@@ -43,7 +43,7 @@ abstract class BaseDbConfig implements DbConfigInterface
     final public function connect(): void
     {
         if (is_null($this->cdo)) {
-            $this->cdo = new CDO($this, env('DEBUG', false));
+            $this->cdo = new CDO($this, (bool) env('DEBUG', false));
         }
     }
 
