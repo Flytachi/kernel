@@ -16,7 +16,7 @@ trait RepositoryCrudTrait
     public function insert(object|array $model): mixed
     {
         try {
-            return $this->db()->insert(($this->schema ? $this->schema . '.' : '') . $this::$table, $model);
+            return $this->db()->insert($this->originTable(), $model);
         } catch (CDOException $exception) {
             throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }
@@ -28,7 +28,7 @@ trait RepositoryCrudTrait
     public function insertGroup(object ...$models): void
     {
         try {
-            $this->db()->insertGroup(($this->schema ? $this->schema . '.' : '') . $this::$table, ...$models);
+            $this->db()->insertGroup($this->originTable(), ...$models);
         } catch (CDOException $exception) {
             throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }
@@ -40,7 +40,7 @@ trait RepositoryCrudTrait
     public function update(object|array $model, Qb $qb): int|string
     {
         try {
-            return $this->db()->update(($this->schema ? $this->schema . '.' : '') . $this::$table, $model, $qb);
+            return $this->db()->update($this->originTable(), $model, $qb);
         } catch (CDOException $exception) {
             throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }
@@ -52,7 +52,7 @@ trait RepositoryCrudTrait
     public function delete(Qb $qb): int|string
     {
         try {
-            return $this->db()->delete(($this->schema ? $this->schema . '.' : '') . $this::$table, $qb);
+            return $this->db()->delete($this->originTable(), $qb);
         } catch (CDOException $exception) {
             throw new RepositoryException($exception->getMessage(), $exception->getCode(), $exception);
         }

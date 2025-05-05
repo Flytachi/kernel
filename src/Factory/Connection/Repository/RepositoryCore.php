@@ -63,6 +63,14 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
     }
 
     /**
+     * @return string
+     */
+    final public function originTable(): string
+    {
+        return (($this->schema) ? $this->schema . '.' : '') . static::$table;
+    }
+
+    /**
      * @throws RepositoryException
      */
     final public function buildSql(): string
@@ -70,7 +78,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
         try {
             $parts = [
                 'SELECT ' . $this->prepareSelect(),
-                'FROM ' . (($this->schema) ? $this->schema . '.' : '') . static::$table
+                'FROM ' . $this->originTable()
             ];
 
             foreach (['as', 'join', 'where', 'union', 'group', 'having', 'order'] as $key) {
@@ -162,7 +170,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function join(RepositoryInterface $repository, string $on): static
     {
-        $context = (($repository->schema) ? $repository->schema . '.' : '') . $repository::$table
+        $context = $repository->originTable()
             . ' ' . $repository->getSql('as') . " ON(" . $on . ")";
         if (isset($this->sqlParts['join'])) {
             $this->sqlParts['join'] .= ' JOIN ' . $context;
@@ -179,7 +187,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function joinLeft(RepositoryInterface $repository, string $on): static
     {
-        $context = (($repository->schema) ? $repository->schema . '.' : '') . $repository::$table
+        $context = $repository->originTable()
             . ' ' . $repository->getSql('as') . " ON(" . $on . ")";
         if (isset($this->sqlParts['join'])) {
             $this->sqlParts['join'] .= ' LEFT JOIN ' . $context;
@@ -196,7 +204,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function joinRight(RepositoryInterface $repository, string $on): static
     {
-        $context = (($repository->schema) ? $repository->schema . '.' : '') . $repository::$table
+        $context = $repository->originTable()
             . ' ' . $repository->getSql('as') . " ON(" . $on . ")";
         if (isset($this->sqlParts['join'])) {
             $this->sqlParts['join'] .= ' RIGHT JOIN ' . $context;
