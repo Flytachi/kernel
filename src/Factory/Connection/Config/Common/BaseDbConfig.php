@@ -75,12 +75,4 @@ abstract class BaseDbConfig implements DbConfigInterface
     {
         return null;
     }
-
-    /**
-     * @return CDO
-     */
-    final public static function entity(): CDO
-    {
-        return ConnectionPool::db(static::class);
-    }
 }
