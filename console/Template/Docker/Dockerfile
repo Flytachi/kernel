@@ -5,7 +5,7 @@ WORKDIR /var/www/html
 RUN apk update && apk add --no-cache php83 \
     php83-common php83-phar php83-pcntl \
     php83-posix php83-mbstring php83-simplexml \
-    php83-pdo php83-fpm php83-curl \
+    php83-iconv php83-pdo php83-fpm php83-curl \
     php83-openssl php83-sockets php83-opcache \
     curl nginx runit
 
