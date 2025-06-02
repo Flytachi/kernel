@@ -11,7 +11,9 @@ use Flytachi\Kernel\Src\Factory\Mapping\Declaration\MappingDeclarationItem;
 use Flytachi\Kernel\Src\Factory\Middleware\MiddlewareInterface;
 use Flytachi\Kernel\Src\Stereotype\ControllerInterface;
 use ReflectionClass;
+use ReflectionEnum;
 use ReflectionMethod;
+use ReflectionUnionType;
 
 class Mapping
 {
@@ -103,6 +105,36 @@ class Mapping
                         foreach ($annotationMiddlewares as $annotationMiddleware) {
                             $middlewares[] = $annotationMiddleware->getName();
                         }
+
+                        // method arguments
+                        $arguments = [];
+                        foreach ($reflectionMethod->getParameters() as $parameter) {
+                            $type = $parameter->getType();
+                            $typeInfo = null;
+
+                            if ($type !== null) {
+                                $types = $type instanceof ReflectionUnionType ? $type->getTypes() : [$type];
+
+                                foreach ($types as $typeSub) {
+                                    if (!$typeSub->isBuiltin()) {
+                                        $refEnum = new ReflectionEnum($typeSub->getName());
+                                        if ($refEnum->isEnum()) {
+                                            $typeInfo = [
+                                                'name' => $refEnum->getName(),
+                                                'backing' => $refEnum->getBackingType()?->getName(),
+                                            ];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            $arguments[] = [
+                                'name' => $parameter->getName(),
+                                'typeInfo' => $typeInfo,
+                            ];
+                        }
+
                         $declarationItem = new MappingDeclarationItem(
                             $mapping->getCallback() ?: '',
                             ($mappingClass != null
@@ -111,6 +143,7 @@ class Mapping
                             ),
                             $reflectionClass->getName(),
                             $reflectionMethod->getName(),
+                            $arguments,
                             [...$middlewaresClass, ...$middlewares]
                         );
                         $declaration->push($declarationItem);

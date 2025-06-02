@@ -8,7 +8,6 @@ use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControl;
-use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControlMiddleware;
 use Flytachi\Kernel\Src\Stereotype\ControllerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -71,27 +70,6 @@ final class Router
         }
 
         $render->render();
-
-        // original
-//            RouteError::throw(HttpCode::BAD_REQUEST, (env('DEBUG'))
-//                ? $exception->getMessage()
-//                : 'Invalid data');
-//        } catch (CDOError | RepositoryError | ArtefactError | SheathException $exception) {
-//            RouteError::throw(
-//                HttpCode::INTERNAL_SERVER_ERROR,
-//                (env('DEBUG'))
-//                ? $exception->getMessage()
-//                : 'Server error',
-//                $exception
-//            );
-//        } catch (ExtraException | RouteError $exception) {
-//            $code = HttpCode::tryFrom((int) $exception->getCode());
-//            RouteError::throw($code ?: HttpCode::INTERNAL_SERVER_ERROR, $exception->getMessage(), $exception);
-//        } catch (\Throwable $exception) {
-//            RouteError::throw(HttpCode::INTERNAL_SERVER_ERROR, (env('DEBUG'))
-//                ? $exception->getMessage()
-//                : 'Server error');
-//        }
     }
 
     /**
@@ -195,7 +173,8 @@ final class Router
                     $item->getClassName(),
                     $item->getClassMethod(),
                     $item->getMiddlewareClassNames(),
-                    $item->getMethod()
+                    $item->getMethod(),
+                    $item->getMethodArgs()
                 );
             }
         } else {
@@ -219,6 +198,7 @@ final class Router
      * @param array $middlewares
      * @param string|null $method The HTTP method for the route (e.g., 'GET', 'POST', ...).
      * If null, the route will be treated as a default action.
+     * @param array $classMethodArgs
      * @return void
      * @throws RouterException If the route is already registered with the same HTTP method or as a default action.
      */
@@ -228,6 +208,7 @@ final class Router
         string $classMethod = 'index',
         array $middlewares = [],
         ?string $method = null,
+        array $classMethodArgs = []
     ): void {
         // Normalize the URL by trimming slashes
         $route = trim($route, '/');
@@ -259,12 +240,22 @@ final class Router
             if (isset($node['actions'][$method])) {
                 throw new RouterException("Route '$route' with method '$method' is already registered.");
             }
-            $node['actions'][$method] = ['class' => $class, 'method' => $classMethod, 'middlewares' => $middlewares];
+            $node['actions'][$method] = [
+                'class' => $class,
+                'method' => $classMethod,
+                'methodArgs' => $classMethodArgs,
+                'middlewares' => $middlewares
+            ];
         } else {
             if (isset($node['defaultAction'])) {
                 throw new RouterException("Route '$route' (default) is already registered.");
             }
-            $node['defaultAction'] = ['class' => $class, 'method' => $classMethod, 'middlewares' => $middlewares];
+            $node['defaultAction'] = [
+                'class' => $class,
+                'method' => $classMethod,
+                'methodArgs' => $classMethodArgs,
+                'middlewares' => $middlewares
+            ];
         }
     }
 
@@ -277,7 +268,8 @@ final class Router
                 $item->getClassName(),
                 $item->getClassMethod(),
                 $item->getMiddlewareClassNames(),
-                $item->getMethod()
+                $item->getMethod(),
+                $item->getMethodArgs(),
             );
         }
         $mapString = var_export(json_decode(json_encode(self::$routes), true), true);
@@ -328,6 +320,23 @@ final class Router
             throw new RouterException(
                 "{$_SERVER['REQUEST_METHOD']} '{$stringUrl}' url realization '{$action['method']}' not found"
             );
+        }
+
+        if (isset($action['methodArgs'])) {
+            foreach ($action['methodArgs'] as $key => $value) {
+                if (!isset($params[$key])) {
+                    continue;
+                }
+
+                if (!empty($value['typeInfo']) && !empty($value['typeInfo']['backing'])) {
+                    settype($params[$key], $value['typeInfo']['backing']);
+                    $params[$value['name']] = $value['typeInfo']['name']::from($params[$key]);
+                } else {
+                    $params[$value['name']] = $params[$key];
+                }
+
+                unset($params[$key]);
+            }
         }
 
         try {
