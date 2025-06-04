@@ -10,7 +10,8 @@ abstract class AbstractMiddleware implements MiddlewareInterface
     {
     }
     abstract public function optionBefore(): void;
-    public function optionAfter(): void
+    public function optionAfter(mixed $resource): mixed
     {
+        return $resource;
     }
 }

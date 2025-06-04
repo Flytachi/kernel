@@ -350,7 +350,7 @@ final class Router
             $result = call_user_func_array([$controller, $action['method']], $params);
 
             foreach ($middlewares as $middleware) {
-                $middleware->optionAfter();
+                $result = $middleware->optionAfter($result);
             }
             return $result;
         } catch (\ArgumentCountError | \TypeError $exception) {

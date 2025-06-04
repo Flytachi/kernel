@@ -7,5 +7,11 @@ namespace Flytachi\Kernel\Src\Factory\Middleware;
 interface MiddlewareInterface
 {
     public function optionBefore(): void;
-    public function optionAfter(): void;
+
+    /**
+     * @template Resource
+     * @param Resource $resource
+     * @return Resource
+     */
+    public function optionAfter(mixed $resource): mixed;
 }
