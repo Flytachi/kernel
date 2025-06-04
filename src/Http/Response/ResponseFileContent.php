@@ -9,6 +9,7 @@ use Flytachi\Kernel\Src\Unit\File\XML;
 
 abstract class ResponseFileContent implements ResponseFileContentInterface
 {
+    protected array $headers = [];
     protected string $resourceType;
     protected mixed $data;
     protected string $fileName;
@@ -51,12 +52,7 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
         }
     }
 
-    final public function getHttpCode(): HttpCode
-    {
-        return $this->httpCode;
-    }
-
-    public function getHeader(): array
+    public function defaultHeaders(): array
     {
         $extension = $this->resourceType == 'binary' ? '' : '.' . $this->resourceType;
         return [
@@ -68,13 +64,28 @@ abstract class ResponseFileContent implements ResponseFileContentInterface
         ];
     }
 
-    public function getFileName(): string
+    final public function addHeader(string $key, string $value): void
+    {
+        $this->headers[$key] = $value;
+    }
+
+    final public function getHttpCode(): HttpCode
+    {
+        return $this->httpCode;
+    }
+
+    final public function getHeader(): array
+    {
+        return [...$this->defaultHeaders(), ...$this->headers];
+    }
+
+    final public function getFileName(): string
     {
         $extension = $this->resourceType == 'binary' ? '' : '.' . $this->resourceType;
         return basename($this->fileName, $extension) . $extension;
     }
 
-    public function getBody(): string
+    final public function getBody(): string
     {
         return $this->data;
     }
