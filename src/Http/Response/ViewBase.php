@@ -9,6 +9,7 @@ use Flytachi\Kernel\Src\Http\HttpCode;
 
 abstract class ViewBase implements ViewInterface
 {
+    protected array $headers = [];
     protected ?string $callClass;
     protected ?string $callClassMethod;
     protected ?string $templateName;
@@ -47,6 +48,16 @@ abstract class ViewBase implements ViewInterface
         $this->callClassMethod = $backtrace['function'] ?? null;
     }
 
+    public function defaultHeaders(): array
+    {
+        return ['Content-Type' => 'text/html; charset=utf-8'];
+    }
+
+    final public function addHeader(string $key, string $value): void
+    {
+        $this->headers[$key] = $value;
+    }
+
     final public function getHttpCode(): HttpCode
     {
         return $this->httpCode;
@@ -62,9 +73,9 @@ abstract class ViewBase implements ViewInterface
         return $this->callClassMethod;
     }
 
-    public function getHeader(): array
+    final public function getHeader(): array
     {
-        return ['Content-Type' => 'text/html; charset=utf-8'];
+        return [...$this->defaultHeaders(), ...$this->headers];
     }
 
     final public function getTemplate(): ?string
@@ -80,7 +91,7 @@ abstract class ViewBase implements ViewInterface
         return Extra::$pathResource . '/' . $this->resourceName . '.php';
     }
 
-    public function getData(): array
+    final public function getData(): array
     {
         return $this->data;
     }

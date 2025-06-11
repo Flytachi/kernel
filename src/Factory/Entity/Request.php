@@ -67,7 +67,7 @@ class Request extends \stdClass implements RequestInterface
             $class = new static();
             if (!empty($data)) {
                 foreach ($data as $key => $value) {
-                    $class->$key = $value;
+                    $class->{dashAsciiToCamelCase($key)} = $value;
                 }
             }
             return $class;

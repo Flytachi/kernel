@@ -10,6 +10,7 @@ use Flytachi\Kernel\Src\Unit\File\XML;
 
 abstract class ResponseBase implements ResponseInterface
 {
+    protected array $headers = [];
     protected mixed $content;
     protected HttpCode $httpCode;
 
@@ -19,12 +20,7 @@ abstract class ResponseBase implements ResponseInterface
         $this->httpCode = $httpCode;
     }
 
-    final public function getHttpCode(): HttpCode
-    {
-        return $this->httpCode;
-    }
-
-    public function getHeader(): array
+    public function defaultHeaders(): array
     {
         $accept = Header::getHeader('Accept');
         if (str_contains($accept, 'text/html')) {
@@ -34,7 +30,22 @@ abstract class ResponseBase implements ResponseInterface
         }
     }
 
-    public function getBody(): string
+    final public function addHeader(string $key, string $value): void
+    {
+        $this->headers[$key] = $value;
+    }
+
+    final public function getHttpCode(): HttpCode
+    {
+        return $this->httpCode;
+    }
+
+    final public function getHeader(): array
+    {
+        return [...$this->defaultHeaders(), ...$this->headers];
+    }
+
+    final public function getBody(): string
     {
         return match (Header::getHeader('Accept')) {
             'application/json' => $this->constructJson($this->content),

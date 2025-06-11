@@ -172,7 +172,7 @@ abstract class ExceptionWrapper
                 include Extra::$pathResource . '/exception.php';
                 $result = ob_get_clean();
             } else {
-                $httpMessage = HttpCode::from($_error['code'])->message();
+                $httpMessage = HttpCode::tryFrom($_error['code'])?->message() ?: 'Unknown Error';
                 $result = '<!DOCTYPE html><html lang="en">';
                 $result .= '<head>';
                 $result .=      '<meta charset="utf-8">';

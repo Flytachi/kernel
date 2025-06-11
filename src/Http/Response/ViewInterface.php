@@ -8,6 +8,8 @@ use Flytachi\Kernel\Src\Http\HttpCode;
 
 interface ViewInterface
 {
+    public function defaultHeaders(): array;
+    public function addHeader(string $key, string $value): void;
     public function getHttpCode(): HttpCode;
     public function getHeader(): array;
     public function getTemplate(): ?string;

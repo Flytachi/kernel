@@ -236,6 +236,44 @@ if (!function_exists('multiCopy')) {
     }
 }
 
+if (!function_exists('dashAsciiToCamelCase')) {
+    /**
+     * Converts a dash-separated ASCII string to camelCase format.
+     *
+     * This function processes an ASCII string where words are separated by dashes (`-`)
+     * and converts it into camelCase notation. The first word remains in the lowercase,
+     * and each later word starts with an uppercase letter. The function assumes
+     * that the input contains only ASCII characters and does not perform UTF-8 handling.
+     *
+     * Example:
+     * dashAsciiToCamelCase('hello-world-example') => 'helloWorldExample'
+     *
+     * @param string $str The dash-separated ASCII string to convert.
+     *
+     * @return string The camelCase formatted string.
+     */
+    function dashAsciiToCamelCase(string $str): string
+    {
+        $len = strlen($str);
+        $result = [];
+        $upperNext = false;
+
+        for ($i = 0; $i < $len; $i++) {
+            $char = $str[$i];
+
+            if ($char === '-') {
+                $upperNext = true;
+                continue;
+            }
+
+            $result[] = $upperNext ? strtoupper($char) : $char;
+            $upperNext = false;
+        }
+
+        return implode('', $result);
+    }
+}
+
 if (!function_exists('trans')) {
     /**
      * Translates a given key using the loaded dictionary.

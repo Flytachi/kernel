@@ -6,6 +6,7 @@ namespace Flytachi\Kernel\Src\Factory\Entity;
 
 use ArgumentCountError;
 use Error;
+use Flytachi\Kernel\Src\Http\Header;
 use Flytachi\Kernel\Src\Http\HttpCode;
 use TypeError;
 
@@ -69,6 +70,13 @@ abstract class RequestBase implements RequestInterface
             if (empty($data)) {
                 return new static();
             } else {
+                foreach ($data as $key => $value) {
+                    $newKey = dashAsciiToCamelCase($key);
+                    if ($newKey !== $key) {
+                        $data[$newKey] = $value;
+                        unset($data[$key]);
+                    }
+                }
                 return new static(...$data);
             }
         } catch (ArgumentCountError $e) {
@@ -99,5 +107,12 @@ abstract class RequestBase implements RequestInterface
             );
             RequestException::throw($errorMessage, previous: $e);
         }
+    }
+
+    final public function header(?string $key = null): array|string
+    {
+        return $key == null
+            ? Header::getHeaders()
+            : Header::getHeader($key);
     }
 }

@@ -8,6 +8,6 @@ use Psr\Log\LogLevel;
 
 class ClientError extends ExtraException
 {
-    protected $code = HttpCode::CONFLICT;
+    protected $code = HttpCode::CONFLICT->value;
     protected string $logLevel = LogLevel::WARNING;
 }

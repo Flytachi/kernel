@@ -8,6 +8,6 @@ use Psr\Log\LogLevel;
 
 class ServerError extends ExtraException
 {
-    protected $code = HttpCode::UNKNOWN_ERROR;
+    protected $code = HttpCode::INTERNAL_SERVER_ERROR->value;
     protected string $logLevel = LogLevel::ERROR;
 }

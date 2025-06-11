@@ -43,7 +43,7 @@ abstract class BaseDbConfig implements DbConfigInterface
     final public function connect(): void
     {
         if (is_null($this->cdo)) {
-            $this->cdo = new CDO($this, env('DEBUG', false));
+            $this->cdo = new CDO($this, (bool) env('DEBUG', false));
         }
     }
 
@@ -74,13 +74,5 @@ abstract class BaseDbConfig implements DbConfigInterface
     public function getSchema(): ?string
     {
         return null;
-    }
-
-    /**
-     * @return CDO
-     */
-    final public static function entity(): CDO
-    {
-        return ConnectionPool::db(static::class);
     }
 }

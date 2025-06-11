@@ -8,7 +8,7 @@ use Psr\Log\LogLevel;
 
 class Error extends ExtraException
 {
-    protected $code = HttpCode::UNKNOWN_ERROR;
+    protected $code = HttpCode::UNKNOWN_ERROR->value;
     protected string $logLevel = LogLevel::ERROR;
 
     public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null)

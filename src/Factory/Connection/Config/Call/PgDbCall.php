@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src\Factory\Connection\Config;
+namespace Flytachi\Kernel\Src\Factory\Connection\Config\Call;
 
 use Flytachi\Kernel\Src\Factory\Connection\Config\Common\BaseDbConfig;
-use Flytachi\Kernel\Src\Factory\Connection\Config\Common\EntityCallDbTrait;
 
-abstract class PgDbConfig extends BaseDbConfig
+final class PgDbCall extends BaseDbConfig
 {
-    use EntityCallDbTrait;
-
-    protected string $host = 'localhost';
-    protected int $port = 5432;
-    protected string $database = 'postgres';
-    protected string $username = 'postgres';
-    protected string $password = '';
-    protected string $schema = 'public';
-    protected ?string $charset = null;
+    public function __construct(
+        public string $host = 'localhost',
+        public int $port = 5432,
+        public string $database = 'postgres',
+        public string $username = 'postgres',
+        public string $password = '',
+        public string $schema = 'public',
+        public ?string $charset = null
+    ) {
+    }
 
     public function getDns(): string
     {
@@ -36,5 +36,9 @@ abstract class PgDbConfig extends BaseDbConfig
     public function getSchema(): ?string
     {
         return $this->schema;
+    }
+
+    public function sepUp(): void
+    {
     }
 }

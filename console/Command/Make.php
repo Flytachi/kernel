@@ -86,6 +86,12 @@ class Make extends Cmd
             if (in_array('w', $this->args['flags'])) {
                 $this->createWebSocket($templateName);
             }
+            if (in_array('D', $this->args['flags'])) {
+                $this->createConfig($templateName);
+            }
+            if (in_array('R', $this->args['flags'])) {
+                $this->createRedisConfig($templateName);
+            }
             if (in_array('n', $this->args['flags'])) {
                 $this->createCmd($templateName);
             }
@@ -221,6 +227,24 @@ class Make extends Cmd
         $this->createFile($info['className'], $info['path'], $code, 'websocket');
     }
 
+    private function createConfig(string $name): void
+    {
+        $info = $this->getInfo($name, 'DbConfig', 'DbConfigTemplate');
+        $code = file_get_contents($info['template']);
+        $code = str_replace("__namespace__", $info['namespace'], $code);
+        $code = str_replace("__className__", $info['className'], $code);
+        $this->createFile($info['className'], $info['path'], $code, 'db config');
+    }
+
+    private function createRedisConfig(string $name): void
+    {
+        $info = $this->getInfo($name, 'RedisConfig', 'RedisConfigTemplate');
+        $code = file_get_contents($info['template']);
+        $code = str_replace("__namespace__", $info['namespace'], $code);
+        $code = str_replace("__className__", $info['className'], $code);
+        $this->createFile($info['className'], $info['path'], $code, 'redis config');
+    }
+
     private function createCmd(string $name): void
     {
         $info = $this->getInfo($name, 'Cmd', 'CmdTemplate');
@@ -341,6 +365,9 @@ class Make extends Cmd
         self::print("p - Template Process, prefix Process", $cl);
         self::print("u - Template Cluster, prefix Cluster", $cl);
         self::print("w - Template WebSocket, prefix WebSocket", $cl);
+        self::print("", $cl);
+        self::print("D - Template DbConfig, prefix Config", $cl);
+        self::print("R - Template RedisConfig, prefix RedisConfig", $cl);
         self::print("", $cl);
         self::print("n - Template CustomCmd, dont prefix", $cl);
         self::printLabel("-[flags...]", $cl);
