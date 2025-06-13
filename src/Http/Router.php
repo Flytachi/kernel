@@ -329,6 +329,12 @@ final class Router
                 }
 
                 if (!empty($value['typeInfo']) && !empty($value['typeInfo']['backing'])) {
+                    if ($value['typeInfo']['backing'] === 'int' && !is_numeric($params[$key])) {
+                        throw new ClientError(
+                            "Argument '{$params[$key]}' does not correspond to type int",
+                            HttpCode::BAD_REQUEST->value
+                        );
+                    }
                     settype($params[$key], $value['typeInfo']['backing']);
                     $params[$value['name']] = $value['typeInfo']['name']::from($params[$key]);
                 } else {
