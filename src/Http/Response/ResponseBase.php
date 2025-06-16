@@ -45,7 +45,7 @@ abstract class ResponseBase implements ResponseInterface
         return [...$this->defaultHeaders(), ...$this->headers];
     }
 
-    final public function getBody(): string
+    public function getBody(): string
     {
         return match (Header::getHeader('Accept')) {
             'application/json' => $this->constructJson($this->content),
