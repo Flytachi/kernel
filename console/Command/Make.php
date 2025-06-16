@@ -282,44 +282,45 @@ class Make extends Cmd
         $className = basename($way);
         $way = str_replace($className, '', $way);
         if (isset($this->args['options']['mvc'])) {
+            $way = '/' . rtrim($way, '/');
             switch ($prefix) {
                 case "Controller":
-                    $way .= 'Controllers';
+                    $way = 'Controllers' . $way;
                     break;
                 case "Service":
-                    $way .= 'Services';
+                    $way = 'Services' . $way;
                     break;
                 case "Middleware":
-                    $way .= 'Middlewares';
+                    $way = 'Middlewares' . $way;
                     break;
                 case "Store":
                 case "Repository":
-                    $way .= 'Repositories';
+                    $way = 'Repositories' . $way;
                     break;
                 case "Model":
-                    $way .= 'Models';
+                    $way = 'Models' . $way;
                     break;
                 case "Dto":
-                    $way .= 'Entity';
+                    $way = 'Entity' . $way;
                     break;
                 case "Request":
-                    $way .= 'Requests';
+                    $way = 'Requests' . $way;
                     break;
                 case "Job":
-                    $way .= 'Jobs';
+                    $way = 'Jobs' . $way;
                     break;
                 case "Cluster":
                 case "Process":
-                    $way .= 'Processes';
+                    $way = 'Processes' . $way;
                     break;
                 case "WebSocket":
-                    $way .= 'Sockets';
+                    $way = 'Sockets' . $way;
                     break;
                 case "Cmd":
-                    $way .= 'Commands';
+                    $way = 'Commands' . $way;
                     break;
                 default:
-                    $way .= 'Utils';
+                    $way = 'Utils' . $way;
             }
         }
 
