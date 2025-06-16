@@ -157,35 +157,26 @@ final class Wrapper
 
     private static function init(RepositoryInterface $repo): void
     {
-        $countBody = '*';
         $sql = $repo->buildSql();
-        if (str_contains($sql, 'LIMIT')) {
-            $sql = strstr($sql, 'LIMIT', true);
-        }
-        if (str_contains($sql, 'ORDER')) {
-            $sql = strstr($sql, 'ORDER', true);
-        }
-        if (str_contains($sql, 'GROUP BY')) {
-            $countBody = trim(str_replace('GROUP BY', 'DISTINCT', strstr($sql, 'GROUP BY', false)));
-            $sql = strstr($sql, 'GROUP BY', true);
-        }
+        $sql = preg_replace('/\s+LIMIT\s+\d+/i', '', $sql);
+        $sql = preg_replace('/\s+OFFSET\s+\d+/i', '', $sql);
+        $sql = preg_replace('/\s+FOR\s+UPDATE/i', '', $sql); // если используется
 
-        $sql = 'SELECT COUNT(' . $countBody . ') ' . strstr($sql, 'FROM');
+        $countSql = 'SELECT COUNT(*) FROM (' . $sql . ') AS tmp';
+
         self::$limitPage = (int) $repo->getSql('limit');
         self::$currentPage = (self::$limitPage + $repo->getSql('offset')) / self::$limitPage;
 
-        $stmt = $repo->db()->prepare($sql);
-        // Bind
+        $stmt = $repo->db()->prepare($countSql);
         if ($repo->getSql('binds')) {
             foreach ($repo->getSql('binds') as $hash => $value) {
                 $stmt->bindValue($hash, $value);
             }
         }
+
         $stmt->execute();
-        self::$totalItem = $stmt->fetchColumn();
-        self::$totalPages = (int) ceil(
-            self::$totalItem / self::$limitPage
-        );
+        self::$totalItem = (int) $stmt->fetchColumn();
+        self::$totalPages = (int) ceil(self::$totalItem / self::$limitPage);
     }
 
     private static function buildPanel(): string
