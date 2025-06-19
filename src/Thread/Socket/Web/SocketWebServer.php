@@ -189,9 +189,12 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
 
             // new connection
             if (in_array($this->resourceConnection, $read)) {
-                if (($connect = stream_socket_accept($this->resourceConnection, -1)) && $this->handshake($connect)) {
+                if (
+                    ($connect = stream_socket_accept($this->resourceConnection, -1))
+                    && ($info = $this->handshake($connect))
+                ) {
                     $this->resourceConnects[(string) $connect] = $connect;
-                    $this->connects[(string) $connect] = new Resource($connect);
+                    $this->connects[(string) $connect] = new Resource($connect, $info);
                     try {
                         $this->handleConnect($this->connects[(string) $connect]);
                     } catch (\Throwable $exception) {
