@@ -8,6 +8,8 @@ use Flytachi\Kernel\Src\Http\Method;
 
 final class AccessControl
 {
+    use AccessControlTrait;
+
     protected array $origin = [];
     protected array $methods = [Method::OPTIONS->name];
     protected array $allowHeaders = [];
@@ -121,34 +123,10 @@ final class AccessControl
 
     final protected function using(): void
     {
-        header_remove("X-Powered-By");
         header("HTTP/1.1 200 OK");
-        if (!empty($this->origin)) {
-            if (count($this->origin) == 1) {
-                header('Access-Control-Allow-Origin: ' . $this->origin[0]);
-            } elseif (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $this->origin)) {
-                header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-            }
-        } else {
-            header('Access-Control-Allow-Origin: *');
-        }
         if (!empty($this->methods)) {
             header('Access-Control-Allow-Methods: ' . implode(', ', $this->methods));
         }
-        if (!empty($this->allowHeaders)) {
-            header('Access-Control-Allow-Headers: ' . implode(', ', $this->allowHeaders));
-        }
-        if (!empty($this->exposeHeaders)) {
-            header('Access-Control-Expose-Headers: ' . implode(', ', $this->exposeHeaders));
-        }
-        if ($this->credentials && empty($this->origin)) {
-            header('Access-Control-Allow-Credentials: ' . $this->credentials);
-        }
-        if ($this->maxAge > 0) {
-            header('Access-Control-Max-Age: ' . $this->maxAge);
-        }
-        if (!empty($this->vary)) {
-            header('Vary: ' . implode(', ', $this->vary));
-        }
+        $this->useHeaders();
     }
 }

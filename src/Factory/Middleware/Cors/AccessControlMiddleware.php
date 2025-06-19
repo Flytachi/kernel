@@ -9,6 +9,8 @@ use Flytachi\Kernel\Src\Factory\Middleware\MiddlewareInterface;
 
 abstract class AccessControlMiddleware extends AbstractMiddleware implements MiddlewareInterface
 {
+    use AccessControlTrait;
+
     protected array $origin = [];
     protected array $allowHeaders = [];
     protected array $exposeHeaders = [];
@@ -27,5 +29,11 @@ abstract class AccessControlMiddleware extends AbstractMiddleware implements Mid
             'maxAge' => $self->maxAge,
             'vary' => $self->vary,
         ];
+    }
+
+    public function optionBefore(): void
+    {
+        header('Access-Control-Allow-Methods: ' . $_SERVER['REQUEST_METHOD']);
+        $this->useHeaders();
     }
 }
