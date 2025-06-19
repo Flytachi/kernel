@@ -35,7 +35,7 @@ class Resource
         return $this->connect;
     }
 
-    public function getInfo(string $key): ?string
+    public function getInfo(string $key): mixed
     {
         return $this->info[$key] ?? null;
     }
