@@ -197,6 +197,28 @@ if (!function_exists('flushDirectory')) {
     }
 }
 
+if (!function_exists('parseUrlDetail')) {
+    function parseUrlDetail(string $url): array
+    {
+        $parsedUrl = parse_url($url);
+        $params = [];
+        if (isset($parsedUrl['query'])) {
+            parse_str($parsedUrl['query'], $params);
+        }
+
+        return [
+            'scheme' => $parsedUrl['scheme'],
+            'host' => $parsedUrl['host'],
+            'port' => $parsedUrl['port'],
+            'user' => $parsedUrl['user'],
+            'pass' => $parsedUrl['pass'],
+            'path' => $parsedUrl['path'],
+            'query' => $params,
+            'fragment' => $parsedUrl['fragment']
+        ];
+    }
+}
+
 if (!function_exists('multiCopy')) {
     /**
      * Copies files and directories from the source directory to the destination directory recursively.

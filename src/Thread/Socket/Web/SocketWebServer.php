@@ -421,6 +421,9 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
         $header = explode(' ', $line);
         $info['method'] = $header[0] ?? null;
         $info['uri'] = $header[1] ?? null;
+        $data = parseUrlDetail($info['uri']);
+        $info['url'] = $data['path'];
+        $info['params'] = $data['query'];
 
         // считываем заголовки из соединения
         while ($line = rtrim(fgets($connect))) {

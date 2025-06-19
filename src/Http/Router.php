@@ -35,18 +35,18 @@ final class Router
             . ' ' . $_SERVER['REQUEST_URI']
             . ' IP: ' . Header::getIpAddress()
         );
-        $data = self::splitUrlAndParams($_SERVER['REQUEST_URI']);
-        $_GET = $data['params'];
+        $data = parseUrlDetail($_SERVER['REQUEST_URI']);
+        $_GET = $data['query'];
 
         $render = new Rendering();
         try {
             // registration
             self::registrar($isDevelop);
 
-            $resolve = self::resolveActions($data['url']);
+            $resolve = self::resolveActions($data['path']);
             if (!$resolve) {
                 throw new ClientError(
-                    "{$_SERVER['REQUEST_METHOD']} '{$data['url']}' url not found",
+                    "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
             }
@@ -59,7 +59,7 @@ final class Router
             $resolve = self::resolveActionSelect($resolve, $_SERVER['REQUEST_METHOD']);
             if (!$resolve) {
                 throw new ClientError(
-                    "{$_SERVER['REQUEST_METHOD']} '{$data['url']}' url not found",
+                    "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
             }
@@ -286,22 +286,6 @@ final class Router
             } catch (\Throwable $e) {
             }
         }
-    }
-
-
-    final protected static function splitUrlAndParams(string $url): array
-    {
-        $parsedUrl = parse_url($url);
-        $urlWithoutParams = $parsedUrl['path'];
-        $params = [];
-        if (isset($parsedUrl['query'])) {
-            parse_str($parsedUrl['query'], $params);
-        }
-
-        return [
-            'url' => $urlWithoutParams,
-            'params' => $params
-        ];
     }
 
     /**
