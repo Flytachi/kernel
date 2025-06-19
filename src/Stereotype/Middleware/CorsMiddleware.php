@@ -9,7 +9,4 @@ use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControlMiddleware;
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class CorsMiddleware extends AccessControlMiddleware
 {
-    public function optionBefore(): void
-    {
-    }
 }
