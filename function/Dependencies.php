@@ -207,14 +207,14 @@ if (!function_exists('parseUrlDetail')) {
         }
 
         return [
-            'scheme' => $parsedUrl['scheme'],
-            'host' => $parsedUrl['host'],
-            'port' => $parsedUrl['port'],
-            'user' => $parsedUrl['user'],
-            'pass' => $parsedUrl['pass'],
-            'path' => $parsedUrl['path'],
+            'scheme' => $parsedUrl['scheme'] ?? null,
+            'host' => $parsedUrl['host'] ?? null,
+            'port' => $parsedUrl['port'] ?? null,
+            'user' => $parsedUrl['user'] ?? null,
+            'pass' => $parsedUrl['pass'] ?? null,
+            'path' => $parsedUrl['path'] ?? null,
             'query' => $params,
-            'fragment' => $parsedUrl['fragment']
+            'fragment' => $parsedUrl['fragment'] ?? null
         ];
     }
 }
