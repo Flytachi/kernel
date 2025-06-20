@@ -42,7 +42,9 @@ class Iteration
                 if ($attempts == $maxAttempts) {
                     throw new UnitException($error->getMessage(), $error->getCode(), $error);
                 }
-                TimeTool::sleepSec($sleepSecond);
+                if ($sleepSecond != 0) {
+                    TimeTool::sleepSec($sleepSecond);
+                }
             }
         }
     }
