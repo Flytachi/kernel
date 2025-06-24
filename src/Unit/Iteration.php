@@ -22,11 +22,16 @@ class Iteration
      * @param int $maxAttempts
      * @param callable $func
      * @param int $sleepSecond
+     * @param string $exceptionClass
      * @return void
-     * @throws \Exception
+     * @throws UnitException
      */
-    public static function callThrow(int $maxAttempts, callable $func, int $sleepSecond = 0): void
-    {
+    public static function callThrow(
+        int $maxAttempts,
+        callable $func,
+        int $sleepSecond = 0,
+        string $exceptionClass = \Throwable::class
+    ): void {
         $label = self::callableName($func);
         $attempts = 0;
         Extra::$logger->withName("Iteration::callThrow")->debug("Iteration Start [attempt:{$maxAttempts}] {$label}");
@@ -39,11 +44,15 @@ class Iteration
             } catch (\Throwable $error) {
                 Extra::$logger->withName("Iteration::callThrow")->debug("Throw {$attempts} - "
                     . $error->getMessage() . PHP_EOL . $error->getTraceAsString());
-                if ($attempts == $maxAttempts) {
+                if ($error instanceof $exceptionClass) {
+                    if ($attempts == $maxAttempts) {
+                        throw new UnitException($error->getMessage(), $error->getCode(), $error);
+                    }
+                    if ($sleepSecond != 0) {
+                        TimeTool::sleepSec($sleepSecond);
+                    }
+                } else {
                     throw new UnitException($error->getMessage(), $error->getCode(), $error);
-                }
-                if ($sleepSecond != 0) {
-                    TimeTool::sleepSec($sleepSecond);
                 }
             }
         }
