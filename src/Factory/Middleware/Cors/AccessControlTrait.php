@@ -24,7 +24,7 @@ trait AccessControlTrait
         if (!empty($this->exposeHeaders)) {
             header('Access-Control-Expose-Headers: ' . implode(', ', $this->exposeHeaders));
         }
-        if ($this->credentials && empty($this->origin)) {
+        if ($this->credentials && !empty($this->origin)) {
             header('Access-Control-Allow-Credentials: ' . $this->credentials);
         }
         if ($this->maxAge > 0) {
