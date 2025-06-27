@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Unit\DataTableNet;
 
 use Flytachi\Kernel\Src\Factory\Connection\Qb;
+use Flytachi\Kernel\Src\Factory\Entity\RequestException;
 use Flytachi\Kernel\Src\Stereotype\RequestObject;
 use Flytachi\Kernel\Src\Unit\DataTableNet\Entity\DTNetColumn;
 use Flytachi\Kernel\Src\Unit\DataTableNet\Entity\DTNetColumns;
@@ -51,6 +52,31 @@ class DataTableNetRequest extends RequestObject
 
         // Initialize columns
         $this->columns = new DTNetColumns($columns ?? []);
+    }
+
+    /**
+     * Validates that all requested columns are explicitly allowed.
+     *
+     * This method checks whether each column's `data` value is present in the given `$allowed` list.
+     * If any column is not allowed, a {@see RequestException} is thrown.
+     *
+     * This is useful for whitelisting allowed fields before SQL generation.
+     *
+     * @param string[] $allowed List of permitted column `data` keys (e.g. ['id', 'name', 'status']).
+     * @return void
+     *
+     * @throws RequestException If any column is not in the allowed list.
+     *
+     * @see overrideSelection()
+     * @see selection()
+     */
+    public function allowColumns(array $allowed): void
+    {
+        foreach ($this->columns->items as $column) {
+            if (!in_array($column->data, $allowed, true)) {
+                throw new RequestException("Column '{$column->data}' is not allowed");
+            }
+        }
     }
 
     /**
