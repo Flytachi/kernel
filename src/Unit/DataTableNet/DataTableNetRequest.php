@@ -118,13 +118,24 @@ class DataTableNetRequest extends RequestObject
      *
      * For each column, uses `name` if defined, otherwise `data`.
      *
+     *  Example:
+     *  - name: "t.id", data: "id" => "t.id AS id"
+     *  - name: "id", data: "id" => "id"
+     *
      * @return string Comma-separated list of SQL column identifiers.
      * @see overrideSelection()
      */
     final public function selection(): string
     {
         $naming = array_map(
-            fn(DTNetColumn $item) => $item->name ?: $item->data,
+            function (DTNetColumn $item): string {
+                // If a name is defined and different from data, alias it
+                if (!empty($item->name) && $item->name !== $item->data) {
+                    return "{$item->name} AS {$item->data}";
+                }
+                // Use name if defined, otherwise fallback to data
+                return $item->name ?: $item->data;
+            },
             $this->columns->items
         );
 

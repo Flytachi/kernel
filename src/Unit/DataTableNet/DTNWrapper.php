@@ -52,32 +52,52 @@ class DTNWrapper
             );
         }
 
-        // Setup base repo
-        $repo->select($request->selection());
-        $repo->where($headQueryBuilder);
-        $repo->orderBy($request->order());
-        $repo->limit($request->length, $request->start);
+        try {
+            // Setup base repo
+            $repo->select($request->selection());
+            $repo->where($headQueryBuilder);
+            $repo->orderBy($request->order());
+            $repo->limit($request->length, $request->start);
 
-        // 1. Total count
-        if ($accurateCounts) {
-            $recordsTotal = self::countRecords($repo);
+            // 1. Total count
+            if ($accurateCounts) {
+                $recordsTotal = self::countRecords($repo);
+            }
+
+            // 2. Filtered count
+            $repo->cleanCache('where');
+            $repo->cleanCache('binds');
+            $repo->where(Qb::and(
+                $headQueryBuilder ?: Qb::empty(),
+                $request->filter()
+            ));
+
+            $recordsFiltered = self::countRecords($repo);
+
+            return new DataTableNetResponse(
+                $request->draw,
+                $recordsTotal ?? $recordsFiltered,
+                $recordsFiltered,
+                $repo->findAll()
+            );
+        } catch (\Throwable $throwable) {
+            if ((int) $throwable->getCode() === 42703) {
+                $message = $throwable->getMessage();
+
+                if (preg_match('/column "(.*?)" does not exist/i', $message, $matches)) {
+                    $invalidColumn = $matches[1];
+                    $userMessage = "Invalid column reference: `{$invalidColumn}` does not exist in the table";
+                } else {
+                    $userMessage = "Invalid column name used in request. Please check your field mappings";
+                }
+
+                throw new DataTableNetException(
+                    $userMessage,
+                    previous: $throwable
+                );
+            }
+            throw $throwable;
         }
-
-        // 2. Filtered count
-        $repo->cleanCache('where');
-        $repo->cleanCache('binds');
-        $repo->where(Qb::and(
-            $headQueryBuilder ?: Qb::empty(),
-            $request->filter()
-        ));
-        $recordsFiltered = self::countRecords($repo);
-
-        return new DataTableNetResponse(
-            $request->draw,
-            $recordsTotal ?? $recordsFiltered,
-            $recordsFiltered,
-            $repo->findAll()
-        );
     }
 
     /**
