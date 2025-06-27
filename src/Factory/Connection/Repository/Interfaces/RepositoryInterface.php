@@ -14,6 +14,7 @@ interface RepositoryInterface
     public function originTable(): string;
     public function buildSql(): string;
     public function getSql(?string $param = null): mixed;
+    public function cleanCache(?string $param = null): void;
     public function select(string $option): static;
     public function as(string $alias): static;
     public function join(RepositoryInterface $repository, string $on): static;

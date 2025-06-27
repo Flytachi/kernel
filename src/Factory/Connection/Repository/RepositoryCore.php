@@ -116,9 +116,15 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
         }
     }
 
-    final protected function cleanCache(): void
+    final public function cleanCache(?string $param = null): void
     {
-        $this->sqlParts = [];
+        if ($param) {
+            if (isset($this->sqlParts[$param])) {
+                unset($this->sqlParts[$param]);
+            };
+        } else {
+            $this->sqlParts = [];
+        }
     }
 
     private function prepareSelect(): string

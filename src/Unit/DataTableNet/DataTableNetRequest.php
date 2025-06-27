@@ -13,6 +13,12 @@ use Flytachi\Kernel\Src\Unit\DataTableNet\Entity\DTNetSearch;
 
 class DataTableNetRequest extends RequestObject
 {
+    /** @var callable|null User-defined callback for filtering logic */
+    private $filterCallback = null;
+
+    /** @var string|null Fallback ORDER BY string */
+    private ?string $defaultOrder = null;
+
     public DTNetSearch $search;
     /* @var DTNetOrder[] $order */
     public array $order = [];
@@ -30,65 +36,119 @@ class DataTableNetRequest extends RequestObject
         $this->valid('start', 'is_numeric');
         $this->valid('length', '\Flytachi\Kernel\Src\Unit\Tool::isIntPositive');
 
-        // search
+        // Initialize search
         $this->search = match (true) {
             $search === null => new DTNetSearch(),
             default => new DTNetSearch($search['value'] ?? '', $search['regex'] ?? false),
         };
 
-        // order
+        // Initialize ordering
         if (!empty($order)) {
-            $this->order = [];
             foreach ($order as $orderItem) {
                 $this->order[] = new DTNetOrder($orderItem['column'], $orderItem['dir']);
             }
         }
 
-        // columns
+        // Initialize columns
         $this->columns = new DTNetColumns($columns ?? []);
     }
 
     /**
-     * Generates a comma-separated list of column names for use in a SQL SELECT clause.
+     * Overrides column identifiers for use in the SQL SELECT clause.
      *
-     * If a `$resetNames` map is provided, it will override the `name` property
-     * of matching columns based on their `data` keys.
+     * Sets the `name` property of each column based on the given map,
+     * where keys are `data` field names and values are SQL-safe identifiers.
      *
-     * @param array<string, string> $resetNames An associative array of data => name overrides
-     * @return string A comma-separated list of column names for SQL selection
+     * @param array<string, string> $resetNames Associative array of `data => name`.
+     * @return void
+     *
+     * @see selection()
+     * @example
+     *   $request->overrideSelection([
+     *       'created' => 'created_at',
+     *       'userName' => 'users.name'
+     *   ]);
      */
-    public function selection(array $resetNames = []): string
+    final public function overrideSelection(array $resetNames = []): void
+    {
+        foreach ($this->columns->items as $item) {
+            if (isset($resetNames[$item->data])) {
+                $item->name = $resetNames[$item->data];
+            }
+        }
+    }
+
+    /**
+     * Sets a custom filtering callback for global and per-column search.
+     *
+     * The callback receives a `DTNetColumn` and a `string` value
+     * and must return a `Qb|null` (or `null` to skip the column).
+     *
+     * @param callable|null $callback function(DTNetColumn $column, string $value): ?Qb
+     * @return void
+     *
+     * @see filter()
+     * @example
+     *   $request->overrideFilter(function (DTNetColumn $col, string $value) {
+     *       return Qb::like($col->data, "%{$value}%");
+     *   });
+     */
+    final public function overrideFilter(?callable $callback): void
+    {
+        $this->filterCallback = $callback;
+    }
+
+    /**
+     * Sets a fallback ORDER BY string used when no sorting is specified.
+     *
+     * @param string|null $defaultContext Example: "id DESC, created_at ASC"
+     * @return void
+     *
+     * @see order()
+     * @example
+     *   $request->overrideOrder('created_at DESC')
+     */
+    final public function overrideOrder(?string $defaultContext = null): void
+    {
+        $this->defaultOrder = $defaultContext;
+    }
+
+    /**
+     * Generates a comma-separated list of column names for a SQL SELECT clause.
+     *
+     * For each column, uses `name` if defined, otherwise `data`.
+     *
+     * @return string Comma-separated list of SQL column identifiers.
+     * @see overrideSelection()
+     */
+    final public function selection(): string
     {
         $naming = array_map(
-            function (DTNetColumn $item) use ($resetNames) {
-                if (isset($resetNames[$item->data])) {
-                    $item->name = $resetNames[$item->data];
-                }
-                return $item->name ?: $item->data;
-            },
+            fn(DTNetColumn $item) => $item->name ?: $item->data,
             $this->columns->items
         );
+
         return implode(', ', $naming);
     }
 
     /**
-     * Builds WHERE condition using global and per-column search.
+     * Builds the SQL WHERE clause based on global and column-specific filters.
      *
-     * @param callable|null $callback Optional function(DTNetColumn $column, string $value): Qb|null
-     *                                to customize condition for each column.
-     * @return Qb
+     * - Global search is applied across all searchable columns (OR conditions).
+     * - Column-specific search is applied using AND conditions.
+     * - Uses the callback from {@see overrideFilter()} if defined, or `LIKE` by default.
+     *
+     * @return Qb A `Qb` WHERE condition or `Qb::empty()` if none.
+     * @see overrideFilter()
      */
-    public function filter(?callable $callback = null): Qb
+    final public function filter(): Qb
     {
         $andConditions = [];
 
-        // Default callback if not provided
-        if ($callback === null) {
-            $callback = function (DTNetColumn $column, string $value): ?Qb {
-                $field = $column->name ?: $column->data;
-                return Qb::like($field, "%{$value}%");
-            };
-        }
+        $callback = $this->filterCallback ?? function (DTNetColumn $column, string $value): ?Qb {
+            $field = $column->name ?: $column->data;
+            return Qb::like($field, "%{$value}%");
+        };
 
         // Global search
         $global = trim($this->search->value ?? '');
@@ -124,17 +184,15 @@ class DataTableNetRequest extends RequestObject
     }
 
     /**
-     * Builds the SQL ORDER BY clause from the column-ordering configuration.
+     * Builds a SQL ORDER BY expression from the current ordering configuration.
      *
-     * Iterates through the list of order instructions and generates a comma-separated
-     * ORDER BY expression using each column's `name` (or `data` as fallback) and the sort direction (ASC/DESC).
+     * Returns a comma-separated list like: "name ASC, created_at DESC".
+     * If no valid order is found, returns a fallback set via {@see overrideOrder()}.
      *
-     * If no valid order instructions are found and a `$defaultContext` is provided, it will be returned instead.
-     *
-     * @param string|null $defaultContext Optional fallback string to return if no order instructions exist
-     * @return string Comma-separated ORDER BY expression (without the "ORDER BY" keyword), or the fallback if defined
+     * @return string SQL ORDER BY clause without the "ORDER BY" keyword.
+     * @see overrideOrder()
      */
-    public function order(?string $defaultContext = null): string
+    final public function order(): string
     {
         $orderClauses = [];
 
@@ -150,8 +208,8 @@ class DataTableNetRequest extends RequestObject
             $orderClauses[] = "{$field} {$direction}";
         }
 
-        if (empty($orderClauses) && $defaultContext !== null) {
-            return $defaultContext;
+        if (empty($orderClauses) && $this->defaultOrder !== null) {
+            return $this->defaultOrder;
         }
 
         return implode(', ', $orderClauses);
