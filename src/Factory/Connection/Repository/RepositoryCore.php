@@ -149,7 +149,9 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function select(string $option): static
     {
-        $this->sqlParts['option'] = $option;
+        if (!empty($option)) {
+            $this->sqlParts['option'] = $option;
+        }
         return $this;
     }
 
@@ -159,7 +161,9 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function as(string $alias): static
     {
-        $this->sqlParts['as'] = $alias;
+        if (!empty($alias)) {
+            $this->sqlParts['as'] = $alias;
+        }
         return $this;
     }
 
@@ -258,7 +262,9 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function groupBy(string $context): static
     {
-        $this->sqlParts['group'] = 'GROUP BY ' . $context;
+        if (!empty($context)) {
+            $this->sqlParts['group'] = 'GROUP BY ' . $context;
+        }
         return $this;
     }
 
@@ -268,7 +274,9 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function having(string $context): static
     {
-        $this->sqlParts['having'] = 'HAVING ' . $context;
+        if (!empty($context)) {
+            $this->sqlParts['having'] = 'HAVING ' . $context;
+        }
         return $this;
     }
 
@@ -278,7 +286,9 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
      */
     final public function orderBy(string $context): static
     {
-        $this->sqlParts['order'] = 'ORDER BY ' . $context;
+        if (!empty($context)) {
+            $this->sqlParts['order'] = 'ORDER BY ' . $context;
+        }
         return $this;
     }
 
