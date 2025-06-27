@@ -71,9 +71,56 @@ class DataTableNetRequest extends RequestObject
         return implode(', ', $naming);
     }
 
-    public function filter(): Qb
+    /**
+     * Builds WHERE condition using global and per-column search.
+     *
+     * @param callable|null $callback Optional function(DTNetColumn $column, string $value): Qb|null
+     *                                to customize condition for each column.
+     * @return Qb
+     */
+    public function filter(?callable $callback = null): Qb
     {
-        return Qb::empty();
+        $andConditions = [];
+
+        // Default callback if not provided
+        if ($callback === null) {
+            $callback = function (DTNetColumn $column, string $value): ?Qb {
+                $field = $column->name ?: $column->data;
+                return Qb::like($field, "%{$value}%");
+            };
+        }
+
+        // Global search
+        $global = trim($this->search->value ?? '');
+        if ($global !== '') {
+            $orConditions = [];
+
+            foreach ($this->columns->items as $column) {
+                if ($column->searchable) {
+                    $cond = $callback($column, $global);
+                    if ($cond !== null) {
+                        $orConditions[] = $cond;
+                    }
+                }
+            }
+
+            if (!empty($orConditions)) {
+                $andConditions[] = Qb::clip(Qb::or(...$orConditions));
+            }
+        }
+
+        // Per-column search
+        foreach ($this->columns->items as $column) {
+            $value = trim($column->search->value ?? '');
+            if ($value !== '' && $column->searchable) {
+                $cond = $callback($column, $value);
+                if ($cond !== null) {
+                    $andConditions[] = $cond;
+                }
+            }
+        }
+
+        return empty($andConditions) ? Qb::empty() : Qb::and(...$andConditions);
     }
 
     /**

@@ -107,6 +107,40 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
     /**
      * @throws RepositoryException
      */
+    final public function buildSql(): string
+    {
+        try {
+            $parts = [
+                'SELECT ' . $this->prepareSelect(),
+                'FROM ' . $this->originTable()
+            ];
+
+            foreach (['as', 'join', 'where', 'union', 'group', 'having', 'order'] as $key) {
+                if (isset($this->sqlParts[$key])) {
+                    $parts[] = trim($this->sqlParts[$key]);
+                }
+            }
+            if (isset($this->sqlParts['limit'])) {
+                $parts[] = 'LIMIT ' . $this->sqlParts['limit'];
+            }
+            if (isset($this->sqlParts['offset'])) {
+                $parts[] = 'OFFSET ' . $this->sqlParts['offset'];
+            }
+            if (isset($this->sqlParts['for'])) {
+                $parts[] = 'FOR ' . $this->sqlParts['for'];
+            }
+
+            $query = implode(' ', $parts);
+            $this->logger->debug('Repository build:' . $query);
+            return $query;
+        } catch (\Throwable $th) {
+            throw new RepositoryException($th->getMessage(), previous: $th);
+        }
+    }
+
+    /**
+     * @throws RepositoryException
+     */
     final public function getSql(?string $param = null): mixed
     {
         if ($param) {
