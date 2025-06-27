@@ -150,6 +150,17 @@ class DataTableNetRequest extends RequestObject
             return Qb::like($field, "%{$value}%");
         };
 
+        // Per-column search
+        foreach ($this->columns->items as $column) {
+            $value = trim($column->search->value ?? '');
+            if ($value !== '' && $column->searchable) {
+                $cond = $callback($column, $value);
+                if ($cond !== null) {
+                    $andConditions[] = $cond;
+                }
+            }
+        }
+
         // Global search
         $global = trim($this->search->value ?? '');
         if ($global !== '') {
@@ -166,17 +177,6 @@ class DataTableNetRequest extends RequestObject
 
             if (!empty($orConditions)) {
                 $andConditions[] = Qb::clip(Qb::or(...$orConditions));
-            }
-        }
-
-        // Per-column search
-        foreach ($this->columns->items as $column) {
-            $value = trim($column->search->value ?? '');
-            if ($value !== '' && $column->searchable) {
-                $cond = $callback($column, $value);
-                if ($cond !== null) {
-                    $andConditions[] = $cond;
-                }
             }
         }
 
