@@ -3,7 +3,7 @@
     "description": "Extra Framework kernel",
     "type": "library",
     "license": "MIT",
-    "version": "5.5.9",
+    "version": "5.6.0",
     "keywords": ["Extra Kernel","extra kernel","framework kernel", "kernel"],
     "autoload": {
         "psr-4": {
@@ -32,7 +32,8 @@
         "ext-pcntl": "*",
         "ext-redis": "*",
         "ext-posix": "*",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "flytachi/file-store": "1.0.0"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "@stable"
