@@ -64,9 +64,9 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    final public function getSchema(): string
+    final public function getSchema(): ?string
     {
         return $this->schema;
     }
