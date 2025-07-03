@@ -46,6 +46,16 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
         return $repository;
     }
 
+    final public function getDbConfigClassName(): string
+    {
+        return $this->dbConfigClassName;
+    }
+
+    final public function getModelClassName(): string
+    {
+        return $this->modelClassName;
+    }
+
     /**
      * @return CDO
      */
