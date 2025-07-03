@@ -34,7 +34,6 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
         if ($this->schema == null) {
             $this->schema = $config->getSchema();
         }
-        $config->connect();
     }
 
     public static function entity(?string $as = null): static
