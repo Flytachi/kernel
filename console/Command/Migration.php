@@ -50,26 +50,36 @@ class Migration extends Cmd
             self::printLabel($item->config::class, 32);
 
             $item->config->sepUp();
-            $sqlMain = $sqlSub = [];
+            $sqlMain = $sqlSub = $sqlSubF = [];
 
             foreach ($item->getTables() as $structure) {
                 if ($structure instanceof Table) {
                     $sql = $structure->toSql($item->config->getDriver());
-                    $exp = explode(PHP_EOL . 'CREATE', $sql);
+                    $exp = explode(PHP_EOL . ');' . PHP_EOL, $sql);
+
                     $sqlMain[] = [
                         'title' => $structure->getFullName(),
-                        'exec' => $exp[0]
+                        'exec' => $exp[0] . ');'
                     ];
                     if (count($exp) > 1) {
-                        for ($i = 1; $i < count($exp); $i++) {
-                            $sqlSub[] = [
-                                'title' => $structure->getFullName(),
-                                'exec' => 'CREATE' . $exp[$i]
-                            ];
+                        $subExp = explode(PHP_EOL, $exp[1]);
+                        for ($i = 0; $i < count($subExp); $i++) {
+                            if (str_starts_with($subExp[$i], 'ALTER TABLE')) {
+                                $sqlSubF[] = [
+                                    'title' => $structure->getFullName(),
+                                    'exec' =>  $subExp[$i]
+                                ];
+                            } else {
+                                $sqlSub[] = [
+                                    'title' => $structure->getFullName(),
+                                    'exec' =>  $subExp[$i]
+                                ];
+                            }
                         }
                     }
                 }
             }
+            $sqlSub = [...$sqlSub, ...$sqlSubF];
 
             $db = $item->config->connection();
             $db->beginTransaction();
