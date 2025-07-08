@@ -78,7 +78,7 @@ class Migration extends Cmd
             foreach ($sqlMain as $sql) {
                 try {
                     $info = $db->exec($sql['exec']);
-                    self::print("- Table " . $sql['title'] . ' -> creation sucess ', 32);
+                    self::print("- Table " . $sql['title'] . ' -> creation success', 32);
                 } catch (\Throwable $e) {
                     self::print("- Table " . $sql['title'] . ' -> creation failed', 31);
                     if (env('DEBUG', false)) {
@@ -92,7 +92,7 @@ class Migration extends Cmd
             foreach ($sqlSub as $sql) {
                 try {
                     $db->exec($sql['exec']);
-                    self::print("- " . $sql['exec'] . ' -> creation sucess', 32);
+                    self::print("- " . $sql['exec'] . ' -> creation success', 32);
                 } catch (\Throwable $e) {
                     self::print("- " . $sql['exec'] . ' -> creation failed', 31);
                     if (env('DEBUG', false)) {

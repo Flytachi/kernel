@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Unit\DbMapping;
 
+use Flytachi\DbMapping\Attributes\DbMap;
 use Flytachi\DbMapping\Structure\Table;
 use Flytachi\DbMapping\Tools\ColumnMapping;
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Factory\Connection\Config\Common\DbConfigInterface;
 use Flytachi\Kernel\Src\Factory\Connection\Repository\Interfaces\RepositoryInterface;
+use ReflectionAttribute;
 use ReflectionClass;
 
 class DbMapping
@@ -66,6 +68,12 @@ class DbMapping
 
                 $reflectionClassModel = new ReflectionClass($repository->getModelClassName());
                 $columnMap = new ColumnMapping($config->getDriver());
+
+                $annotationClassModel = $reflectionClassModel
+                    ->getAttributes(DbMap::class, ReflectionAttribute::IS_INSTANCEOF);
+                if (empty($annotationClassModel)) {
+                    continue;
+                }
 
                 foreach ($reflectionClassModel->getProperties() as $property) {
                     $columnMap->push($property);
