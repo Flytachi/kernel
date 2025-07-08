@@ -50,10 +50,14 @@ class Migration extends Cmd
             self::printLabel($item->config::class, 32);
 
             $item->config->sepUp();
-            $sqlMain = $sqlSub = $sqlSubF = [];
+            $sqlSchema = $sqlMain = $sqlSub = $sqlSubF = [];
 
             foreach ($item->getTables() as $structure) {
                 if ($structure instanceof Table) {
+                    $schemaSql = $structure->createSchemaIfNotExists($item->config->getDriver());
+                    if ($schemaSql !== null && !in_array($schemaSql, $sqlSchema)) {
+                        $sqlSchema[] = $schemaSql;
+                    }
                     $sql = $structure->toSql($item->config->getDriver());
                     $exp = explode(PHP_EOL . ');' . PHP_EOL, $sql);
 
@@ -79,34 +83,51 @@ class Migration extends Cmd
                     }
                 }
             }
-            $sqlSub = [...$sqlSub, ...$sqlSubF];
 
             $db = $item->config->connection();
 
-            self::printMessage("* structure", 32);
-            foreach ($sqlMain as $sql) {
-                try {
-                    $db->exec($sql['exec']);
-                    self::print("- Table " . $sql['title'] . ' -> creation success', 32);
-                } catch (\Throwable $e) {
-                    self::print("- Table " . $sql['title'] . ' -> creation failed', 31);
-                    if (env('DEBUG', false)) {
-                        self::print($e->getMessage(), 31);
-                        self::print($e->getTraceAsString(), 31);
+            if (count($sqlSchema) > 0) {
+                self::printMessage("* Schema", 32);
+                foreach ($sqlSchema as $sql) {
+                    try {
+                        $db->exec($sql);
+                        self::print("- Shema " . $sql . ' -> creation success', 32);
+                    } catch (\Throwable $e) {
+                        self::print("- Shema " . $sql . ' -> creation failed', 31);
+                        if (env('DEBUG', false)) {
+                            self::print($e->getMessage(), 31);
+                        }
                     }
                 }
             }
 
-            self::printMessage("* constraints", 32);
-            foreach ($sqlSub as $sql) {
-                try {
-                    $db->exec($sql['exec']);
-                    self::print("- " . $sql['exec'] . ' -> creation success', 32);
-                } catch (\Throwable $e) {
-                    self::print("- " . $sql['exec'] . ' -> creation failed', 31);
-                    if (env('DEBUG', false)) {
-                        self::print($e->getMessage(), 31);
-                        self::print($e->getTraceAsString(), 31);
+            if (count($sqlMain) > 0) {
+                self::printMessage("* Structure", 32);
+                foreach ($sqlMain as $sql) {
+                    try {
+                        $db->exec($sql['exec']);
+                        self::print("- Table " . $sql['title'] . ' -> creation success', 32);
+                    } catch (\Throwable $e) {
+                        self::print("- Table " . $sql['title'] . ' -> creation failed', 31);
+                        if (env('DEBUG', false)) {
+                            self::print($e->getMessage(), 31);
+                        }
+                    }
+                }
+            }
+
+            $sqlSub = [...$sqlSub, ...$sqlSubF];
+            if (count($sqlSub) > 0) {
+                self::printMessage("* Constraints", 32);
+                foreach ($sqlSub as $sql) {
+                    try {
+                        $db->exec($sql['exec']);
+                        self::print("- " . $sql['exec'] . ' -> creation success', 32);
+                    } catch (\Throwable $e) {
+                        self::print("- " . $sql['exec'] . ' -> creation failed', 31);
+                        if (env('DEBUG', false)) {
+                            self::print($e->getMessage(), 31);
+                        }
                     }
                 }
             }
