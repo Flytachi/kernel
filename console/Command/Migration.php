@@ -82,12 +82,11 @@ class Migration extends Cmd
             $sqlSub = [...$sqlSub, ...$sqlSubF];
 
             $db = $item->config->connection();
-            $db->beginTransaction();
 
             self::printMessage("* structure", 32);
             foreach ($sqlMain as $sql) {
                 try {
-                    $info = $db->exec($sql['exec']);
+                    $db->exec($sql['exec']);
                     self::print("- Table " . $sql['title'] . ' -> creation success', 32);
                 } catch (\Throwable $e) {
                     self::print("- Table " . $sql['title'] . ' -> creation failed', 31);
@@ -111,8 +110,6 @@ class Migration extends Cmd
                     }
                 }
             }
-
-            $db->commit();
 
             self::printLabel($item->config::class, 32);
         }
