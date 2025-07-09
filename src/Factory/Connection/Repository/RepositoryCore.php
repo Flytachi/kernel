@@ -334,4 +334,9 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface
         $this->sqlParts['for'] = $context;
         return $this;
     }
+
+    public function mapIdentifierColumnName(): string
+    {
+        return 'id';
+    }
 }

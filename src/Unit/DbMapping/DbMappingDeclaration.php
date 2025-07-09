@@ -28,7 +28,6 @@ final class DbMappingDeclaration
         $newItem = new DbMappingDeclarationItem($config);
         $newItem->push($structureTable);
         $this->items[] = $newItem;
-
     }
 
     public function getItems(): array
