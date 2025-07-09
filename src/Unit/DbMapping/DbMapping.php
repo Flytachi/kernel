@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Unit\DbMapping;
 
-use Flytachi\DbMapping\Attributes\DbMap;
+use Flytachi\DbMapping\Attributes\Entity\Table as EntityTable;
 use Flytachi\DbMapping\Structure\Table;
 use Flytachi\DbMapping\Tools\ColumnMapping;
 use Flytachi\Kernel\Extra;
@@ -70,7 +70,7 @@ class DbMapping
                 $columnMap = new ColumnMapping($config->getDriver());
 
                 $annotationClassModel = $reflectionClassModel
-                    ->getAttributes(DbMap::class, ReflectionAttribute::IS_INSTANCEOF);
+                    ->getAttributes(EntityTable::class, ReflectionAttribute::IS_INSTANCEOF);
                 if (empty($annotationClassModel)) {
                     continue;
                 }
