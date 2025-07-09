@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Factory\Connection\Repository;
 
+use Flytachi\DbMapping\DbMapRepoInterface;
 use Flytachi\Kernel\Src\Factory\Connection\CDO\CDO;
 use Flytachi\Kernel\Src\Factory\Connection\ConnectionPool;
 use Flytachi\Kernel\Src\Factory\Connection\Qb;
@@ -11,7 +12,7 @@ use Flytachi\Kernel\Src\Factory\Connection\Repository\Interfaces\RepositoryInter
 use Flytachi\Kernel\Src\Factory\Entity\ModelInterface;
 use Flytachi\Kernel\Src\Factory\Stereotype;
 
-abstract class RepositoryCore extends Stereotype implements RepositoryInterface
+abstract class RepositoryCore extends Stereotype implements RepositoryInterface, DbMapRepoInterface
 {
     /** @var class-string $dbConfigClassName dbConfig class name (default => DbConfig::class) */
     protected string $dbConfigClassName;
