@@ -7,6 +7,8 @@ namespace Flytachi\Kernel\Console\Command;
 use Flytachi\DbMapping\Structure\Table;
 use Flytachi\Kernel\Console\Inc\Cmd;
 use Flytachi\Kernel\Src\Unit\DbMapping\DbMapping;
+use Flytachi\Kernel\Src\Unit\DbMapping\DbMappingDeclaration;
+use JetBrains\PhpStorm\ArrayShape;
 
 class Migration extends Cmd
 {
@@ -35,6 +37,9 @@ class Migration extends Cmd
                 case 'migrate':
                     $this->migrate();
                     break;
+                case 'sql':
+                    $this->showSql();
+                    break;
                 default:
                     self::printMessage("Argument '{$this->args['arguments'][1]}' not found");
                     break;
@@ -42,15 +47,112 @@ class Migration extends Cmd
         }
     }
 
-    private function migrate(): void
+    private function showSql(): void
     {
         $declaration = DbMapping::scanningDeclaration();
+        $data = $this->processDeclarationData($declaration);
 
         foreach ($declaration->getItems() as $item) {
             self::printLabel($item->config::class, 32);
 
+            if (count($data['sqlSchema']) > 0) {
+                self::printMessage("* Schema", 32);
+                foreach ($data['sqlSchema'] as $sql) {
+                    self::printSplit($sql);
+                }
+            }
+
+            if (count($data['sqlMain']) > 0) {
+                self::printMessage("* Structure", 32);
+                foreach ($data['sqlMain'] as $sql) {
+                    self::printSplit($sql['exec']);
+                }
+            }
+
+            if (count($data['sqlSub']) > 0) {
+                self::printMessage("* Constraints", 32);
+                foreach ($data['sqlSub'] as $sql) {
+                    self::printSplit($sql['exec']);
+                }
+            }
+            self::printLabel($item->config::class, 32);
+        }
+    }
+
+    private function migrate(): void
+    {
+        $declaration = DbMapping::scanningDeclaration();
+        $data = $this->processDeclarationData($declaration);
+
+        foreach ($declaration->getItems() as $item) {
+            self::printLabel($item->config::class, 32);
+
+            $db = $item->config->connection();
+
+            if (count($data['sqlSchema']) > 0) {
+                self::printMessage("* Schema", 32);
+                foreach ($data['sqlSchema'] as $sql) {
+                    try {
+                        $db->exec($sql);
+                        self::print("- Shema " . $sql . ' -> creation success', 32);
+                    } catch (\Throwable $e) {
+                        self::print("- Shema " . $sql . ' -> creation failed', 31);
+                        if (env('DEBUG', false)) {
+                            self::print($e->getMessage(), 31);
+                        }
+                    }
+                }
+            }
+
+            if (count($data['sqlMain']) > 0) {
+                self::printMessage("* Structure", 32);
+                foreach ($data['sqlMain'] as $sql) {
+                    try {
+                        $db->exec($sql['exec']);
+                        self::print("- Table " . $sql['title'] . ' -> creation success', 32);
+                    } catch (\Throwable $e) {
+                        self::print("- Table " . $sql['title'] . ' -> creation failed', 31);
+                        if (env('DEBUG', false)) {
+                            self::print($e->getMessage(), 31);
+                        }
+                    }
+                }
+            }
+
+            if (count($data['sqlSub']) > 0) {
+                self::printMessage("* Constraints", 32);
+                foreach ($data['sqlSub'] as $sql) {
+                    try {
+                        $db->exec($sql['exec']);
+                        self::print("- " . $sql['exec'] . ' -> creation success', 32);
+                    } catch (\Throwable $e) {
+                        self::print("- " . $sql['exec'] . ' -> creation failed', 31);
+                        if (env('DEBUG', false)) {
+                            self::print($e->getMessage(), 31);
+                        }
+                    }
+                }
+            }
+            self::printLabel($item->config::class, 32);
+        }
+    }
+
+    /**
+     * Processes the database declaration and prepares SQL statements.
+     *
+     * @param DbMappingDeclaration $declaration
+     * @return array{sqlSchema: array, sqlMain: array, sqlSub: array{0: array, 1: array}}
+     * An associative array containing 'sqlSchema', 'sqlMain', and 'sqlSub' arrays.
+     */
+    private function processDeclarationData(DbMappingDeclaration $declaration): array
+    {
+        $sqlSchema = [];
+        $sqlMain = [];
+        $sqlSub = [];
+        $sqlSubF = [];
+
+        foreach ($declaration->getItems() as $item) {
             $item->config->sepUp();
-            $sqlSchema = $sqlMain = $sqlSub = $sqlSubF = [];
 
             foreach ($item->getTables() as $structure) {
                 if ($structure instanceof Table) {
@@ -63,7 +165,7 @@ class Migration extends Cmd
 
                     $sqlMain[] = [
                         'title' => $structure->getFullName(),
-                        'exec' => $exp[0] . ');'
+                        'exec' => (count($exp) == 1 ? $exp[0] : $exp[0] . PHP_EOL . ');')
                     ];
                     if (count($exp) > 1) {
                         $subExp = explode(PHP_EOL, $exp[1]);
@@ -83,57 +185,13 @@ class Migration extends Cmd
                     }
                 }
             }
-
-            $db = $item->config->connection();
-
-            if (count($sqlSchema) > 0) {
-                self::printMessage("* Schema", 32);
-                foreach ($sqlSchema as $sql) {
-                    try {
-                        $db->exec($sql);
-                        self::print("- Shema " . $sql . ' -> creation success', 32);
-                    } catch (\Throwable $e) {
-                        self::print("- Shema " . $sql . ' -> creation failed', 31);
-                        if (env('DEBUG', false)) {
-                            self::print($e->getMessage(), 31);
-                        }
-                    }
-                }
-            }
-
-            if (count($sqlMain) > 0) {
-                self::printMessage("* Structure", 32);
-                foreach ($sqlMain as $sql) {
-                    try {
-                        $db->exec($sql['exec']);
-                        self::print("- Table " . $sql['title'] . ' -> creation success', 32);
-                    } catch (\Throwable $e) {
-                        self::print("- Table " . $sql['title'] . ' -> creation failed', 31);
-                        if (env('DEBUG', false)) {
-                            self::print($e->getMessage(), 31);
-                        }
-                    }
-                }
-            }
-
-            $sqlSub = [...$sqlSub, ...$sqlSubF];
-            if (count($sqlSub) > 0) {
-                self::printMessage("* Constraints", 32);
-                foreach ($sqlSub as $sql) {
-                    try {
-                        $db->exec($sql['exec']);
-                        self::print("- " . $sql['exec'] . ' -> creation success', 32);
-                    } catch (\Throwable $e) {
-                        self::print("- " . $sql['exec'] . ' -> creation failed', 31);
-                        if (env('DEBUG', false)) {
-                            self::print($e->getMessage(), 31);
-                        }
-                    }
-                }
-            }
-
-            self::printLabel($item->config::class, 32);
         }
+
+        return [
+            'sqlSchema' => $sqlSchema,
+            'sqlMain' => $sqlMain,
+            'sqlSub' => [...$sqlSub, ...$sqlSubF] // Combine them here
+        ];
     }
 
     public static function help(): void
