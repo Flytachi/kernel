@@ -97,7 +97,7 @@ class Db extends Cmd
                     } catch (\Throwable $e) {
                         self::print("- [f] shema '{$sql['title']}'", 31);
                         if (env('DEBUG', false)) {
-                            self::print($e->getMessage(), 31);
+                            self::print("\t" . $e->getMessage(), 31);
                         }
                     }
                 }
@@ -112,7 +112,7 @@ class Db extends Cmd
                     } catch (\Throwable $e) {
                         self::print("- [f] table '{$sql['title']}'", 31);
                         if (env('DEBUG', false)) {
-                            self::print($e->getMessage(), 31);
+                            self::print("\t" . $e->getMessage(), 31);
                         }
                     }
                 }
@@ -127,7 +127,7 @@ class Db extends Cmd
                     } catch (\Throwable $e) {
                         self::print("- [f] " . $sql['title'], 31);
                         if (env('DEBUG', false)) {
-                            self::print($e->getMessage(), 31);
+                            self::print("\t" . $e->getMessage(), 31);
                         }
                     }
                 }
