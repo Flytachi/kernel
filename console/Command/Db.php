@@ -8,15 +8,14 @@ use Flytachi\DbMapping\Structure\Table;
 use Flytachi\Kernel\Console\Inc\Cmd;
 use Flytachi\Kernel\Src\Unit\DbMapping\DbMapping;
 use Flytachi\Kernel\Src\Unit\DbMapping\DbMappingDeclaration;
-use JetBrains\PhpStorm\ArrayShape;
 
-class Migration extends Cmd
+class Db extends Cmd
 {
-    public static string $title = "command db control";
+    public static string $title = "command database control";
 
     public function handle(): void
     {
-        self::printTitle("Migration", 32);
+        self::printTitle("Db", 32);
 
         if (
             count($this->args['arguments']) > 1
@@ -24,10 +23,10 @@ class Migration extends Cmd
             $this->resolution();
         } else {
             self::printMessage("Enter argument");
-            self::print("Example: extra migration migrate");
+            self::print("Example: extra db sql");
         }
 
-        self::printTitle("Migration", 32);
+        self::printTitle("Db", 32);
     }
 
     private function resolution(): void
@@ -58,7 +57,7 @@ class Migration extends Cmd
             if (count($data['sqlSchema']) > 0) {
                 self::printMessage("* Schema", 32);
                 foreach ($data['sqlSchema'] as $sql) {
-                    self::printSplit($sql);
+                    self::printSplit($sql['exec']);
                 }
             }
 
@@ -93,10 +92,10 @@ class Migration extends Cmd
                 self::printMessage("* Schema", 32);
                 foreach ($data['sqlSchema'] as $sql) {
                     try {
-                        $db->exec($sql);
-                        self::print("- Shema " . $sql . ' -> creation success', 32);
+                        $db->exec($sql['exec']);
+                        self::print("- [s] shema '{$sql['title']}'", 32);
                     } catch (\Throwable $e) {
-                        self::print("- Shema " . $sql . ' -> creation failed', 31);
+                        self::print("- [f] shema '{$sql['title']}'", 31);
                         if (env('DEBUG', false)) {
                             self::print($e->getMessage(), 31);
                         }
@@ -109,9 +108,9 @@ class Migration extends Cmd
                 foreach ($data['sqlMain'] as $sql) {
                     try {
                         $db->exec($sql['exec']);
-                        self::print("- Table " . $sql['title'] . ' -> creation success', 32);
+                        self::print("- [s] table '{$sql['title']}'", 32);
                     } catch (\Throwable $e) {
-                        self::print("- Table " . $sql['title'] . ' -> creation failed', 31);
+                        self::print("- [f] table '{$sql['title']}'", 31);
                         if (env('DEBUG', false)) {
                             self::print($e->getMessage(), 31);
                         }
@@ -124,9 +123,9 @@ class Migration extends Cmd
                 foreach ($data['sqlSub'] as $sql) {
                     try {
                         $db->exec($sql['exec']);
-                        self::print("- " . $sql['exec'] . ' -> creation success', 32);
+                        self::print("- [s] " . $sql['title'], 32);
                     } catch (\Throwable $e) {
-                        self::print("- " . $sql['exec'] . ' -> creation failed', 31);
+                        self::print("- [f] " . $sql['title'], 31);
                         if (env('DEBUG', false)) {
                             self::print($e->getMessage(), 31);
                         }
@@ -157,8 +156,18 @@ class Migration extends Cmd
             foreach ($item->getTables() as $structure) {
                 if ($structure instanceof Table) {
                     $schemaSql = $structure->createSchemaIfNotExists($item->config->getDriver());
-                    if ($schemaSql !== null && !in_array($schemaSql, $sqlSchema)) {
-                        $sqlSchema[] = $schemaSql;
+                    if ($schemaSql !== null) {
+                        $title = str_replace(
+                            ';',
+                            '',
+                            str_replace('CREATE SCHEMA IF NOT EXISTS ', '', $schemaSql)
+                        );
+                        if (!isset($sqlSchema[$title])) {
+                            $sqlSchema[$title] = [
+                                'title' => $title,
+                                'exec' => $schemaSql,
+                            ];
+                        }
                     }
                     $sql = $structure->toSql($item->config->getDriver());
                     $exp = explode(PHP_EOL . ');' . PHP_EOL, $sql);
@@ -171,13 +180,21 @@ class Migration extends Cmd
                         $subExp = explode(PHP_EOL, $exp[1]);
                         for ($i = 0; $i < count($subExp); $i++) {
                             if (str_starts_with($subExp[$i], 'ALTER TABLE')) {
+                                preg_match('/ADD\s+CONSTRAINT\s+([a-zA-Z0-9_]+)/i', $sql, $match);
+                                $title = $match[1] ?? 'unknown';
                                 $sqlSubF[] = [
-                                    'title' => $structure->getFullName(),
+                                    'title' => "constraint '{$title}'",
                                     'exec' =>  $subExp[$i]
                                 ];
                             } else {
+                                preg_match(
+                                    '/\bINDEX\s+(?:IF\s+NOT\s+EXISTS\s+)?([a-zA-Z0-9_]+)/i',
+                                    $subExp[$i],
+                                    $match
+                                );
+                                $title = $match[1] ?? 'unknown';
                                 $sqlSub[] = [
-                                    'title' => $structure->getFullName(),
+                                    'title' => "index '{$title}'",
                                     'exec' =>  $subExp[$i]
                                 ];
                             }
@@ -190,16 +207,21 @@ class Migration extends Cmd
         return [
             'sqlSchema' => $sqlSchema,
             'sqlMain' => $sqlMain,
-            'sqlSub' => [...$sqlSub, ...$sqlSubF] // Combine them here
+            'sqlSub' => [...$sqlSub, ...$sqlSubF]
         ];
     }
 
     public static function help(): void
     {
         $cl = 34;
-        self::printTitle("Migration Help", $cl);
+        self::printTitle("Db Help", $cl);
+
+        self::printLabel("extra db [args...] -[flags...] --[options...]", $cl);
+        self::printMessage("args - command", $cl);
+        self::print("migrate - migration mapping sql in databases", $cl);
+        self::print("sql - show mapping sql", $cl);
 
 
-        self::printTitle("Migration Help", $cl);
+        self::printTitle("Db Help", $cl);
     }
 }
