@@ -180,7 +180,7 @@ class Db extends Cmd
                         $subExp = explode(PHP_EOL, $exp[1]);
                         for ($i = 0; $i < count($subExp); $i++) {
                             if (str_starts_with($subExp[$i], 'ALTER TABLE')) {
-                                preg_match('/ADD\s+CONSTRAINT\s+([a-zA-Z0-9_]+)/i', $sql, $match);
+                                preg_match('/ADD\s+CONSTRAINT\s+([a-zA-Z0-9_]+)/i', $subExp[$i], $match);
                                 $title = $match[1] ?? 'unknown';
                                 $sqlSubF[] = [
                                     'title' => "constraint '{$title}'",
