@@ -84,7 +84,7 @@ final class Locale
         // return
         $value = Tool::arrayNestedValue($GLOBALS['DICTIONARY'], explode('.', $key));
 
-        if (is_string($value)) {
+        if (is_string($value) && !empty($value)) {
             return empty($params) ? $value : sprintf($value, ...$params);
         } else {
             return $key;
