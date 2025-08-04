@@ -59,7 +59,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
     /**
      * @return CDO
      */
-    final public function db(): CDO
+    public function db(): CDO
     {
         return ConnectionPool::db($this->dbConfigClassName);
     }
@@ -67,7 +67,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
     /**
      * @return string|null
      */
-    final public function getSchema(): ?string
+    public function getSchema(): ?string
     {
         return $this->schema;
     }
@@ -75,7 +75,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
     /**
      * @return string
      */
-    final public function originTable(): string
+    public function originTable(): string
     {
         return (($this->schema) ? $this->schema . '.' : '') . static::$table;
     }
@@ -83,7 +83,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
     /**
      * @throws RepositoryException
      */
-    final public function buildSql(): string
+    public function buildSql(): string
     {
         try {
             $parts = [
@@ -91,7 +91,7 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
                 'FROM ' . $this->originTable()
             ];
 
-            foreach (['as', 'join', 'where', 'union', 'group', 'having', 'order'] as $key) {
+            foreach (['as', 'join', 'where', 'group', 'having', 'order'] as $key) {
                 if (isset($this->sqlParts[$key])) {
                     $parts[] = trim($this->sqlParts[$key]);
                 }
@@ -183,6 +183,22 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
         return $this;
     }
 
+    private function joinedContext(RepositoryInterface $repository, string $on): string
+    {
+        if (count($repository->sqlParts) > 1) {
+            if (isset($this->sqlParts['binds'])) {
+                $this->sqlParts['binds'] = [...$this->sqlParts['binds'], ...$repository->getSql('binds')];
+            } else {
+                $this->sqlParts['binds'] = $repository->getSql('binds');
+            }
+            return '(' . $repository->getSql() . ') '
+                . $repository->getSql('as') . " ON(" . $on . ")";
+        } else {
+            return $repository->originTable()
+                . ' ' . $repository->getSql('as') . " ON(" . $on . ")";
+        }
+    }
+
     /**
      * @param RepositoryInterface $repository
      * @param string $on
@@ -190,12 +206,10 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
      */
     final public function join(RepositoryInterface $repository, string $on): static
     {
-        $context = $repository->originTable()
-            . ' ' . $repository->getSql('as') . " ON(" . $on . ")";
         if (isset($this->sqlParts['join'])) {
-            $this->sqlParts['join'] .= ' JOIN ' . $context;
+            $this->sqlParts['join'] .= ' JOIN ' . $this->joinedContext($repository, $on);
         } else {
-            $this->sqlParts['join'] = 'JOIN ' . $context;
+            $this->sqlParts['join'] = 'JOIN ' . $this->joinedContext($repository, $on);
         }
         return $this;
     }
@@ -207,12 +221,10 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
      */
     final public function joinLeft(RepositoryInterface $repository, string $on): static
     {
-        $context = $repository->originTable()
-            . ' ' . $repository->getSql('as') . " ON(" . $on . ")";
         if (isset($this->sqlParts['join'])) {
-            $this->sqlParts['join'] .= ' LEFT JOIN ' . $context;
+            $this->sqlParts['join'] .= ' LEFT JOIN ' . $this->joinedContext($repository, $on);
         } else {
-            $this->sqlParts['join'] = 'LEFT JOIN ' . $context;
+            $this->sqlParts['join'] = 'LEFT JOIN ' . $this->joinedContext($repository, $on);
         }
         return $this;
     }
@@ -224,12 +236,10 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
      */
     final public function joinRight(RepositoryInterface $repository, string $on): static
     {
-        $context = $repository->originTable()
-            . ' ' . $repository->getSql('as') . " ON(" . $on . ")";
         if (isset($this->sqlParts['join'])) {
-            $this->sqlParts['join'] .= ' RIGHT JOIN ' . $context;
+            $this->sqlParts['join'] .= ' RIGHT JOIN ' . $this->joinedContext($repository, $on);
         } else {
-            $this->sqlParts['join'] = 'RIGHT JOIN ' . $context;
+            $this->sqlParts['join'] = 'RIGHT JOIN ' . $this->joinedContext($repository, $on);
         }
         return $this;
     }
@@ -249,25 +259,6 @@ abstract class RepositoryCore extends Stereotype implements RepositoryInterface,
                     $this->sqlParts['binds'] = $qb->getCache();
                 }
             }
-        }
-        return $this;
-    }
-
-    /**
-     * @param RepositoryInterface $repository
-     * @return static
-     */
-    final public function union(RepositoryInterface $repository): static
-    {
-        if (isset($this->sqlParts['union'])) {
-            $this->sqlParts['union'] .= ' UNION ' . $repository->getSql();
-        } else {
-            $this->sqlParts['union'] = 'UNION ' . $repository->getSql();
-        }
-        if (isset($this->sqlParts['binds'])) {
-            $this->sqlParts['binds'] = [...$this->sqlParts['binds'], ...$repository->getSql('binds')];
-        } else {
-            $this->sqlParts['binds'] = $repository->getSql('binds');
         }
         return $this;
     }

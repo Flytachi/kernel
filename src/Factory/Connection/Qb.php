@@ -12,7 +12,7 @@ use Flytachi\Kernel\Src\Unit\Algorithm;
  * `Qb` is a utility class that generates and holds SQL conditions.
  * It provides methods to build various SQL conditions and logical operators.
  *
- * @version 4.0
+ * @version 4.1
  * @author Flytachi
  */
 final class Qb
@@ -137,7 +137,7 @@ final class Qb
     }
 
     /**
-     * Less than or equal to operator.
+     * Less than or equal to the operator.
      *
      * @param string $column The column name.
      * @param int|float|string $value The value to compare.
@@ -348,7 +348,7 @@ final class Qb
      * @param Qb ...$conditions The conditions to combine.
      * @return Qb
      */
-    public static function and(Qb ...$conditions): Qb
+    public static function and(?Qb ...$conditions): Qb
     {
         $data = self::logicalPrepare('AND', $conditions);
         return new self($data['query'], $data['cache']);
@@ -360,7 +360,7 @@ final class Qb
      * @param Qb ...$conditions The conditions to combine.
      * @return Qb
      */
-    public static function or(Qb ...$conditions): Qb
+    public static function or(?Qb ...$conditions): Qb
     {
         $data = self::logicalPrepare('OR', $conditions);
         return new self($data['query'], $data['cache']);
@@ -372,7 +372,7 @@ final class Qb
      * @param Qb ...$conditions The conditions to combine.
      * @return Qb
      */
-    public static function xor(Qb ...$conditions): Qb
+    public static function xor(?Qb ...$conditions): Qb
     {
         $data = self::logicalPrepare('XOR', $conditions);
         return new self($data['query'], $data['cache']);
@@ -494,7 +494,7 @@ final class Qb
         $cache = [];
 
         foreach ($conditions as $condition) {
-            if ($condition->query === '') {
+            if ($condition == null || $condition->query === '') {
                 continue;
             }
             $queryParts[] = $condition->query;

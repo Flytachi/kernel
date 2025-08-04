@@ -23,7 +23,6 @@ interface RepositoryInterface
     public function joinLeft(RepositoryInterface $repository, string $on): static;
     public function joinRight(RepositoryInterface $repository, string $on): static;
     public function where(?Qb $qb): static;
-    public function union(RepositoryInterface $repository): static;
     public function groupBy(string $context): static;
     public function having(string $context): static;
     public function orderBy(string $context): static;
