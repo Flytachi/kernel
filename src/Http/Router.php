@@ -5,32 +5,31 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Http;
 
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\ActuatorItemInterface;
 use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControl;
+use Flytachi\Kernel\Src\Factory\Stereotype;
 use Flytachi\Kernel\Src\Stereotype\ControllerInterface;
-use Psr\Log\LoggerInterface;
 
-final class Router
+final class Router extends Stereotype implements ActuatorItemInterface
 {
     /**
      * An array to store registered routes in a tree structure.
      *
      * @var array
      */
-    private static array $routes = [];
-    private static LoggerInterface $logger;
+    private array $routes = [];
 
-    final public static function run(bool $isDevelop = false): void
+    final public function run(): void
     {
-        self::$logger = Extra::$logger->withName(self::class);
         Header::setHeaders();
-        self::route($isDevelop);
+        $this->route((bool) env('DEBUG', false));
     }
 
-    private static function route(bool $isDevelop = false): void
+    private function route(bool $isDevelop = false): void
     {
-        self::$logger->debug(
+        $this->logger->debug(
             'route: ' . $_SERVER['REQUEST_METHOD']
             . ' ' . $_SERVER['REQUEST_URI']
             . ' IP: ' . Header::getIpAddress()
@@ -41,9 +40,9 @@ final class Router
         $render = new Rendering();
         try {
             // registration
-            self::registrar($isDevelop);
+            $this->registrar($isDevelop);
 
-            $resolve = self::resolveActions($data['path']);
+            $resolve = $this->resolveActions($data['path']);
             if (!$resolve) {
                 throw new ClientError(
                     "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
@@ -56,14 +55,14 @@ final class Router
                 AccessControl::processed($resolve['options']);
             }
 
-            $resolve = self::resolveActionSelect($resolve, $_SERVER['REQUEST_METHOD']);
+            $resolve = $this->resolveActionSelect($resolve, $_SERVER['REQUEST_METHOD']);
             if (!$resolve) {
                 throw new ClientError(
                     "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
             }
-            $result = self::callResolveAction($resolve['action'], $resolve['params'], $resolve['url'] ?? '');
+            $result = $this->callResolveAction($resolve['action'], $resolve['params'], $resolve['url'] ?? '');
             $render->setResource($result);
         } catch (\Throwable $e) {
             $render->setResource($e);
@@ -83,9 +82,9 @@ final class Router
      * @return array|null Returns an array with the action and
      * parameters if a route is found, or null if no route matches.
      */
-    final public static function resolveActions(string $url): ?array
+    final public function resolveActions(string $url): ?array
     {
-        $node = self::$routes;
+        $node = $this->routes;
         $params = [];
         $parts = explode('/', trim($url, '/'));
 
@@ -104,7 +103,7 @@ final class Router
         return ['options' => $node, 'params' => $params];
     }
 
-    final public static function resolveActionSelect(array $resolve, string $httpMethod): ?array
+    final public function resolveActionSelect(array $resolve, string $httpMethod): ?array
     {
         if (isset($resolve['options']['actions'][$httpMethod])) {
             return [
@@ -119,48 +118,7 @@ final class Router
         return null;
     }
 
-    /**
-     * Resolves a given URL and HTTP method to a registered route.
-     *
-     * This method searches the registered routes for a match to the provided URL and HTTP method.
-     * If a match is found, it returns an array containing the associated controller action and any dynamic parameters.
-     * If no match is found, it returns null.
-     *
-     * @param string $url The requested URL to resolve.
-     * @param string $httpMethod The HTTP method used in the request (e.g., "GET").
-     * @return array|null Returns an array with the action and
-     * parameters if a route is found, or null if no route matches.
-     */
-    final public static function resolve(string $url, string $httpMethod): ?array
-    {
-        $node = self::$routes;
-        $params = [];
-        $parts = explode('/', trim($url, '/'));
-
-        // Traverse the route tree to find a match
-        foreach ($parts as $part) {
-            if (isset($node[$part])) {
-                $node = $node[$part];
-            } elseif (isset($node['{param}'])) {
-                $node = $node['{param}'];
-                $params[] = $part;
-            } else {
-                return null; // No matching route found
-            }
-        }
-
-        // Return the action and parameters if a match is found
-        if (isset($node['actions'][$httpMethod])) {
-            return ['action' => $node['actions'][$httpMethod], 'params' => $params];
-        }
-        if (isset($node['defaultAction'])) {
-            return ['action' => $node['defaultAction'], 'params' => $params];
-        }
-
-        return null; // No action found for the route
-    }
-
-    private static function registrar(bool $isDevelop): void
+    private function registrar(bool $isDevelop): void
     {
         if ($isDevelop) {
             if (file_exists(Extra::$pathFileMapping)) {
@@ -168,7 +126,7 @@ final class Router
             }
             $declaration = Mapping::scanningDeclaration();
             foreach ($declaration->getChildren() as $item) {
-                self::request(
+                $this->request(
                     $item->getUrl(),
                     $item->getClassName(),
                     $item->getClassMethod(),
@@ -179,9 +137,9 @@ final class Router
             }
         } else {
             if (!file_exists(Extra::$pathFileMapping)) {
-                self::generateMappingRoutes();
+                $this->generateMappingRoutes();
             } else {
-                self::$routes = require Extra::$pathFileMapping;
+                $this->routes = require Extra::$pathFileMapping;
             }
         }
     }
@@ -202,7 +160,7 @@ final class Router
      * @return void
      * @throws RouterException If the route is already registered with the same HTTP method or as a default action.
      */
-    private static function request(
+    private function request(
         string $route,
         string $class,
         string $classMethod = 'index',
@@ -215,7 +173,7 @@ final class Router
         $parts = explode('/', $route);
 
         // Build the route tree
-        $node = &self::$routes;
+        $node = &$this->routes;
         foreach ($parts as $part) {
             $isParam = preg_match('/^\{[a-zA-Z_][a-zA-Z0-9_]*}$/', $part) === 1;
             $key = $isParam ? '{param}' : $part;
@@ -259,11 +217,11 @@ final class Router
         }
     }
 
-    final public static function generateMappingRoutes(): void
+    final public function generateMappingRoutes(): void
     {
         $declaration = Mapping::scanningDeclaration();
         foreach ($declaration->getChildren() as $item) {
-            self::request(
+            $this->request(
                 $item->getUrl(),
                 $item->getClassName(),
                 $item->getClassMethod(),
@@ -272,7 +230,7 @@ final class Router
                 $item->getMethodArgs(),
             );
         }
-        $mapString = var_export(json_decode(json_encode(self::$routes), true), true);
+        $mapString = var_export(json_decode(json_encode($this->routes), true), true);
         $fileData = "<?php" . PHP_EOL . PHP_EOL;
         $fileData .= "/**" . PHP_EOL . " * Mapping configurations"
             . PHP_EOL . " * - Created on: " . date(DATE_RFC822)
@@ -295,7 +253,7 @@ final class Router
      * @return mixed
      * @throws RouterException|ClientError
      */
-    final protected static function callResolveAction(array $action, array $params = [], string $stringUrl = ''): mixed
+    final protected function callResolveAction(array $action, array $params = [], string $stringUrl = ''): mixed
     {
         $controller = new $action['class']();
         $methods = get_class_methods($controller);

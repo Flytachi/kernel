@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Console;
 
 use Flytachi\Kernel\Console\Inc\CoreHandle;
+use Flytachi\Kernel\Src\ActuatorItemInterface;
 
-class Core extends CoreHandle
+class Core extends CoreHandle implements ActuatorItemInterface
 {
     public function __construct($args)
     {
         $this->parser($args);
-        $this->cluster();
     }
 
-    private function cluster(): void
+    public function run(): void
     {
         try {
             if (array_key_exists(0, self::$arguments['arguments'])) {

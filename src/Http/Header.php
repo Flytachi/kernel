@@ -47,9 +47,9 @@ abstract class Header
 
 
     /**
-     * @return string
+     * @return null|string
      */
-    public static function getIpAddress(): string
+    public static function getIpAddress(): ?string
     {
         return static::$headers['Ip-Address'];
     }

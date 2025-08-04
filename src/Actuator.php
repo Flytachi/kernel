@@ -6,9 +6,11 @@ use Flytachi\Kernel\Src\Http\Router;
 
 final class Actuator
 {
-    public static function use(): never
+    public static function use(ActuatorItemInterface ...$items): never
     {
-        Router::run(env('DEBUG', false));
+        foreach ($items as $item) {
+            $item->run();
+        }
         exit();
     }
 }
