@@ -44,7 +44,7 @@ if (!function_exists('bytes')) {
             $mod   = 1000;
         }
 
-        // Determine unit to use
+        // Determine the unit to use
         if (($power = array_search((string) $force_unit, $units)) === false) {
             $power = ($bytes > 0) ? floor(log($bytes, $mod)) : 0;
         }
