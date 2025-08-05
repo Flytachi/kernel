@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Health;
 
-use Flytachi\Kernel\Src\Stereotype\ResponseJson;
+use Flytachi\Kernel\Extra;
 
 class HealthIndicator implements HealthIndicatorInterface
 {
@@ -16,29 +16,30 @@ class HealthIndicator implements HealthIndicatorInterface
 //                'db' => $this->db(),
 //                'cache' => $this->cache(),
 //                'disk' => $this->disk(),
+                'memory' => $this->memoryHealth()
             ]
         ];
     }
 
     public function info(array $args = []): array
     {
+        $framework = Extra::info();
+        $data = json_decode(file_get_contents(Extra::$pathRoot . '/composer.json'), true);
         return [
-            'app' => [
-                'name' => 'Extra Framework App',
-                'version' => '1.2.0',
-                'description' => 'Demo API on Extra Framework'
-            ],
-            'build' => [
-                'time' => date('c')
-            ],
-            'environment' => $_ENV['APP_ENV'] ?? 'development',
             'php' => [
                 'version' => PHP_VERSION,
-                'sapi' => php_sapi_name()
+                'sapi' => php_sapi_name(),
+                'zend_version' => zend_version(),
             ],
             'framework' => [
                 'name' => 'Extra',
-                'version' => \Flytachi\Kernel\Extra::VERSION
+                'core' => $framework['name'] ?? null,
+                'version' => $framework['version'] ?? null,
+            ],
+            'project' => [
+                'name' => $data['name'] ?? '',
+                'version' => $data['version'] ?? '',
+                'description' => $data['description'] ?? '',
             ]
         ];
     }
@@ -46,13 +47,14 @@ class HealthIndicator implements HealthIndicatorInterface
     public function metrics(array $args = []): array
     {
         return [
-            'os' => Health::os(),
             'cpu' => Health::cpu(),
             'memory' => Health::memory(),
             'disk' => Health::disk(),
+            'system' => Health::system(),
             'php' => [
                 'version' => PHP_VERSION,
                 'sapi' => PHP_SAPI,
+                'zend_version' => zend_version(),
                 'execution_time' => microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'],
             ],
             'opcache' => function_exists('opcache_get_status')
@@ -69,12 +71,16 @@ class HealthIndicator implements HealthIndicatorInterface
 
     public function env(array $args = []): array
     {
-        return ['status' => 'UP'];
+        return [];
     }
 
     public function loggers(array $args = []): array
     {
-        return ['status' => 'UP'];
+        $allowedLevels = env('LOGGER_LEVEL_ALLOW');
+        $allowedLevels = array_map('trim', explode(',', $allowedLevels));
+        return [
+            'levels' => $allowedLevels,
+        ];
     }
 
     public function mappings(array $args = []): array
@@ -93,5 +99,25 @@ class HealthIndicator implements HealthIndicatorInterface
             ];
         }
         return $list;
+    }
+
+    protected function memoryHealth(): array
+    {
+        $memoryInfo = Health::memory();
+        $status = 'UP';
+        $warning = null;
+        if ($memoryInfo['limit'] > 0 && $memoryInfo['usage'] > 0.9 * $memoryInfo['limit']) {
+            $status = 'DOWN';
+            $warning = 'Memory usage above 90% of the limit';
+        }
+        return [
+            'status' => $status,
+            'details' => array_filter([
+                'usage' => $memoryInfo['usage'],
+                'peak' => $memoryInfo['peak'],
+                'limit' => $memoryInfo['limit'],
+                'warning' => $warning,
+            ]),
+        ];
     }
 }

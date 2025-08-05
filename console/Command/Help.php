@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Console\Command;
 
 use Flytachi\Kernel\Console\Inc\Cmd;
+use Flytachi\Kernel\Extra;
 
 class Help extends Cmd
 {
@@ -27,7 +28,9 @@ class Help extends Cmd
 
     public function list(): void
     {
+        $framework = Extra::info();
         self::printTitle("Extra Help", 34);
+        self::print("Extra Version: " . $framework['version'], 34);
         self::print("PHP Version: " . PHP_VERSION, 34);
         self::print("OS: " . PHP_OS_FAMILY . DIRECTORY_SEPARATOR . PHP_OS, 34);
         self::print("SAPI: " . PHP_SAPI, 34);

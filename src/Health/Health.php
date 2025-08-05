@@ -54,17 +54,32 @@ final readonly class Health implements ActuatorItemInterface
 
     public static function memory(): array
     {
+        $limit = ini_get('memory_limit');
         return [
             'usage' => memory_get_usage(true),
             'peak' => memory_get_peak_usage(true),
-            'limit' => ini_get('memory_limit'),
+            'limit' => $limit == '-1' ? -1 : self::convertToBytes($limit),
         ];
     }
 
-    public static function os(): array
+    private static function convertToBytes(string $val): int
+    {
+        $val = trim($val);
+        $unit = strtolower(substr($val, -1));
+        $num = (int) $val;
+
+        return match ($unit) {
+            'g' => $num * 1024 * 1024 * 1024,
+            'm' => $num * 1024 * 1024,
+            'k' => $num * 1024,
+            default => (int) $val,
+        };
+    }
+
+    public static function system(): array
     {
         return [
-            'name' => php_uname('s'),
+            'os' => php_uname('s'),
             'release' => php_uname('r'),
             'hostname' => gethostname(),
         ];

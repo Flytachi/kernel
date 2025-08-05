@@ -17,7 +17,6 @@ use Psr\Log\LoggerInterface;
  */
 final class Extra extends ExtraConfig
 {
-    public final const string VERSION = '5.7.0';
     public static LoggerInterface $logger;
 
     public static function init(
@@ -68,5 +67,13 @@ final class Extra extends ExtraConfig
         } else {
             self::$logger = $logger;
         }
+    }
+
+    public static function info(): array
+    {
+        return json_decode(
+            file_get_contents(__DIR__ . '/composer.json') ?: '',
+            true
+        ) ?? [];
     }
 }
