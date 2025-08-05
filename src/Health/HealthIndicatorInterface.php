@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Health;
 
-use Flytachi\Kernel\Src\Stereotype\ResponseJson;
-
 interface HealthIndicatorInterface
 {
-    public function health(): ResponseJson;
-    public function info(): ResponseJson;
-    public function metrics(): ResponseJson;
-    public function env(): ResponseJson;
-    public function loggers(): ResponseJson;
-    public function mappings(): ResponseJson;
-    public function db(): ResponseJson;
-    public function cache(): ResponseJson;
-    public function disk(): ResponseJson;
+    public function health(array $args = []): array;
+    public function info(array $args = []): array;
+    public function metrics(array $args = []): array;
+    public function env(array $args = []): array;
+    public function loggers(array $args = []): array;
+    public function mappings(array $args = []): array;
+//    public function db(): array;
+//    public function cache(): array;
+//    public function disk(): array;
 }

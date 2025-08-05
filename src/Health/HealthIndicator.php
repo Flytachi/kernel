@@ -9,70 +9,70 @@ use Flytachi\Kernel\Src\Stereotype\ResponseJson;
 class HealthIndicator implements HealthIndicatorInterface
 {
 
-    public function health(): ResponseJson
+    public function health(array $args = []): array
     {
-        return new ResponseJson([
+        return [
             'status' => 'UP',
             'components' => [
-                'db' => $this->db()->getBody(),
-                'cache' => $this->cache()->getBody(),
-                'disk' => $this->disk()->getBody(),
+                'db' => $this->db(),
+                'cache' => $this->cache(),
+                'disk' => $this->disk(),
             ]
-        ]);
+        ];
     }
 
-    public function info(): ResponseJson
+    public function info(array $args = []): array
     {
-        return new ResponseJson([
+        return [
             'php' => PHP_VERSION,
             'framework' => 'Extra',
             'sapi' => php_sapi_name(),
-        ]);
+        ];
     }
 
-    public function metrics(): ResponseJson
+    public function metrics(array $args = []): array
     {
-        return new ResponseJson([
+        return [
             'memory_usage' => memory_get_usage(),
             'memory_peak' => memory_get_peak_usage(),
             'load_average' => sys_getloadavg(),
-        ]);
+        ];
     }
 
-    public function env(): ResponseJson
+    public function env(array $args = []): array
     {
-        return new ResponseJson(['status' => 'UP']);
+        return ['status' => 'UP'];
     }
 
-    public function loggers(): ResponseJson
+    public function loggers(array $args = []): array
     {
-        return new ResponseJson(['status' => 'UP']);
+        return ['status' => 'UP'];
     }
 
-    public function mappings(): ResponseJson
+    public function mappings(array $args = []): array
     {
-        return new ResponseJson(['status' => 'UP']);
+        return ['status' => 'UP'];
     }
 
-    public function db(): ResponseJson
+    public function db(): array
     {
-        return new ResponseJson(['status' => 'UP']);
+        return ['status' => 'UP'];
     }
 
-    public function cache(): ResponseJson
+    public function cache(): array
     {
-        return new ResponseJson(['status' => 'UP']);
+        return ['status' => 'UP'];
     }
 
-    public function disk(): ResponseJson
+    public function disk(): array
     {
         $free = disk_free_space('/');
         $total = disk_total_space('/');
-        return new ResponseJson([
+        return [
             'status' => $free / $total > 0.1 ? 'UP' : 'WARN',
             'details' => [
                 'used_percent' => round((1 - $free / $total) * 100, 2)
             ]
-        ]);
+        ];
     }
 }
