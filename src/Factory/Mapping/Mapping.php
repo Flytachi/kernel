@@ -29,24 +29,22 @@ class Mapping
 
     /**
      * @param class-string|null $interface
-     * @return array
+     * @return array<ReflectionClass>
      */
     public static function scanProjectRefClasses(?string $interface = null): array
     {
         $reflectionClasses = [];
         $resources = self::scanProjectFiles();
         foreach ($resources as $resource) {
-            $className = ucwords(
-                str_replace(
-                    '.php',
-                    '',
-                    str_replace('/', '\\', str_replace(Extra::$pathRoot . '/', '', $resource))
-                )
+            $className = str_replace(
+                '.php',
+                '',
+                str_replace('/', '\\', str_replace(Extra::$pathRoot . '/', '', $resource))
             );
 
             try {
                 $reflectionClass = new ReflectionClass($className);
-                if ($interface !== null || $reflectionClass->implementsInterface(ControllerInterface::class)) {
+                if ($interface === null || $reflectionClass->implementsInterface($interface)) {
                     $reflectionClasses[] = $reflectionClass;
                 }
             } catch (\ReflectionException $ex) {
@@ -60,38 +58,8 @@ class Mapping
      */
     public static function scanningDeclaration(): MappingDeclaration
     {
-        $resources = scanFindAllFile(Extra::$pathRoot, 'php', [
-            Extra::$pathRoot . '/vendor'
-        ]);
-        $reflectionClasses = self::scanReflectionFilter($resources);
+        $reflectionClasses = self::scanProjectRefClasses(ControllerInterface::class);
         return self::scanDeclarationFilter($reflectionClasses);
-    }
-
-    /**
-     * @param array $resources
-     * @return array<ReflectionClass>
-     */
-    private static function scanReflectionFilter(array $resources): array
-    {
-        $reflectionClasses = [];
-        foreach ($resources as $resource) {
-            $className = ucwords(
-                str_replace(
-                    '.php',
-                    '',
-                    str_replace('/', '\\', str_replace(Extra::$pathRoot . '/', '', $resource))
-                )
-            );
-
-            try {
-                $reflectionClass = new ReflectionClass($className);
-                if ($reflectionClass->implementsInterface(ControllerInterface::class)) {
-                    $reflectionClasses[] = $reflectionClass;
-                }
-            } catch (\ReflectionException $ex) {
-            }
-        }
-        return $reflectionClasses;
     }
 
     /**
