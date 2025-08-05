@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Health;
 
 use Flytachi\Kernel\Src\ActuatorItemInterface;
+use Flytachi\Kernel\Src\Factory\Middleware\MiddlewareInterface;
 use Flytachi\Kernel\Src\Http\Header;
 use Flytachi\Kernel\Src\Http\Rendering;
 use Flytachi\Kernel\Src\Stereotype\ResponseJson;
@@ -12,10 +13,12 @@ use Flytachi\Kernel\Src\Stereotype\ResponseJson;
 final readonly class Health implements ActuatorItemInterface
 {
     /**
-     * @param class-string $indicatorClass
+     * @param class-string<HealthIndicatorInterface> $indicatorClass
+     * @param class-string<MiddlewareInterface>|null $middlewareClass
      */
     public function __construct(
-        private string $indicatorClass = HealthIndicator::class
+        private string $indicatorClass = HealthIndicator::class,
+        private ?string $middlewareClass = null
     ) {
     }
 
@@ -25,7 +28,9 @@ final readonly class Health implements ActuatorItemInterface
         $data = parseUrlDetail($_SERVER['REQUEST_URI']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && str_starts_with($data['path'], '/actuator')) {
+            /** @var HealthIndicatorInterface $indicator */
             $indicator = new $this->indicatorClass();
+
             $metta = trim(str_replace('/actuator', '', $data['path']), '/');
             $mettaExp = explode('/', $metta);
             $method = $mettaExp[0];
@@ -33,7 +38,13 @@ final readonly class Health implements ActuatorItemInterface
             $arg = array_values($mettaExp);
 
             $render = new Rendering();
+
             try {
+                if ($this->middlewareClass !== null) {
+                    /** @var MiddlewareInterface $middleware */
+                    $middleware = new $this->middlewareClass();
+                    $middleware->optionBefore();
+                }
                 $result = $indicator->{$method}($arg);
                 $render->setResource(new ResponseJson($result));
             } catch (\Throwable $e) {

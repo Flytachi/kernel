@@ -18,6 +18,44 @@ use ReflectionUnionType;
 class Mapping
 {
     /**
+     * @return array
+     */
+    public static function scanProjectFiles(): array
+    {
+        return scanFindAllFile(Extra::$pathRoot, 'php', [
+            Extra::$pathRoot . '/vendor'
+        ]);
+    }
+
+    /**
+     * @param class-string|null $interface
+     * @return array
+     */
+    public static function scanProjectRefClasses(?string $interface = null): array
+    {
+        $reflectionClasses = [];
+        $resources = self::scanProjectFiles();
+        foreach ($resources as $resource) {
+            $className = ucwords(
+                str_replace(
+                    '.php',
+                    '',
+                    str_replace('/', '\\', str_replace(Extra::$pathRoot . '/', '', $resource))
+                )
+            );
+
+            try {
+                $reflectionClass = new ReflectionClass($className);
+                if ($interface !== null || $reflectionClass->implementsInterface(ControllerInterface::class)) {
+                    $reflectionClasses[] = $reflectionClass;
+                }
+            } catch (\ReflectionException $ex) {
+            }
+        }
+        return $reflectionClasses;
+    }
+
+    /**
      * @return MappingDeclaration
      */
     public static function scanningDeclaration(): MappingDeclaration

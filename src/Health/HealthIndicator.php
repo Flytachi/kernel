@@ -8,13 +8,14 @@ use Flytachi\Kernel\Extra;
 
 class HealthIndicator implements HealthIndicatorInterface
 {
-    public function health(array $args = []): array
+    final public function health(array $args = []): array
     {
         $components = [
             'db' => $this->diskDb(),
             'cache' => $this->diskCache(),
             'disk' => $this->diskHealth(),
-            'memory' => $this->memoryHealth()
+            'memory' => $this->memoryHealth(),
+            'custom' => $this->customHealth()
         ];
 
         $statuses = array_column($components, 'status');
@@ -36,7 +37,10 @@ class HealthIndicator implements HealthIndicatorInterface
     public function info(array $args = []): array
     {
         $framework = Extra::info();
-        $data = json_decode(file_get_contents(Extra::$pathRoot . '/composer.json'), true);
+        $data = json_decode(
+            file_get_contents(Extra::$pathRoot . '/composer.json') ?: '',
+            true
+        );
         return [
             'php' => [
                 'version' => PHP_VERSION,
@@ -56,7 +60,7 @@ class HealthIndicator implements HealthIndicatorInterface
         ];
     }
 
-    public function metrics(array $args = []): array
+    final public function metrics(array $args = []): array
     {
         return [
             'cpu' => Health::cpu(),
@@ -113,7 +117,7 @@ class HealthIndicator implements HealthIndicatorInterface
         return $list;
     }
 
-    protected function diskDb(): array
+    final protected function diskDb(): array
     {
         return [
             'status' => 'UP',
@@ -121,7 +125,7 @@ class HealthIndicator implements HealthIndicatorInterface
         ];
     }
 
-    protected function diskCache(): array
+    final protected function diskCache(): array
     {
         return [
             'status' => 'UP',
@@ -129,7 +133,7 @@ class HealthIndicator implements HealthIndicatorInterface
         ];
     }
 
-    protected function diskHealth(): array
+    final protected function diskHealth(): array
     {
         $diskInfo = Health::disk();
         $usagePercent = $diskInfo['usage_percent'];
@@ -156,7 +160,7 @@ class HealthIndicator implements HealthIndicatorInterface
         ];
     }
 
-    protected function memoryHealth(): array
+    final protected function memoryHealth(): array
     {
         $memoryInfo = Health::memory();
         $limit = $memoryInfo['limit'];
@@ -185,6 +189,14 @@ class HealthIndicator implements HealthIndicatorInterface
                 'usage_percent' => round($usagePercent, 2),
                 'warning' => $warning,
             ]),
+        ];
+    }
+
+    protected function customHealth(): array
+    {
+        return [
+            'status' => 'UP',
+            'details' => []
         ];
     }
 }
