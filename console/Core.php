@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Console;
 
+use Flytachi\Kernel\ActuatorItemInterface;
 use Flytachi\Kernel\Console\Inc\CoreHandle;
-use Flytachi\Kernel\Src\ActuatorItemInterface;
 
 class Core extends CoreHandle implements ActuatorItemInterface
 {

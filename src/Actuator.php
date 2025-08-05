@@ -2,7 +2,7 @@
 
 namespace Flytachi\Kernel\Src;
 
-use Flytachi\Kernel\Src\Http\Router;
+use Flytachi\Kernel\ActuatorItemInterface;
 
 final class Actuator
 {
@@ -11,6 +11,6 @@ final class Actuator
         foreach ($items as $item) {
             $item->run();
         }
-        exit();
+        exit;
     }
 }

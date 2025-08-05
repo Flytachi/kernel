@@ -1,5 +1,7 @@
 <?php
 
+use Flytachi\Kernel\Src\Health\HealthIndicator;
+
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 include_once dirname(__DIR__) . '/Extra.php';
 
@@ -7,6 +9,6 @@ include_once dirname(__DIR__) . '/Extra.php';
 
 \Flytachi\Kernel\Src\Actuator::use(
 //    new \Flytachi\Kernel\Console\Core($argv)
-    new \Flytachi\Kernel\Src\Health\HealthIndicator(),
+    new \Flytachi\Kernel\Src\Health\Health(),
     new \Flytachi\Kernel\Src\Http\Router(),
 );

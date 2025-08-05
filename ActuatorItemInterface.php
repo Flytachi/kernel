@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src;
+namespace Flytachi\Kernel;
 
 interface ActuatorItemInterface
 {
