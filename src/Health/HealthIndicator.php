@@ -10,14 +10,26 @@ class HealthIndicator implements HealthIndicatorInterface
 {
     public function health(array $args = []): array
     {
+        $components = [
+            'db' => $this->diskDb(),
+            'cache' => $this->diskCache(),
+            'disk' => $this->diskHealth(),
+            'memory' => $this->memoryHealth()
+        ];
+
+        $statuses = array_column($components, 'status');
+
+        if (in_array('DOWN', $statuses)) {
+            $overallStatus = 'DOWN';
+        } elseif (in_array('WARN', $statuses)) {
+            $overallStatus = 'WARN';
+        } else {
+            $overallStatus = 'UP';
+        }
+
         return [
-            'status' => 'UP',
-            'components' => [
-//                'db' => $this->db(),
-//                'cache' => $this->cache(),
-//                'disk' => $this->disk(),
-                'memory' => $this->memoryHealth()
-            ]
+            'status' => $overallStatus,
+            'components' => $components
         ];
     }
 
@@ -101,21 +113,76 @@ class HealthIndicator implements HealthIndicatorInterface
         return $list;
     }
 
-    protected function memoryHealth(): array
+    protected function diskDb(): array
     {
-        $memoryInfo = Health::memory();
+        return [
+            'status' => 'UP',
+            'details' => []
+        ];
+    }
+
+    protected function diskCache(): array
+    {
+        return [
+            'status' => 'UP',
+            'details' => []
+        ];
+    }
+
+    protected function diskHealth(): array
+    {
+        $diskInfo = Health::disk();
+        $usagePercent = $diskInfo['usage_percent'];
+
         $status = 'UP';
         $warning = null;
-        if ($memoryInfo['limit'] > 0 && $memoryInfo['usage'] > 0.9 * $memoryInfo['limit']) {
+
+        if ($usagePercent >= 90) {
             $status = 'DOWN';
-            $warning = 'Memory usage above 90% of the limit';
+            $warning = 'Disk usage above 90% of total capacity';
+        } elseif ($usagePercent >= 80) {
+            $status = 'WARN';
+            $warning = 'Disk usage above 80% of total capacity';
         }
+
         return [
             'status' => $status,
             'details' => array_filter([
-                'usage' => $memoryInfo['usage'],
+                'free' => $diskInfo['free'],
+                'total' => $diskInfo['total'],
+                'usage_percent' => round($usagePercent, 2),
+                'warning' => $warning,
+            ]),
+        ];
+    }
+
+    protected function memoryHealth(): array
+    {
+        $memoryInfo = Health::memory();
+        $limit = $memoryInfo['limit'];
+        $usage = $memoryInfo['usage'];
+        $usagePercent = $limit > 0 ? ($usage / $limit) * 100 : 0;
+
+        $status = 'UP';
+        $warning = null;
+
+        if ($limit > 0) {
+            if ($usagePercent >= 90) {
+                $status = 'DOWN';
+                $warning = 'Memory usage above 90% of the limit';
+            } elseif ($usagePercent >= 80) {
+                $status = 'WARN';
+                $warning = 'Memory usage above 80% of the limit';
+            }
+        }
+
+        return [
+            'status' => $status,
+            'details' => array_filter([
+                'usage' => $usage,
                 'peak' => $memoryInfo['peak'],
-                'limit' => $memoryInfo['limit'],
+                'limit' => $limit,
+                'usage_percent' => round($usagePercent, 2),
                 'warning' => $warning,
             ]),
         ];
