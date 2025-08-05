@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Http;
 
-use Flytachi\Kernel\ActuatorItemInterface;
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\ActuatorItemInterface;
 use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControl;

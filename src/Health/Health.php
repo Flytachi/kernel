@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Health;
 
-use Flytachi\Kernel\ActuatorItemInterface;
+use Flytachi\Kernel\Src\ActuatorItemInterface;
 
 class Health implements ActuatorItemInterface
 {
