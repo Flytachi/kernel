@@ -28,19 +28,19 @@ class Mapping
     }
 
     /**
+     * @param array $resources
      * @param class-string|null $interface
      * @return array<ReflectionClass>
      */
-    public static function scanProjectRefClasses(?string $interface = null): array
+    public static function scanRefClasses(array $resources, ?string $interface = null): array
     {
         $reflectionClasses = [];
-        $resources = self::scanProjectFiles();
         foreach ($resources as $resource) {
-            $className = str_replace(
+            $className = ucfirst(str_replace(
                 '.php',
                 '',
                 str_replace('/', '\\', str_replace(Extra::$pathRoot . '/', '', $resource))
-            );
+            ));
 
             try {
                 $reflectionClass = new ReflectionClass($className);
@@ -58,7 +58,8 @@ class Mapping
      */
     public static function scanningDeclaration(): MappingDeclaration
     {
-        $reflectionClasses = self::scanProjectRefClasses(ControllerInterface::class);
+        $resources = self::scanProjectFiles();
+        $reflectionClasses = self::scanRefClasses($resources, ControllerInterface::class);
         return self::scanDeclarationFilter($reflectionClasses);
     }
 
