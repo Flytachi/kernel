@@ -24,13 +24,14 @@ class CDO extends PDO
      * @return void
      * @throws CDOException
      */
-    public function __construct(DbConfigInterface $config, bool $debug = false)
+    public function __construct(DbConfigInterface $config, int $timeout = 5, bool $debug = false)
     {
         self::$logger = Extra::$logger->withName("CDO");
         try {
             parent::__construct($config->getDNS(), $config->getUsername(), $config->getPassword());
             $this->SetAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->SetAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+            $this->SetAttribute(PDO::ATTR_TIMEOUT, $timeout);
             $this->setAttribute(PDO::ATTR_PERSISTENT, $config->getPersistentStatus());
             if ($debug) {
                 $this->SetAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

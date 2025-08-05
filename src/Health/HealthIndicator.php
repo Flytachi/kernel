@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Health;
 
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 
 class HealthIndicator implements HealthIndicatorInterface
 {
     final public function health(array $args = []): array
     {
+        $projectFiles = Mapping::scanProjectFiles();
         $components = [
             'db' => $this->diskDb(),
             'cache' => $this->diskCache(),

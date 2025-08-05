@@ -40,10 +40,10 @@ abstract class BaseDbConfig implements DbConfigInterface
     /**
      * @throws CDOException
      */
-    final public function connect(): void
+    final public function connect(int $timeout = 3): void
     {
         if (is_null($this->cdo)) {
-            $this->cdo = new CDO($this, (bool) env('DEBUG', false));
+            $this->cdo = new CDO($this, $timeout, (bool) env('DEBUG', false));
         }
     }
 
@@ -69,6 +69,21 @@ abstract class BaseDbConfig implements DbConfigInterface
     {
         $this->connect();
         return $this->cdo;
+    }
+
+    /**
+     * @return bool
+     */
+    final public function ping(): bool
+    {
+        try {
+            $this->connect();
+            $stmt = $this->cdo->query("SELECT 1");
+        } catch (CDOException $e) {
+            $stmt = false;
+        } finally {
+            return $stmt !== false;
+        }
     }
 
     public function getSchema(): ?string

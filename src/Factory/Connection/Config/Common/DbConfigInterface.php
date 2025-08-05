@@ -14,9 +14,10 @@ interface DbConfigInterface
     public function getDriver(): string;
     public function getUsername(): string;
     public function getPassword(): string;
-    public function connect(): void;
+    public function connect(int $timeout = 3): void;
     public function disconnect(): void;
     public function reconnect(): void;
     public function connection(): CDO;
+    public function ping(): bool;
     public function getSchema(): ?string;
 }

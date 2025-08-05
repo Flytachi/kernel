@@ -10,11 +10,12 @@ abstract class BaseRedisConfig implements RedisConfigInterface
 {
     private ?Redis $store = null;
 
-    final public function connect(): void
+    final public function connect(float $timeout = 1.5, float $readTimeout = 2): void
     {
         if (is_null($this->store)) {
             $this->store = new Redis();
-            $this->store->connect($this->host, $this->port, 10);
+            $this->store->connect($this->host, $this->port, $timeout);
+            $this->store->setOption(Redis::OPT_READ_TIMEOUT, $readTimeout);
             if ($this->password) {
                 $this->store->auth($this->password);
             }
@@ -41,5 +42,18 @@ abstract class BaseRedisConfig implements RedisConfigInterface
     {
         $this->connect();
         return $this->store;
+    }
+
+    /**
+     * @return bool
+     */
+    final public function ping(): bool
+    {
+        try {
+            $this->connect();
+            return $this->store->ping() === '+PONG';
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }
