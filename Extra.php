@@ -17,6 +17,7 @@ use Psr\Log\LoggerInterface;
  */
 final class Extra extends ExtraConfig
 {
+    public final const string VERSION = '5.7.0';
     public static LoggerInterface $logger;
 
     public static function init(
