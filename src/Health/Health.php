@@ -43,4 +43,49 @@ final readonly class Health implements ActuatorItemInterface
             $render->render();
         }
     }
+
+    public static function cpu(): array
+    {
+        return [
+            'load_average' => sys_getloadavg(),
+            'core_count' => (int) shell_exec('nproc') ?: 1,
+        ];
+    }
+
+    public static function memory(): array
+    {
+        return [
+            'usage' => memory_get_usage(true),
+            'peak' => memory_get_peak_usage(true),
+            'limit' => ini_get('memory_limit'),
+        ];
+    }
+
+    public static function os(): array
+    {
+        return [
+            'name' => php_uname('s'),
+            'release' => php_uname('r'),
+            'hostname' => gethostname(),
+        ];
+    }
+
+    public static function disk(): array
+    {
+        return [
+            'free' => disk_free_space("/"),
+            'total' => disk_total_space("/"),
+            'usage_percent' => round(
+                (1 - disk_free_space("/") /
+                    disk_total_space("/")
+                ) * 100,
+                2
+            )
+        ];
+    }
+
+    public static function uptimeSeconds(): ?int
+    {
+        return (int) shell_exec('awk \'{print int($1)}\' /proc/uptime') ?: null;
+    }
 }
