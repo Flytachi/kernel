@@ -33,6 +33,9 @@ class Cfg extends Cmd
     {
         if (array_key_exists(1, $this->args['arguments'])) {
             switch ($this->args['arguments'][1]) {
+                case 'init':
+                    $this->initArg();
+                    break;
                 case 'env':
                     $this->envArg();
                     break;
@@ -47,6 +50,23 @@ class Cfg extends Cmd
                     break;
             }
         }
+    }
+
+    private function initArg(): void
+    {
+        $filePath = Extra::$pathRoot . '/composer.json';
+        if (file_exists($filePath)) {
+            $projectData = json_decode(
+                file_get_contents($filePath) ?: '',
+                true
+            );
+            $projectData['name'] = basename(Extra::$pathRoot);
+            $projectData['description'] = basename(Extra::$pathRoot) . ' project description';
+            $projectData['version'] = '1.0.0';
+            file_put_contents($filePath, json_encode($projectData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        }
+
+        $this->envCreate();
     }
 
     private function keyArg(): void
