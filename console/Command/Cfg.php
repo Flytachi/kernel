@@ -63,7 +63,8 @@ class Cfg extends Cmd
             $projectData['name'] = basename(Extra::$pathRoot);
             $projectData['description'] = basename(Extra::$pathRoot) . ' project description';
             $projectData['version'] = '1.0.0';
-            file_put_contents($filePath, json_encode($projectData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $data = json_encode($projectData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+            file_put_contents($filePath, $data);
         }
 
         $this->envCreate();
