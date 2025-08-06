@@ -71,7 +71,7 @@ abstract class BaseRedisConfig implements RedisConfigInterface
         try {
             $this->connect();
             $result = $this->store->ping();
-            $status = $result === '+PONG';
+            $status = $result === true || $result === '+PONG';
         } catch (\Throwable $e) {
             $error = $e->getMessage();
         }

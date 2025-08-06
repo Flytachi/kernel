@@ -25,13 +25,12 @@ class HealthIndicator implements HealthIndicatorInterface
         ];
 
         $statuses = array_column($components, 'status');
+        $overallStatus = 'up';
 
-        if (in_array('DOWN', $statuses)) {
-            $overallStatus = 'DOWN';
-        } elseif (in_array('WARN', $statuses)) {
-            $overallStatus = 'WARN';
-        } else {
-            $overallStatus = 'UP';
+        if (in_array('down', $statuses, true)) {
+            $overallStatus = 'down';
+        } elseif (in_array('degraded', $statuses, true)) {
+            $overallStatus = 'degraded';
         }
 
         return [
@@ -194,7 +193,6 @@ class HealthIndicator implements HealthIndicatorInterface
                     default => 'up'
                 };
 
-                // Обновим общий статус, если какой-то из компонентов хуже текущего
                 if ($status === 'down' || ($status === 'degraded' && $worstStatus === 'up')) {
                     $worstStatus = $status;
                 }
@@ -224,14 +222,14 @@ class HealthIndicator implements HealthIndicatorInterface
         $diskInfo = Health::disk();
         $usagePercent = $diskInfo['usage_percent'];
 
-        $status = 'UP';
+        $status = 'up';
         $warning = null;
 
         if ($usagePercent >= 90) {
-            $status = 'DOWN';
+            $status = 'down';
             $warning = 'Disk usage above 90% of total capacity';
         } elseif ($usagePercent >= 80) {
-            $status = 'WARN';
+            $status = 'degraded';
             $warning = 'Disk usage above 80% of total capacity';
         }
 
@@ -253,15 +251,15 @@ class HealthIndicator implements HealthIndicatorInterface
         $usage = $memoryInfo['usage'];
         $usagePercent = $limit > 0 ? ($usage / $limit) * 100 : 0;
 
-        $status = 'UP';
+        $status = 'up';
         $warning = null;
 
         if ($limit > 0) {
             if ($usagePercent >= 90) {
-                $status = 'DOWN';
+                $status = 'down';
                 $warning = 'Memory usage above 90% of the limit';
             } elseif ($usagePercent >= 80) {
-                $status = 'WARN';
+                $status = 'degraded';
                 $warning = 'Memory usage above 80% of the limit';
             }
         }
@@ -281,7 +279,7 @@ class HealthIndicator implements HealthIndicatorInterface
     protected function customHealth(): array
     {
         return [
-            'status' => 'UP',
+            'status' => 'up',
             'details' => []
         ];
     }
