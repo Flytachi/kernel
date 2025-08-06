@@ -31,8 +31,12 @@ class Help extends Cmd
         $framework = Extra::info();
         $project = Extra::projectInfo();
         self::printTitle("Extra Help", 34);
-        if (!empty($project['extra'])) {
-            self::print("Project: " . $project['extra']['name'] . $project['extra']['version'], 34);
+        if (!empty($project['extra']) && !empty($project['extra']['project'])) {
+            $projectName = $project['extra']['project']['name'] ?? 'unknown';
+            $projectVersion = $project['extra']['project']['version']
+                ? ' (' . $project['extra']['project']['version'] . ')'
+                : '';
+            self::print("Project: {$projectName}{$projectVersion}", 34);
         }
         self::print("Extra Version: " . $framework['version'], 34);
         self::print("PHP Version: " . PHP_VERSION, 34);

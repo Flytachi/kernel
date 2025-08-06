@@ -39,10 +39,7 @@ class HealthIndicator implements HealthIndicatorInterface
     public function info(array $args = []): array
     {
         $framework = Extra::info();
-        $data = json_decode(
-            file_get_contents(Extra::$pathRoot . '/composer.json') ?: '',
-            true
-        );
+        $project = Extra::projectInfo();
         return [
             'php' => [
                 'version' => PHP_VERSION,
@@ -50,15 +47,16 @@ class HealthIndicator implements HealthIndicatorInterface
                 'zend_version' => zend_version(),
             ],
             'framework' => [
-                'name' => 'Extra',
-                'core' => $framework['name'] ?? null,
+                'name' => $framework['name'] ?? null,
                 'version' => $framework['version'] ?? null,
             ],
-            'project' => [
-                'name' => $data['name'] ?? '',
-                'version' => $data['version'] ?? '',
-                'description' => $data['description'] ?? '',
-            ]
+            'project' => isset($project['extra']['project'])
+                ? [
+                    'name' => $project['extra']['project']['name'] ?? '',
+                    'version' => $project['extra']['project']['version'] ?? '',
+                    'description' => $project['extra']['project']['description'] ?? '',
+                ]
+                : null
         ];
     }
 
