@@ -29,7 +29,11 @@ class Help extends Cmd
     public function list(): void
     {
         $framework = Extra::info();
+        $project = Extra::projectInfo();
         self::printTitle("Extra Help", 34);
+        if (!empty($project['extra'])) {
+            self::print("Project: " . $project['extra']['name'] . $project['extra']['version'], 34);
+        }
         self::print("Extra Version: " . $framework['version'], 34);
         self::print("PHP Version: " . PHP_VERSION, 34);
         self::print("OS: " . PHP_OS_FAMILY . DIRECTORY_SEPARATOR . PHP_OS, 34);
