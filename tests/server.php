@@ -7,8 +7,8 @@ include_once dirname(__DIR__) . '/Extra.php';
 
 \Flytachi\Kernel\Src\Actuator::use(
     new \Flytachi\Kernel\Src\Health\Health(
-//        indicatorClass: \Flytachi\Kernel\Src\Health\HealthIndicator::class,
-//        middlewareClass: \Flytachi\Kernel\Src\Stereotype\Middleware\SecurityMiddleware::class,
+    //        indicatorClass: \Flytachi\Kernel\Src\Health\HealthIndicator::class,
+    //        middlewareClass: \Flytachi\Kernel\Src\Stereotype\Middleware\SecurityMiddleware::class,
     ),
     new \Flytachi\Kernel\Src\Http\Router(),
 );
