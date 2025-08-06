@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Health;
 
 use Flytachi\Kernel\Src\ActuatorItemInterface;
+use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Middleware\MiddlewareInterface;
 use Flytachi\Kernel\Src\Http\Header;
+use Flytachi\Kernel\Src\Http\HttpCode;
 use Flytachi\Kernel\Src\Http\Rendering;
 use Flytachi\Kernel\Src\Stereotype\ResponseJson;
 
@@ -32,10 +34,7 @@ final readonly class Health implements ActuatorItemInterface
             $indicator = new $this->indicatorClass();
 
             $metta = trim(str_replace('/actuator', '', $data['path']), '/');
-            $mettaExp = explode('/', $metta);
-            $method = $mettaExp[0];
-            unset($mettaExp[0]);
-            $arg = array_values($mettaExp);
+            $method = trim($metta, '/');
 
             $render = new Rendering();
 
@@ -45,10 +44,20 @@ final readonly class Health implements ActuatorItemInterface
                     $middleware = new $this->middlewareClass();
                     $middleware->optionBefore();
                 }
-                $result = $indicator->{$method}($arg);
+                if (!method_exists($indicator, $method)) {
+                    throw new ClientError(
+                        "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
+                        HttpCode::NOT_FOUND->value
+                    );
+                }
+                $result = $indicator->{$method}();
                 $render->setResource(new ResponseJson($result));
             } catch (\Throwable $e) {
-                $render->setResource($e);
+                $httpCode = HttpCode::tryFrom((int) $e->getCode()) ?: HttpCode::UNKNOWN_ERROR;
+                $render->setResource(new ResponseJson(
+                    $e->getMessage(),
+                    $httpCode
+                ));
             }
 
             $render->render();
