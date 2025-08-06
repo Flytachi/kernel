@@ -55,7 +55,10 @@ final readonly class Health implements ActuatorItemInterface
             } catch (\Throwable $e) {
                 $httpCode = HttpCode::tryFrom((int) $e->getCode()) ?: HttpCode::UNKNOWN_ERROR;
                 $render->setResource(new ResponseJson(
-                    $e->getMessage(),
+                    [
+                        'code' => $e->getCode(),
+                        'message' => $e->getMessage()
+                    ],
                     $httpCode
                 ));
             }
