@@ -86,6 +86,38 @@ abstract class BaseDbConfig implements DbConfigInterface
         }
     }
 
+    /**
+     * @return array{
+     *     status: bool, latency: float|null, error: string|null
+     * }
+     */
+    final public function pingDetail(): array
+    {
+        $start = microtime(true);
+        $status = true;
+        $error = null;
+
+        try {
+            $this->connect();
+            $stmt = $this->cdo->query("SELECT 1");
+
+            if ($stmt === false) {
+                $status = false;
+            }
+        } catch (CDOException $e) {
+            $status = false;
+            $error = $e->getMessage();
+        }
+
+        $latency = (microtime(true) - $start) * 1000;
+
+        return [
+            'status' => $status,
+            'latency' => round($latency, 2),
+            'error' => $error,
+        ];
+    }
+
     public function getSchema(): ?string
     {
         return null;

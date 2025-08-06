@@ -56,4 +56,32 @@ abstract class BaseRedisConfig implements RedisConfigInterface
             return false;
         }
     }
+
+    /**
+     * @return array{
+     *     status: bool, latency: float|null, error: string|null
+     * }
+     */
+    final public function pingDetail(): array
+    {
+        $start = microtime(true);
+        $error = null;
+        $status = false;
+
+        try {
+            $this->connect();
+            $result = $this->store->ping();
+            $status = $result === '+PONG';
+        } catch (\Throwable $e) {
+            $error = $e->getMessage();
+        }
+
+        $latency = (microtime(true) - $start) * 1000;
+
+        return [
+            'status' => $status,
+            'latency' => round($latency, 2),
+            'error' => $error,
+        ];
+    }
 }

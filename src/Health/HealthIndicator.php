@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Health;
 
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Factory\Connection\Config\Common\DbConfigInterface;
+use Flytachi\Kernel\Src\Factory\Connection\Config\Common\RedisConfigInterface;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 
 class HealthIndicator implements HealthIndicatorInterface
 {
+    private const int DEGRADED_THRESHOLD_MS = 500;
+
     final public function health(array $args = []): array
     {
         $projectFiles = Mapping::scanProjectFiles();
         $components = [
-            'db' => $this->diskDb(),
-            'cache' => $this->diskCache(),
+            'db' => $this->dbHealth($projectFiles),
+            'cache' => $this->cacheHealth($projectFiles),
             'disk' => $this->diskHealth(),
             'memory' => $this->memoryHealth(),
             'custom' => $this->customHealth()
@@ -117,19 +121,101 @@ class HealthIndicator implements HealthIndicatorInterface
         return $list;
     }
 
-    final protected function diskDb(): array
+    final protected function dbHealth(array $projectFiles): array
     {
+        $refClasses = Mapping::scanRefClasses($projectFiles, DbConfigInterface::class);
+        $details = [];
+        $worstStatus = 'up';
+
+        foreach ($refClasses as $refClass) {
+            /** @var DbConfigInterface $config */
+            $config = $refClass->newInstance();
+            $config->sepUp();
+
+            try {
+                $result = $config->pingDetail();
+
+                // item status
+                if (!$result['status']) {
+                    $status = 'down';
+                } elseif ($result['latency'] !== null && $result['latency'] >= self::DEGRADED_THRESHOLD_MS) {
+                    $status = 'degraded';
+                } else {
+                    $status = 'up';
+                }
+
+                // status
+                if ($status === 'down') {
+                    $worstStatus = 'down';
+                } elseif ($status === 'degraded' && $worstStatus !== 'down') {
+                    $worstStatus = 'degraded';
+                }
+
+                $details[$refClass->getName()] = [
+                    'status' => $status,
+                    'driver' => $config->getDriver(),
+                    'latency' => $result['latency'],
+                    'error' => $result['error']
+                ];
+            } catch (\Throwable $e) {
+                $details[$refClass->getName()] = [
+                    'status' => 'down',
+                    'driver' => $config->getDriver(),
+                    'latency' => null,
+                    'error' => $e->getMessage()
+                ];
+                $worstStatus = 'down';
+            }
+        }
+
         return [
-            'status' => 'UP',
-            'details' => []
+            'status' => $worstStatus,
+            'details' => $details
         ];
     }
 
-    final protected function diskCache(): array
+    final protected function cacheHealth(array $projectFiles): array
     {
+        $refClasses = Mapping::scanRefClasses($projectFiles, RedisConfigInterface::class);
+        $details = [];
+        $worstStatus = 'up';
+
+        foreach ($refClasses as $refClass) {
+            /** @var RedisConfigInterface $config */
+            $config = $refClass->newInstance();
+            $config->sepUp();
+
+            try {
+                $result = $config->pingDetail();
+
+                $status = match (true) {
+                    !$result['status'] => 'down',
+                    $result['latency'] > self::DEGRADED_THRESHOLD_MS => 'degraded',
+                    default => 'up'
+                };
+
+                // Обновим общий статус, если какой-то из компонентов хуже текущего
+                if ($status === 'down' || ($status === 'degraded' && $worstStatus === 'up')) {
+                    $worstStatus = $status;
+                }
+
+                $details[$refClass->getName()] = [
+                    'status' => $status,
+                    'latency' => $result['latency'],
+                    'error' => $result['error']
+                ];
+            } catch (\Throwable $e) {
+                $details[$refClass->getName()] = [
+                    'status' => 'down',
+                    'error' => $e->getMessage()
+                ];
+                $worstStatus = 'down';
+            }
+        }
+
         return [
-            'status' => 'UP',
-            'details' => []
+            'status' => $worstStatus,
+            'details' => $details
         ];
     }
 

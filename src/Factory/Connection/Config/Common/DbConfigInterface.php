@@ -19,5 +19,6 @@ interface DbConfigInterface
     public function reconnect(): void;
     public function connection(): CDO;
     public function ping(): bool;
+    public function pingDetail(): array;
     public function getSchema(): ?string;
 }

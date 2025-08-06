@@ -10,6 +10,7 @@ use Flytachi\DbMapping\Tools\ColumnMapping;
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Factory\Connection\Config\Common\DbConfigInterface;
 use Flytachi\Kernel\Src\Factory\Connection\Repository\Interfaces\RepositoryInterface;
+use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use ReflectionAttribute;
 use ReflectionClass;
 
@@ -17,38 +18,9 @@ class DbMapping
 {
     public static function scanningDeclaration(): DbMappingDeclaration
     {
-        $resources = scanFindAllFile(Extra::$pathRoot, 'php', [
-            Extra::$pathRoot . '/vendor'
-        ]);
-        $reflectionClasses = self::scanReflectionFilter($resources);
+        $resources = Mapping::scanProjectFiles();
+        $reflectionClasses = Mapping::scanRefClasses($resources, RepositoryInterface::class);
         return self::scanDeclarationFilter($reflectionClasses);
-    }
-
-    /**
-     * @param array $resources
-     * @return array<ReflectionClass>
-     */
-    private static function scanReflectionFilter(array $resources): array
-    {
-        $reflectionClasses = [];
-        foreach ($resources as $resource) {
-            $className = ucwords(
-                str_replace(
-                    '.php',
-                    '',
-                    str_replace('/', '\\', str_replace(Extra::$pathRoot . '/', '', $resource))
-                )
-            );
-
-            try {
-                $reflectionClass = new ReflectionClass($className);
-                if ($reflectionClass->implementsInterface(RepositoryInterface::class)) {
-                    $reflectionClasses[] = $reflectionClass;
-                }
-            } catch (\ReflectionException $ex) {
-            }
-        }
-        return $reflectionClasses;
     }
 
     /**

@@ -14,4 +14,5 @@ interface RedisConfigInterface
     public function reconnect(): void;
     public function connection(): Redis;
     public function ping(): bool;
+    public function pingDetail(): array;
 }
