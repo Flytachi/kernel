@@ -55,16 +55,22 @@ class Cfg extends Cmd
     private function initArg(): void
     {
         $filePath = Extra::$pathRoot . '/composer.json';
-        if (file_exists($filePath)) {
+        if (file_exists($filePath) && is_readable($filePath)) {
             $projectData = json_decode(
                 file_get_contents($filePath) ?: '',
                 true
             );
-            $projectData['name'] = basename(Extra::$pathRoot);
-            $projectData['description'] = basename(Extra::$pathRoot) . ' project description';
-            $projectData['version'] = '1.0.0';
-            $data = json_encode($projectData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
-            file_put_contents($filePath, $data);
+
+            $extra = $projectData['extra'] ?? [];
+
+            $extra['project']['name'] = basename(Extra::$pathRoot);
+            $extra['project']['version'] = $extra['project']['version'] ?? '1.0.0';
+            $extra['project']['description'] = $extra['project']['description'] ?? 'Extra framework based';
+
+            $projectData['extra'] = $extra;
+
+            $json = json_encode($projectData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            file_put_contents($filePath, $json . PHP_EOL);
         }
 
         $this->envCreate();
