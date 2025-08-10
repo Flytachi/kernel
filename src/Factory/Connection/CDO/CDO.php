@@ -33,12 +33,35 @@ class CDO extends PDO
             $this->SetAttribute(PDO::ATTR_EMULATE_PREPARES, false);
             $this->SetAttribute(PDO::ATTR_TIMEOUT, $timeout);
             $this->setAttribute(PDO::ATTR_PERSISTENT, $config->getPersistentStatus());
+            $this->applyDatabaseTimezone(date_default_timezone_get());
+
             if ($debug) {
                 $this->SetAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             }
             self::$logger->debug('connection:' . $config->getDns());
         } catch (PDOException $e) {
             throw new CDOException($e->getMessage(), previous: $e);
+        }
+    }
+
+    private function applyDatabaseTimezone(string $tz): void
+    {
+        $driver = $this->getAttribute(PDO::ATTR_DRIVER_NAME);
+
+        switch ($driver) {
+            case 'pgsql':
+                $this->exec("SET TIMEZONE TO " . $this->quote($tz));
+                break;
+            case 'mysql':
+                $this->exec("SET time_zone = " . $this->quote($tz));
+                break;
+            case 'oci':
+                // Oracle
+                $this->exec("ALTER SESSION SET TIME_ZONE = " . $this->quote($tz));
+                break;
+            default:
+                self::$logger->warning("Timezone setting not implemented for driver: {$driver}");
+                break;
         }
     }
 

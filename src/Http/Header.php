@@ -29,6 +29,13 @@ abstract class Header
                 array_values(apache_request_headers())
             );
         }
+        if (isset($_SERVER['HTTP_TIMEZONE'])) {
+            if (date_default_timezone_get() !== $_SERVER['HTTP_TIMEZONE']) {
+                if (in_array($_SERVER['HTTP_TIMEZONE'], timezone_identifiers_list(), true)) {
+                    date_default_timezone_set($_SERVER['HTTP_TIMEZONE']);
+                }
+            }
+        }
         if (isset($_SERVER['REMOTE_ADDR'])) {
             self::$headers['Ip-Address'] = $_SERVER['REMOTE_ADDR'];
         }
