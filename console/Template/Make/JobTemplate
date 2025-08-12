@@ -8,6 +8,6 @@ class __className__ extends Job
 {
     public function run(mixed $data = null): void
     {
-        $this->logger?->info('RUN');
+        $this->logger->info('RUN');
     }
 }
