@@ -10,6 +10,8 @@ use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControl;
 use Flytachi\Kernel\Src\Factory\Stereotype;
+use Flytachi\Kernel\Src\Http\RCartridge\HttpCartridge;
+use Flytachi\Kernel\Src\Http\RCartridge\RouteCartridgeInterface;
 use Flytachi\Kernel\Src\Stereotype\ControllerInterface;
 
 final class Router extends Stereotype implements ActuatorItemInterface
@@ -20,6 +22,15 @@ final class Router extends Stereotype implements ActuatorItemInterface
      * @var array
      */
     private array $routes = [];
+    private RouteCartridgeInterface $cartridge;
+
+    public function __construct(?RouteCartridgeInterface $cartridge = null)
+    {
+        parent::__construct();
+        $this->cartridge = $cartridge === null
+            ? new HttpCartridge()
+            : $cartridge;
+    }
 
     final public function run(): void
     {
@@ -34,18 +45,17 @@ final class Router extends Stereotype implements ActuatorItemInterface
             . ' ' . $_SERVER['REQUEST_URI']
             . ' IP: ' . Header::getIpAddress()
         );
-        $data = parseUrlDetail($_SERVER['REQUEST_URI']);
-        $_GET = $data['query'];
 
         $render = new Rendering();
         try {
             // registration
             $this->registrar($isDevelop);
 
-            $resolve = $this->resolveActions($data['path']);
+            $input = $this->cartridge->wrapInput();
+            $resolve = $this->resolveActions($input['path']);
             if (!$resolve) {
                 throw new ClientError(
-                    "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
+                    "{$_SERVER['REQUEST_METHOD']} '{$input['path']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
             }
@@ -58,14 +68,16 @@ final class Router extends Stereotype implements ActuatorItemInterface
             $resolve = $this->resolveActionSelect($resolve, $_SERVER['REQUEST_METHOD']);
             if (!$resolve) {
                 throw new ClientError(
-                    "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
+                    "{$_SERVER['REQUEST_METHOD']} '{$input['path']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
             }
             $result = $this->callResolveAction($resolve['action'], $resolve['params'], $resolve['url'] ?? '');
-            $render->setResource($result);
-        } catch (\Throwable $e) {
-            $render->setResource($e);
+        } catch (\Throwable $result) {
+        } finally {
+            $render->setResource(
+                $this->cartridge->wrapOutput($result)
+            );
         }
 
         $render->render();
