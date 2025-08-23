@@ -10,8 +10,6 @@ use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Mapping\Mapping;
 use Flytachi\Kernel\Src\Factory\Middleware\Cors\AccessControl;
 use Flytachi\Kernel\Src\Factory\Stereotype;
-use Flytachi\Kernel\Src\Http\RCartridge\HttpCartridge;
-use Flytachi\Kernel\Src\Http\RCartridge\RouteCartridgeInterface;
 use Flytachi\Kernel\Src\Stereotype\ControllerInterface;
 
 final class Router extends Stereotype implements ActuatorItemInterface
@@ -22,15 +20,6 @@ final class Router extends Stereotype implements ActuatorItemInterface
      * @var array
      */
     private array $routes = [];
-    private RouteCartridgeInterface $cartridge;
-
-    public function __construct(?RouteCartridgeInterface $cartridge = null)
-    {
-        parent::__construct();
-        $this->cartridge = $cartridge === null
-            ? new HttpCartridge()
-            : $cartridge;
-    }
 
     final public function run(): void
     {
@@ -51,7 +40,9 @@ final class Router extends Stereotype implements ActuatorItemInterface
             // registration
             $this->registrar($isDevelop);
 
-            $input = $this->cartridge->wrapInput();
+            $input = parseUrlDetail($_SERVER['REQUEST_URI']);
+            $_GET = $input['query'];
+
             $resolve = $this->resolveActions($input['path']);
             if (!$resolve) {
                 throw new ClientError(
@@ -75,9 +66,7 @@ final class Router extends Stereotype implements ActuatorItemInterface
             $result = $this->callResolveAction($resolve['action'], $resolve['params'], $resolve['url'] ?? '');
         } catch (\Throwable $result) {
         } finally {
-            $render->setResource(
-                $this->cartridge->wrapOutput($result)
-            );
+            $render->setResource($result);
         }
 
         $render->render();
