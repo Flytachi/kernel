@@ -74,6 +74,18 @@ final class Blink extends Stereotype
         return 'Authorization: Bearer ' . $token;
     }
 
+    /**
+     * Returns the Authorization header value with the Basic token.
+     *
+     * @param string $username The username to include in the Authorization header.
+     * @param string $password The password to include in the Authorization header.
+     * @return string The Authorization header value with the Basic token.
+     */
+    public static function authBasic(string $username, string $password): string
+    {
+        return 'Authorization: Basic ' . base64_encode($username . ':' . $password);
+    }
+
     private static function setOption(int $option, mixed $value): void
     {
         if (self::$blink === null) {
