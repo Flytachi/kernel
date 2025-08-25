@@ -34,18 +34,19 @@ final class Router extends Stereotype implements ActuatorItemInterface
             . ' ' . $_SERVER['REQUEST_URI']
             . ' IP: ' . Header::getIpAddress()
         );
-        $data = parseUrlDetail($_SERVER['REQUEST_URI']);
-        $_GET = $data['query'];
 
         $render = new Rendering();
         try {
             // registration
             $this->registrar($isDevelop);
 
-            $resolve = $this->resolveActions($data['path']);
+            $input = parseUrlDetail($_SERVER['REQUEST_URI']);
+            $_GET = $input['query'];
+
+            $resolve = $this->resolveActions($input['path']);
             if (!$resolve) {
                 throw new ClientError(
-                    "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
+                    "{$_SERVER['REQUEST_METHOD']} '{$input['path']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
             }
@@ -58,14 +59,14 @@ final class Router extends Stereotype implements ActuatorItemInterface
             $resolve = $this->resolveActionSelect($resolve, $_SERVER['REQUEST_METHOD']);
             if (!$resolve) {
                 throw new ClientError(
-                    "{$_SERVER['REQUEST_METHOD']} '{$data['path']}' url not found",
+                    "{$_SERVER['REQUEST_METHOD']} '{$input['path']}' url not found",
                     HttpCode::NOT_FOUND->value
                 );
             }
             $result = $this->callResolveAction($resolve['action'], $resolve['params'], $resolve['url'] ?? '');
+        } catch (\Throwable $result) {
+        } finally {
             $render->setResource($result);
-        } catch (\Throwable $e) {
-            $render->setResource($e);
         }
 
         $render->render();

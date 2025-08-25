@@ -9,8 +9,12 @@ trait ExtraExceptionTrait
     /**
      * @throws self
      */
-    public static function throw(string $message, ?HttpCode $httpCode = null, ?\Throwable $previous = null)
-    {
-        throw new static($message, $httpCode?->value ?: 0, $previous);
+    public static function throw(
+        string $message,
+        HttpCode|int|null $httpCode = null,
+        ?\Throwable $previous = null
+    ) {
+        $code = (is_numeric($httpCode) ? (int)$httpCode : $httpCode?->value) ?: 0;
+        throw new static($message, $code, $previous);
     }
 }
