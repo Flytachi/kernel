@@ -62,6 +62,17 @@ final class Rendering
         foreach ($this->header as $name => $value) {
             header("{$name}: {$value}");
         }
+
+        // without content
+        if ($this->httpCode->value == 204 || $this->httpCode->isRedirection()) {
+            Extra::$logger->withName(self::class)->debug(sprintf(
+                "HTTP [%d] %s",
+                $this->httpCode->value,
+                $this->httpCode->message(),
+            ));
+            exit;
+        }
+
         if ($this->action === 1) {
             Extra::$logger->withName(self::class)->debug(sprintf(
                 "HTTP [%d] %s -> %s",
@@ -87,7 +98,7 @@ final class Rendering
             ));
             echo $this->body;
         }
-        exit();
+        exit;
     }
 
     private function logging(\Throwable $resource): void
@@ -95,13 +106,23 @@ final class Rendering
         $logType = $resource instanceof ExtraException
             ? $resource->getLogLevel()
             : 'alert';
-        Extra::$logger->withName($resource::class)->{$logType}(sprintf(
-            "%d: %s\n# %s(%d) -> Stack trace:\n%s",
-            $resource->getCode(),
-            $resource->getMessage(),
-            $resource->getFile(),
-            $resource->getLine(),
-            $resource->getTraceAsString(),
-        ));
+        if ((bool) env('DEBUG', false)) {
+            Extra::$logger->withName($resource::class)->{$logType}(sprintf(
+                "%d: %s -> %s(%d)\n#Stack trace:\n%s",
+                $resource->getCode(),
+                $resource->getMessage(),
+                $resource->getFile(),
+                $resource->getLine(),
+                $resource->getTraceAsString(),
+            ));
+        } else {
+            Extra::$logger->withName($resource::class)->{$logType}(sprintf(
+                "%d: %s -> %s(%d)",
+                $resource->getCode(),
+                $resource->getMessage(),
+                $resource->getFile(),
+                $resource->getLine()
+            ));
+        }
     }
 }

@@ -3,13 +3,7 @@
     "description": "Extra Framework kernel",
     "type": "library",
     "license": "MIT",
-    "version": "5.7.3",
-    "keywords": [
-        "Extra Kernel",
-        "extra kernel",
-        "framework kernel",
-        "kernel"
-    ],
+    "version": "5.7.4",
     "autoload": {
         "psr-4": {
             "Flytachi\\Kernel\\": "/",
@@ -21,12 +15,6 @@
             "function/Tags.php"
         ]
     },
-    "authors": [
-        {
-            "name": "Flytachi",
-            "email": "jasur.rakhmatov03@gmail.com"
-        }
-    ],
     "require": {
         "php": ">=8.3",
         "flytachi/db-mapping": "~1.2.0",
@@ -43,5 +31,26 @@
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "@stable"
-    }
+    },
+    "keywords": [
+        "Extra Kernel",
+        "extra kernel",
+        "framework kernel",
+        "kernel"
+    ],
+    "homepage": "https://github.com/flytachi/kernel",
+    "support": {
+        "issues": "https://github.com/flytachi/kernel/issues",
+        "source": "https://github.com/flytachi/kernel"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/flytachi/kernel.git"
+    },
+    "authors": [
+        {
+            "name": "Flytachi",
+            "email": "jasur.rakhmatov03@gmail.com"
+        }
+    ]
 }
