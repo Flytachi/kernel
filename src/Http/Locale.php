@@ -43,6 +43,18 @@ final class Locale
         self::$locale->lang = trim($lang, '/');
     }
 
+    public static function getPath(): string
+    {
+        self::init();
+        return self::$locale->path;
+    }
+
+    public static function getLang(): string
+    {
+        self::init();
+        return self::$locale->lang;
+    }
+
     /**
      * Translates a given key using the loaded dictionary.
      *
