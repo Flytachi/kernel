@@ -48,6 +48,24 @@ final class Tool
     }
 
     /**
+     * Checks if a given value is a valid phone number in E.164 format.
+     *
+     * The phone number may optionally start with a '+' sign, must not start with 0,
+     * and must contain between 8 and 15 digits in total.
+     *
+     * Examples of valid numbers:
+     *  - +998901234567
+     *  - 998901234567
+     *
+     * @param string $value The value to check if it is a valid phone number.
+     * @return bool True if the given value is a valid phone number, false otherwise.
+     */
+    public static function isPhoneNumber(string $value): bool
+    {
+        return (bool) preg_match('/^\+?[1-9]\d{7,14}$/', $value);
+    }
+
+    /**
      * Check if the given value is a positive integer.
      *
      * @param mixed $value The value to be checked.

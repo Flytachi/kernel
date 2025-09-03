@@ -389,7 +389,11 @@ final class Qb
      */
     public static function clip(Qb $condition): Qb
     {
-        return new self('(' . $condition->query . ')', $condition->cache);
+        if (empty($condition->query)) {
+            return new self($condition->query, $condition->cache);
+        } else {
+            return new self('(' . $condition->query . ')', $condition->cache);
+        }
     }
 
     /**
