@@ -104,7 +104,7 @@ final class DebugDump
             'line' => $line,
             'delta' => $delta,
             'memory' => bytes(memory_get_usage(), 'MiB'),
-            'timezone' => env('TIME_ZONE', 'UTC'),
+            'timezone' => date_default_timezone_get(),
             'time' => date(DATE_ATOM),
         ];
     }

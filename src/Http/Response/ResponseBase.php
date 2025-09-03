@@ -91,7 +91,7 @@ abstract class ResponseBase implements ResponseInterface
                 'debug' => [
                     'time' => ($delta < 0.001) ? 0.001 : $delta,
                     'date' => date(DATE_ATOM),
-                    'timezone' => env('TIME_ZONE', 'UTC'),
+                    'timezone' => date_default_timezone_get(),
                     'sapi' => PHP_SAPI,
                     'memory' => bytes($memory, ($memory >= 1048576 ? 'MiB' : 'KiB')),
                 ]

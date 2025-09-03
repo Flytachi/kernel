@@ -60,7 +60,7 @@ abstract class ExceptionWrapper
             $context['debug'] = [
                 'time' => ($delta < 0.001) ? 0.001 : $delta,
                 'date' => date(DATE_ATOM),
-                'timezone' => env('TIME_ZONE', 'UTC'),
+                'timezone' => date_default_timezone_get(),
                 'sapi' => PHP_SAPI,
                 'memory' => bytes($memory, ($memory >= 1048576 ? 'MiB' : 'KiB')),
             ];
@@ -89,7 +89,7 @@ abstract class ExceptionWrapper
             $context['debug'] = [
                 'time' => ($delta < 0.001) ? 0.001 : $delta,
                 'date' => date(DATE_ATOM),
-                'timezone' => env('TIME_ZONE', 'UTC'),
+                'timezone' => date_default_timezone_get(),
                 'sapi' => PHP_SAPI,
                 'memory' => bytes($memory, ($memory >= 1048576 ? 'MiB' : 'KiB')),
             ];
@@ -137,7 +137,7 @@ abstract class ExceptionWrapper
             $result .=        '</span>';
             $result .=        '<span style="float: right;font-style: italic;">';
             $result .=            '<span style="color: #adadad">' . date(DATE_ATOM) . '</span> ';
-            $result .=            '<span style="color: #00ffff">' . env('TIME_ZONE', 'UTC') . '</span>';
+            $result .=            '<span style="color: #00ffff">' . date_default_timezone_get() . '</span>';
             $result .=        '</span>';
             $result .=    '</div>';
             $result .=    '<hr style="border: 1px solid #999999;">';
