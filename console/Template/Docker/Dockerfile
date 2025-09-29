@@ -3,6 +3,8 @@ WORKDIR /var/www/html
 
 # Installing required packages
 RUN apk update && apk add --no-cache php83 \
+    php83-dom php83-xml php83-xmlwriter \
+    php83-tokenizer php83-ctype php83-session \
     php83-common php83-phar php83-pcntl \
     php83-posix php83-mbstring php83-simplexml \
     php83-iconv php83-pdo php83-fpm php83-curl \
