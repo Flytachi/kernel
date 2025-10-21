@@ -139,10 +139,16 @@ class Make extends Cmd
     private function createRepository(string $name): void
     {
         $info = $this->getInfo($name, 'Repository', 'RepositoryTemplate');
+        $tName = strtolower(str_replace('Repository', '', $info['className']));
+        if ($tName[-1] == 'y') {
+            $tName = substr($tName, 0, -1) . 'ies';
+        } else {
+            $tName .= 's';
+        }
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
         $code = str_replace("__className__", $info['className'], $code);
-        $code = str_replace("__tableName__", strtolower(str_replace('Repository', 's', $info['className'])), $code);
+        $code = str_replace("__tableName__", $tName, $code);
         $this->createFile($info['className'], $info['path'], $code, 'repository');
     }
 

@@ -9,6 +9,7 @@ use Flytachi\Kernel\Src\Http\HttpCode;
 
 class Request extends \stdClass implements RequestInterface
 {
+    use ValidateTrait;
     use RequestValidatorTrait;
 
     /**

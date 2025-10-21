@@ -12,6 +12,7 @@ use TypeError;
 
 abstract class RequestBase implements RequestInterface
 {
+    use ValidateTrait;
     use RequestValidatorTrait;
 
     /**
