@@ -85,15 +85,18 @@ class DataTableNetRequest extends RequestObject
      * Sets the `name` property of each column based on the given map,
      * where keys are `data` field names and values are SQL-safe identifiers.
      *
+     * Example:
+     * ```
+     *  $request->overrideSelection([
+     *      'created' => 'created_at',
+     *      'userName' => 'users.name'
+     *  ]);
+     * ```
+     *
      * @param array<string, string> $resetNames Associative array of `data => name`.
      * @return void
      *
      * @see selection()
-     * @example
-     *   $request->overrideSelection([
-     *       'created' => 'created_at',
-     *       'userName' => 'users.name'
-     *   ]);
      */
     final public function overrideSelection(array $resetNames = []): void
     {
@@ -110,14 +113,17 @@ class DataTableNetRequest extends RequestObject
      * The callback receives a `DTNetColumn` and a `string` value
      * and must return a `Qb|null` (or `null` to skip the column).
      *
+     * Example:
+     * ```
+     *  $request->overrideFilter(function (DTNetColumn $col, string $value) {
+     *      return Qb::like($col->data, "%{$value}%");
+     *  });
+     * ```
+     *
      * @param callable|null $callback function(DTNetColumn $column, string $value): ?Qb
      * @return void
      *
      * @see filter()
-     * @example
-     *   $request->overrideFilter(function (DTNetColumn $col, string $value) {
-     *       return Qb::like($col->data, "%{$value}%");
-     *   });
      */
     final public function overrideFilter(?callable $callback): void
     {
@@ -127,12 +133,14 @@ class DataTableNetRequest extends RequestObject
     /**
      * Sets a fallback ORDER BY string used when no sorting is specified.
      *
+     *  Example:
+     *  ```
+     *  $request->overrideOrder('created_at DESC')
+     *  ```
      * @param string|null $defaultContext Example: "id DESC, created_at ASC"
      * @return void
      *
      * @see order()
-     * @example
-     *   $request->overrideOrder('created_at DESC')
      */
     final public function overrideOrder(?string $defaultContext = null): void
     {

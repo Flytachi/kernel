@@ -10,6 +10,47 @@ abstract class Header
      * @var array<string, string> $headers
      */
     private static array $headers = [];
+    /**
+     * @var array<string, string> $initHeaders
+     */
+    private static array $initHeaders = [];
+
+    /**
+     * Initializes the custom (outgoing) HTTP headers for the current response.
+     *
+     * This method allows you to define additional headers that will be sent
+     * to the client when {@see Header::setHeaders()} is called.
+     *
+     * It does not affect or overwrite the incoming request headers that were
+     * received from the client. Instead, it stores the provided headers
+     * internally in {@see self::$initHeaders} for later use.
+     *
+     * Example:
+     * ```
+     * // Recommended path '../public/index.php'
+     * Header::initHeaders([
+     *     'Content-Type' => 'application/json',
+     *     'X-Powered-By' => 'Extra Kernel',
+     * ]);
+     * // ... other code ...
+     *
+     * // Using (default use in Router)
+     * Header::setHeaders();
+     * ```
+     *
+     * @param array<string,string> $headers
+     *     An associative array of header names and their corresponding values.
+     *     For example: ['Content-Type' => 'application/json'].
+     *
+     * @return void
+     *
+     * @see Header::setHeaders() Sends the headers initialized here.
+     * @see Header::getHeaders() Retrieves all current request headers.
+     */
+    public static function initHeaders(array $headers): void
+    {
+        self::$initHeaders = $headers;
+    }
 
     /**
      * Sets the headers for the request.
@@ -23,10 +64,10 @@ abstract class Header
     public static function setHeaders(): void
     {
         if (function_exists('apache_request_headers')) {
-            static::$headers = apache_request_headers();
+            $apacheHeaders = apache_request_headers();
             static::$headers = array_combine(
-                array_map('ucwords', array_keys(apache_request_headers())),
-                array_values(apache_request_headers())
+                array_map('ucwords', array_keys($apacheHeaders)),
+                array_values($apacheHeaders)
             );
         }
         if (isset($_SERVER['HTTP_TIMEZONE'])) {
@@ -39,8 +80,12 @@ abstract class Header
         if (isset($_SERVER['REMOTE_ADDR'])) {
             self::$headers['Ip-Address'] = $_SERVER['REMOTE_ADDR'];
         }
-//        if (file_exists(PATH_APP . '/Config/security.php')) include PATH_APP . '/Config/security.php';
-//        if ($_SERVER['REQUEST_METHOD'] == Method::OPTIONS->name) Response::text(HttpCode::NO_CONTENT);
+
+        if (!empty(self::$initHeaders)) {
+            foreach (self::$initHeaders as $key => $value) {
+                header("$key: $value");
+            }
+        }
     }
 
     /**
@@ -87,7 +132,7 @@ abstract class Header
      */
     public static function inHeader(string $key, string $value, bool $isUcWords = true): bool
     {
-        return str_contains((static::$headers[($isUcWords ? ucwords($key) : $key)] ?? ''), $value);
+        return str_contains((static::$headers[($isUcWords? ucwords($key) : $key)] ?? ''), $value);
     }
 
     /**
@@ -97,15 +142,9 @@ abstract class Header
      */
     final public static function getBearerToken(): string|null
     {
-        if ($auth = static::$headers['Authorization'] ?? '') {
-            if (preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
-                return $matches[1];
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        $auth = static::$headers['Authorization'] ?? '';
+        return preg_match('/Bearer\s(\S+)/', $auth, $m)
+            ? $m[1] : null;
     }
 
     /**
@@ -115,14 +154,8 @@ abstract class Header
      */
     final public static function getBasicToken(): string|null
     {
-        if ($auth = static::$headers['Authorization'] ?? '') {
-            if (preg_match('/Basic\s(\S+)/', $auth, $matches)) {
-                return base64_decode($matches[1]);
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        $auth = static::$headers['Authorization'] ?? '';
+        return preg_match('/Basic\s(\S+)/', $auth, $m)
+            ? base64_decode($m[1]) : null;
     }
 }

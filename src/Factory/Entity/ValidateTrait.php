@@ -13,6 +13,29 @@ trait ValidateTrait
      * It sequentially applies each rule from the `$rules` array to the given property (`$field`).
      * Validation stops at the first rule that fails.
      *
+     *  Examples:
+     *  ```
+     *  // Validate that 'age' is numeric, and range 18 and 99
+     *  $this->validate('age', ['numeric', 'range:18,99']);
+     *
+     *  // Validate that 'name' is a string up to 500 characters long
+     *  $this->validate('name', ['string', 'length:0,500']);
+     *
+     *  // Validate that 'status' is one of the allowed values
+     *  $this->validate('status', ['in:active,pending,archived']);
+     *
+     *  // Validate a nested field
+     *  $this->validate('lang.ru.title', ['string', 'length:1,100']);
+     *
+     *  // Validate all 'title' fields within the 'lang' array
+     *  $this->validate('lang.*.title', ['string', 'length:1,100']);
+     *
+     *  // Use a custom callback for complex validation logic
+     *  $this->validate('payload', [function($value) {
+     *      return is_array($value) && isset($value['id']);
+     *  }]);
+     *  ```
+     *
      * @param string $field The name of the object's property to validate.
      * @param array<callable|callable-string|string> $rules An array of validation rules.
      *        - String-based rules: 'boolean', 'numeric', 'array', 'string', 'range:1,100'.
@@ -21,44 +44,6 @@ trait ValidateTrait
      * @param bool $checkIfNull If false, validation is skipped for null or non-existent fields.
      *
      * @return static Returns `$this` to allow method chaining.
-     *
-     * @example
-     * Validate that 'age' is numeric, and range 18 and 99:
-     * ```php
-     * $this->validate('age', ['numeric', 'range:18,99']);
-     * ```
-     *
-     * @example
-     * Validate that 'description' is a string up to 500 characters long:
-     * ```php
-     * $this->validate('description', ['string', 'length:0,500']);
-     * ```
-     *
-     * @example
-     * Validate that 'status' is one of the allowed values:
-     * ```php
-     * $this->validate('status', ['in:active,pending,archived']);
-     * ```
-     *
-     * @example
-     * Validate a nested field
-     * ```php
-     * $this->validate('lang.ru.title', ['string', 'length:1,100']);
-     * ```
-     *
-     * @example
-     * Validate all 'title' fields within the 'lang' array
-     * ```php
-     * $this->validate('lang.*.title', ['string', 'length:1,100']);
-     * ```
-     *
-     * @example
-     * Use a custom callback for complex validation logic:
-     * ```php
-     * $this->validate('payload', [function($value) {
-     * return is_array($value) && isset($value['id']);
-     * }]);
-     * ```
      */
     final protected function validate(string $field, array $rules, bool $checkIfNull = true): static
     {

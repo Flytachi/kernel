@@ -217,7 +217,9 @@ if (!function_exists('dashAsciiToCamelCase')) {
      * that the input contains only ASCII characters and does not perform UTF-8 handling.
      *
      * Example:
-     * dashAsciiToCamelCase('hello-world-example') => 'helloWorldExample'
+     *  ```
+     *  dashAsciiToCamelCase('hello-world-example') // result 'helloWorldExample'
+     *  ```
      *
      * @param string $str The dash-separated ASCII string to convert.
      *

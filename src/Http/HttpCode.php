@@ -7,16 +7,20 @@ namespace Flytachi\Kernel\Src\Http;
 use Override;
 
 /**
- * Enum HttpStatus
+ * Enum HttpCode
  *
- * HttpStatus is a helper enumeration that provides an easy way
+ * HttpCode is a helper enumeration that provides an easy way
  * to handle HTTP status codes. The aim of this enum is to offer
  * a simple interface to work with HTTP response status codes,
  * making the handling of HTTP responses easier and more standardized.
  *
+ * Example:
+ * ```
+ * HttpCode::CREATED->message(); // result "Created"
+ * ```
+ *
  * @version 2.0
  * @author Flytachi
- * @example echo HttpStatus::getMessage(HttpStatus::OK); // Outputs "OK"
  */
 enum HttpCode: int
 {

@@ -156,24 +156,24 @@ final class Tool
      * and returns the corresponding value if found. If any key in the path is missing,
      * it returns `null`.
      *
+     *  Example:
+     *  ```
+     *  $data = [
+     *      'user' => [
+     *          'profile' => [
+     *              'name' => 'John Doe'
+     *          ]
+     *      ]
+     *  ];
+     *
+     *  $name = arrayNestedValue($data, ['user', 'profile', 'name']); // Returns 'John Doe'
+     *  $age = arrayNestedValue($data, ['user', 'profile', 'age']); // Returns null
+     *  ```
+     *
      * @param array $array The associative array to search in.
      * @param array<string> $keys An array representing the sequence of keys to access the nested value.
      *
      * @return mixed The value found at the given path or `null` if any key is missing.
-     *
-     * @example
-     * ```php
-     * $data = [
-     *     'user' => [
-     *         'profile' => [
-     *             'name' => 'John Doe'
-     *         ]
-     *     ]
-     * ];
-     *
-     * $name = arrayNestedValue($data, ['user', 'profile', 'name']); // Returns 'John Doe'
-     * $age = arrayNestedValue($data, ['user', 'profile', 'age']); // Returns null
-     * ```
      */
     public static function arrayNestedValue(array $array, array $keys): mixed
     {
