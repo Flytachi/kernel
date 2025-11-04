@@ -18,7 +18,7 @@
     "require": {
         "php": ">=8.3",
         "flytachi/db-mapping": "~1.2.0",
-        "flytachi/file-store": "1.0.1",
+        "flytachi/file-store": "1.0.3",
         "monolog/monolog": "3.9.0",
         "vlucas/phpdotenv": "v5.6.1",
         "ext-simplexml": "*",

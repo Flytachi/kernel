@@ -10,6 +10,8 @@ use Flytachi\Kernel\Src\Thread\Conductors\Conductor;
 use Flytachi\Kernel\Src\Thread\Conductors\ConductorClusterJson;
 use Flytachi\Kernel\Src\Thread\Dispatcher\Dispatcher;
 use Flytachi\Kernel\Src\Thread\Dispatcher\DispatcherInterface;
+use Flytachi\Kernel\Src\Thread\Entity\CCondition;
+use Flytachi\Kernel\Src\Thread\Entity\CStatus;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterHandler;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterStatement;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterThread;
@@ -22,22 +24,27 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     use ClusterThread;
     use ClusterHandler;
 
-    protected string $conductorClassName = ConductorClusterJson::class;
-    private Conductor $conductor;
     /** @var int $pid System process id */
     protected int $pid;
+    protected static string $EC_MAIN = 'clusters';
+    protected static string $EC_THREADS = 'clusters-threads';
     private bool $iAmChild = false;
-    protected int $balancer = 10;
+    protected int $balancer = 0;
 
-    final public static function stmPath(): string
+    final public static function stmName(): string
     {
-        return Extra::$pathStorageCache . '/' . hash('xxh64', static::class) . '__c.json';
+        return hash('xxh64', static::class);
     }
 
-    final public static function stmThreadsPath(): string
-    {
-        return Extra::$pathStorageCache . '/' . hash('xxh64', static::class) . '__t';
-    }
+//    final public static function stmPath(): string
+//    {
+//        return Extra::$pathStorageCache . '/clusters/' . hash('xxh64', static::class);
+//    }
+//
+//    final public static function stmThreadsPath(): string
+//    {
+//        return Extra::$pathStorageCache . '/clusters-threads/' . hash('xxh64', static::class);
+//    }
 
     final protected function streaming(callable $complianceCallable, ?callable $negationCallable = null): void
     {
@@ -58,7 +65,6 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
         $process = new static();
 
         try {
-            $process->conductor = new $process->conductorClassName();
             $process->startRun();
             $process->run($data);
         } catch (\Throwable $e) {
@@ -80,9 +86,6 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     private function startRun(): void
     {
         $this->pid = getmypid();
-        if (!is_dir(static::stmThreadsPath())) {
-            mkdir(static::stmThreadsPath(), recursive: true);
-        }
         $this->logger = Extra::$logger->withName("[{$this->pid}] " . static::class);
 
         if (PHP_SAPI === 'cli') {
@@ -96,7 +99,14 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
                 $this->signTermination();
             });
             cli_set_process_title('extra process ' . static::class);
-            $this->conductor->recordAdd(static::class, $this->pid);
+            Extra::store(static::$EC_MAIN)->write(static::stmName(), new CStatus(
+                pid: $this->pid,
+                className: static::class,
+                condition: CCondition::STARTED,
+                startedAt: time(),
+                balancer: $this->balancer,
+                info: []
+            ));
         }
     }
 
@@ -112,11 +122,8 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
      */
     private function endRun(): void
     {
-        if (is_dir(static::stmThreadsPath())) {
-            @rmdir(static::stmThreadsPath());
-        }
         if (PHP_SAPI === 'cli') {
-            $this->conductor->recordRemove(static::class, $this->pid);
+            Extra::store(static::$EC_MAIN)->del(static::stmName());
         }
     }
 
@@ -157,7 +164,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
         $status = static::status();
         if ($status) {
             throw new ThreadException(
-                "Cluster process already exist [PID:{$status['pid']}] ({$status['startedAt']})",
+                "Cluster process already exist [PID:{$status->pid}] ({$status->getStartedAt()})",
                 HttpCode::LOCKED->value
             );
         } else {
@@ -165,16 +172,17 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
         }
     }
 
-    public static function status(): ?array
+    public static function status(): ?CStatus
     {
         try {
-            $path = static::stmPath();
-            if (!file_exists($path)) {
+            /** @var ?CStatus $status */
+            $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
+            if (!$status) {
                 return null;
             }
-            $status = JSON::read($path);
-            if (!posix_getpgid($status['pid'])) {
-                unlink($path);
+
+            if (!posix_getpgid($status->pid)) {
+                Extra::store(static::$EC_MAIN)->del(static::stmName());
                 return null;
             }
             return $status;
@@ -190,7 +198,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
     {
         $status = static::status();
         if ($status) {
-            return Signal::interrupt($status['pid']);
+            return Signal::interrupt($status->pid);
         } else {
             throw new ThreadException('Cluster process has not started', HttpCode::LOCKED->value);
         }

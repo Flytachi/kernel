@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Thread\Traits;
 
-use Flytachi\Kernel\Src\Unit\File\JSON;
+use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Thread\Entity\CCondition;
+use Flytachi\Kernel\Src\Thread\Entity\CStatus;
 
 trait ClusterStatement
 {
@@ -14,77 +16,87 @@ trait ClusterStatement
 
     public static function threadList(): array
     {
-        $files = glob(static::stmThreadsPath() . '/*.json');
-        foreach ($files as $key => $path) {
-            $files[$key] = (int) basename($path, '.json');
+        $keys = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
+            ->keys();
+        foreach ($keys as $key => $path) {
+            $keys[$key] = (int) trim($path, '_');
         }
-        return $files;
+        return $keys;
     }
 
     public static function threadQty(): int
     {
-        return count(glob(static::stmThreadsPath() . '/*.json'));
+        $keys = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
+            ->keys();
+        return count($keys);
     }
 
     protected function threadCount(): int
     {
-        $files = glob(static::stmThreadsPath() . "/*.json");
-        return count($files);
+        $keys = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
+            ->keys();
+        return count($keys);
     }
 
-    final protected function prepare(int $balancer = 10): void
+    final protected function prepare(int $balancer = 1): void
     {
         // start
-        $data = JSON::read(static::stmPath());
-        $data['condition'] = 'preparation';
-        JSON::write(static::stmPath(), $data);
-        $this->logger?->debug("set condition => preparation");
+        /** @var CStatus $status */
+        $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
+        $status->condition = CCondition::PREPARATION;
+        Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
+        $this->logger?->debug("set condition => " . $status->condition->name);
 
         // preparation
-        $pathThreads = static::stmThreadsPath();
-        if (!is_dir($pathThreads)) {
-            mkdir($pathThreads, recursive: true);
-        }
-        $data['balancer'] = $balancer;
+        Extra::store(static::$EC_THREADS . '/' . static::stmName(), false);
+        $status->balancer = $balancer;
         $this->balancer = $balancer;
-        JSON::write(static::stmPath(), $data);
+        Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
         // custom
         $this->preparation();
 
         // end
-        $data = JSON::read(static::stmPath());
-        $data['condition'] = 'active';
-        JSON::write(static::stmPath(), $data);
-        $this->logger?->debug("set condition => active");
+        /** @var CStatus $status */
+        $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
+        $status->condition = CCondition::ACTIVE;
+        Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
+        $this->logger?->debug("set condition => " . $status->condition->name);
     }
 
-    final protected function setCondition(string $newCondition): void
+    final protected function setCondition(CCondition $newCondition): void
     {
-        $data = JSON::read(static::stmPath());
-        $data['condition'] = $newCondition;
-        JSON::write(static::stmPath(), $data);
-        $this->logger?->debug("set condition => " . $newCondition);
+        /** @var CStatus $status */
+        $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
+        $status->condition = $newCondition;
+        Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
+        $this->logger?->debug("set condition => " . $newCondition->name);
     }
 
     final protected function setInfo(array $newInfo): void
     {
-        $data = JSON::read(static::stmPath());
-        $data['info'] = $newInfo;
-        JSON::write(static::stmPath(), $data);
-        $this->logger?->debug("set info => " . json_encode($data));
+        /** @var CStatus $status */
+        $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
+        $status->info = $newInfo;
+        Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
+        $this->logger?->debug("set info => " . json_encode($newInfo));
     }
 
     protected function preparationThreadBefore(int $pid): void
     {
-        JSON::write(static::stmThreadsPath() . "/{$pid}.json", [
-            'pid' => $pid,
-        ]);
+        Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
+            ->write("_{$pid}_", new CStatus(
+                pid: $pid,
+                className: static::class,
+                condition: CCondition::ACTIVE,
+                startedAt: time(),
+            ));
         $this->logger?->debug("started");
     }
 
     protected function preparationThreadAfter(int $pid): void
     {
-        unlink(static::stmThreadsPath() . "/{$pid}.json");
+        Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
+            ->del("_{$pid}_");
         $this->logger?->debug("finished");
     }
 }
