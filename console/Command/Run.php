@@ -6,6 +6,7 @@ namespace Flytachi\Kernel\Console\Command;
 
 use Flytachi\Kernel\Console\Inc\Cmd;
 use Flytachi\Kernel\Extra;
+use Flytachi\Kernel\Src\Thread\Dispatcher\Dispatcher;
 
 class Run extends Cmd
 {
@@ -95,10 +96,10 @@ class Run extends Cmd
     {
         if (extension_loaded('pcntl') && pcntl_async_signals()) {
             if (
-                array_key_exists('class-name', $this->args['options'])
-                && $this->args['options']['class-name']
+                array_key_exists('name', $this->args['options'])
+                && $this->args['options']['name']
             ) {
-                $class = $this->args['options']['class-name'];
+                $class = $this->args['options']['name'];
                 if (class_exists($class)) {
                     if (
                         array_key_exists(0, $this->args['flags'])
@@ -112,7 +113,7 @@ class Run extends Cmd
                     self::printMessage("The specified class '{$class}' was not found");
                 }
             } else {
-                self::printMessage("class-name option not specified");
+                self::printMessage("name option not specified");
             }
         } else {
             self::printMessage("Asynchronous pcntl signals are not enabled", 31);
@@ -123,12 +124,9 @@ class Run extends Cmd
     {
         // Cache Data
         $data = null;
-        if (array_key_exists('class-cache', $this->args['options'])) {
-            $filePath = Extra::$pathStorageCache . '/' . $this->args['options']['class-cache'];
-            if (is_file($filePath)) {
-                $data = unserialize(file_get_contents($filePath));
-                unlink($filePath);
-            }
+        if (array_key_exists('cache', $this->args['options'])) {
+            $data = Extra::store(Dispatcher::ES_NAME)->read($this->args['options']['cache']);
+            Extra::store(Dispatcher::ES_NAME)->del($this->args['options']['cache']);
         }
 
         self::printMessage("{$class} start", 32);
@@ -140,17 +138,17 @@ class Run extends Cmd
     {
         // Cache
         $cache = null;
-        if (array_key_exists('class-cache', $this->args['options'])) {
-            $filePath = Extra::$pathStorageCache . '/' . $this->args['options']['class-cache'];
+        if (array_key_exists('cache', $this->args['options'])) {
+            $filePath = Extra::$pathStorageCache . '/' . $this->args['options']['cache'];
             if (is_file($filePath)) {
-                $cache = $this->args['options']['class-cache'];
+                $cache = $this->args['options']['cache'];
             }
         }
 
         $processId = exec(sprintf(
-            "php extra run thread --class-name='%s' %s > %s 2>&1 & echo $!",
+            "php extra run thread --name='%s' %s > %s 2>&1 & echo $!",
             $class,
-            ($cache ? "--class-cache='{$cache}'" : ''),
+            ($cache ? "--cache='{$cache}'" : ''),
             "/dev/null"
         ));
         self::printMessage("$class started in background!", 32);
@@ -180,8 +178,8 @@ class Run extends Cmd
         self::printMessage("flags - additional args for running", $cl);
         self::print("d - start process in background", $cl);
         self::printMessage("options - data for running", $cl);
-        self::print("class-name - class name, with namespaces(example 'Jobs\ExampleJob')", $cl);
-        self::print("class-cache - name cache file used in process (serializable)", $cl);
+        self::print("name - class name, with namespaces(example 'Main\Threads\ExampleJob')", $cl);
+        self::print("cache - name cache file used in process (serializable)", $cl);
         self::printLabel("thread", $cl);
 
         self::printTitle("Run Help", $cl);

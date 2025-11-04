@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Flytachi\Kernel;
 
 use Dotenv\Dotenv;
-use Flytachi\Kernel\Src\Factory\ExtraConfig;
+use Flytachi\Kernel\Src\Factory\ExtraStore;
 use Flytachi\Kernel\Src\Log\ExtraLogger;
 use Psr\Log\LoggerInterface;
 
 /**
  * Class Extra
  *
- * @version 1.3
+ * @version 1.5
  * @author Flytachi
  */
-final class Extra extends ExtraConfig
+final class Extra extends ExtraStore
 {
     public static LoggerInterface $logger;
 

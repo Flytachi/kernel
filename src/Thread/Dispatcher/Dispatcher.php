@@ -19,18 +19,16 @@ use Psr\Log\LoggerInterface;
  * - `runnable(mixed $data = null): int`: Executes a new process by the class from which this method is called.
  *   It takes data as a parameter if any, and returns the process ID of the created process.
  *
- * @version 3.5
+ * @version 4.0
  * @author Flytachi
  */
 abstract class Dispatcher
 {
+    const string ES_NAME = 'threads/dispatcher';
     protected ?LoggerInterface $logger = null;
 
     public function __construct()
     {
-        if (!is_dir(Extra::$pathStorageCache)) {
-            mkdir(Extra::$pathStorageCache, 0777, true);
-        }
         set_time_limit(0);
         ob_implicit_flush();
     }
@@ -46,19 +44,16 @@ abstract class Dispatcher
     {
         try {
             if ($data) {
-                $fileName = uniqid("process-cache-");
-                $filePath = Extra::$pathStorageCache . '/' . $fileName;
-                $serializeData = serialize($data);
-                file_put_contents($filePath, $serializeData);
-                chmod($filePath, 0777);
+                $fileName = uniqid('cache-');
+                Extra::store(Dispatcher::ES_NAME)->write($fileName, $data);
             }
 
             $selfDirectory = getcwd();
             chdir(Extra::$pathRoot);
             $pid = (int) exec(sprintf(
-                "php extra run thread --class-name='%s' %s > %s 2>&1 & echo $!",
+                "php extra run thread --name='%s' %s > %s 2>&1 & echo $!",
                 static::class,
-                ($data ? "--class-cache='{$fileName}'" : ''),
+                ($data ? "--cache='{$fileName}'" : ''),
                 "/dev/null"
             ));
             chdir($selfDirectory);

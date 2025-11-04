@@ -1,7 +1,5 @@
 <?php
 
-use Flytachi\Kernel\Src\Health\HealthIndicator;
-
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 include_once dirname(__DIR__) . '/Extra.php';
 
