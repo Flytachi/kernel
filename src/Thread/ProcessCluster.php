@@ -6,12 +6,12 @@ namespace Flytachi\Kernel\Src\Thread;
 
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Http\HttpCode;
-use Flytachi\Kernel\Src\Thread\Conductors\Conductor;
-use Flytachi\Kernel\Src\Thread\Conductors\ConductorClusterJson;
 use Flytachi\Kernel\Src\Thread\Dispatcher\Dispatcher;
 use Flytachi\Kernel\Src\Thread\Dispatcher\DispatcherInterface;
-use Flytachi\Kernel\Src\Thread\Entity\CCondition;
+use Flytachi\Kernel\Src\Thread\Entity\CInfo;
+use Flytachi\Kernel\Src\Thread\Entity\Condition;
 use Flytachi\Kernel\Src\Thread\Entity\CStatus;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessStats;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterHandler;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterStatement;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterThread;
@@ -36,20 +36,10 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
         return hash('xxh64', static::class);
     }
 
-//    final public static function stmPath(): string
-//    {
-//        return Extra::$pathStorageCache . '/clusters/' . hash('xxh64', static::class);
-//    }
-//
-//    final public static function stmThreadsPath(): string
-//    {
-//        return Extra::$pathStorageCache . '/clusters-threads/' . hash('xxh64', static::class);
-//    }
-
     final protected function streaming(callable $complianceCallable, ?callable $negationCallable = null): void
     {
         while (true) {
-            if ($this->threadCount() < $this->balancer) {
+            if (static::threadQty() < $this->balancer) {
                 $complianceCallable();
             } else {
                 if ($negationCallable !== null) {
@@ -102,7 +92,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
             Extra::store(static::$EC_MAIN)->write(static::stmName(), new CStatus(
                 pid: $this->pid,
                 className: static::class,
-                condition: CCondition::STARTED,
+                condition: Condition::STARTED,
                 startedAt: time(),
                 balancer: $this->balancer,
                 info: []
@@ -161,10 +151,10 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
      */
     final public static function dispatch(mixed $data = null): int
     {
-        $status = static::status();
-        if ($status) {
+        $info = static::status();
+        if ($info) {
             throw new ThreadException(
-                "Cluster process already exist [PID:{$status->pid}] ({$status->getStartedAt()})",
+                "Cluster process already exist [PID:{$info->status->pid}] ({$info->status->getStartedAt()})",
                 HttpCode::LOCKED->value
             );
         } else {
@@ -172,7 +162,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
         }
     }
 
-    public static function status(): ?CStatus
+    public static function status(bool $showStats = false): ?CInfo
     {
         try {
             /** @var ?CStatus $status */
@@ -185,7 +175,11 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
                 Extra::store(static::$EC_MAIN)->del(static::stmName());
                 return null;
             }
-            return $status;
+
+            return new CInfo(
+                status: $status,
+                stats: $showStats ? ProcessStats::ofPid($status->pid) : null
+            );
         } catch (FileException $e) {
             return null;
         }
@@ -196,9 +190,9 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
      */
     public static function stop(): bool
     {
-        $status = static::status();
-        if ($status) {
-            return Signal::interrupt($status->pid);
+        $info = static::status();
+        if ($info) {
+            return Signal::interrupt($info->status->pid);
         } else {
             throw new ThreadException('Cluster process has not started', HttpCode::LOCKED->value);
         }

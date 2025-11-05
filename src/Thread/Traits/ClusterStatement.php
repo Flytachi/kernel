@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Thread\Traits;
 
 use Flytachi\Kernel\Extra;
-use Flytachi\Kernel\Src\Thread\Entity\CCondition;
+use Flytachi\Kernel\Src\Thread\Entity\Condition;
 use Flytachi\Kernel\Src\Thread\Entity\CStatus;
+use Flytachi\Kernel\Src\Thread\Entity\Status;
 
 trait ClusterStatement
 {
@@ -31,19 +32,12 @@ trait ClusterStatement
         return count($keys);
     }
 
-    protected function threadCount(): int
-    {
-        $keys = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
-            ->keys();
-        return count($keys);
-    }
-
     final protected function prepare(int $balancer = 1): void
     {
         // start
         /** @var CStatus $status */
         $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
-        $status->condition = CCondition::PREPARATION;
+        $status->condition = Condition::PREPARATION;
         Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
         $this->logger?->debug("set condition => " . $status->condition->name);
 
@@ -58,12 +52,12 @@ trait ClusterStatement
         // end
         /** @var CStatus $status */
         $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
-        $status->condition = CCondition::ACTIVE;
+        $status->condition = Condition::ACTIVE;
         Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
         $this->logger?->debug("set condition => " . $status->condition->name);
     }
 
-    final protected function setCondition(CCondition $newCondition): void
+    final protected function setCondition(Condition $newCondition): void
     {
         /** @var CStatus $status */
         $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
@@ -84,11 +78,10 @@ trait ClusterStatement
     protected function preparationThreadBefore(int $pid): void
     {
         Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
-            ->write("_{$pid}_", new CStatus(
+            ->write("_{$pid}_", new Status(
                 pid: $pid,
-                className: static::class,
-                condition: CCondition::ACTIVE,
-                startedAt: time(),
+                condition: Condition::ACTIVE,
+                startedAt: time()
             ));
         $this->logger?->debug("started");
     }
