@@ -132,7 +132,7 @@ abstract class Header
      */
     public static function inHeader(string $key, string $value, bool $isUcWords = true): bool
     {
-        return str_contains((static::$headers[($isUcWords? ucwords($key) : $key)] ?? ''), $value);
+        return str_contains((static::$headers[($isUcWords ? ucwords($key) : $key)] ?? ''), $value);
     }
 
     /**

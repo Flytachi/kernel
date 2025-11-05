@@ -7,12 +7,11 @@ namespace Flytachi\Kernel\Src\Thread\Entity;
 final class ProcessStatus
 {
     public function __construct(
-        public int              $pid,
+        public int $pid,
         public ProcessCondition $condition,
-        public int              $startedAt,
-        public array            $info = []
-    )
-    {
+        public int $startedAt,
+        public array $info = []
+    ) {
     }
 
     /**

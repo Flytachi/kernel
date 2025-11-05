@@ -9,7 +9,6 @@ final class ProcessInfo
     public function __construct(
         public ProcessStatus $status,
         public ?ProcessStats $stats = null
-    )
-    {
+    ) {
     }
 }

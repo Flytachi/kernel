@@ -101,11 +101,16 @@ class Make extends Cmd
     private function createRestController(string $name): void
     {
         $info = $this->getInfo($name, 'Controller', 'RestControllerTemplate');
-        $this->smartInfo($info,
-            'Rests', 'Rest',
-            'Controllers/Rests', 'Controllers/Rest',
-            'Controller/Rests', 'Controller/Rest',
-            'Controllers', 'Controller'
+        $this->smartInfo(
+            $info,
+            'Rests',
+            'Rest',
+            'Controllers/Rests',
+            'Controllers/Rest',
+            'Controller/Rests',
+            'Controller/Rest',
+            'Controllers',
+            'Controller'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -117,11 +122,16 @@ class Make extends Cmd
     private function createController(string $name): void
     {
         $info = $this->getInfo($name, 'Controller', 'ControllerTemplate');
-        $this->smartInfo($info,
-            'Webs', 'Web',
-            'Controllers/Webs', 'Controllers/Web',
-            'Controller/Webs', 'Controller/Web',
-            'Controllers', 'Controller'
+        $this->smartInfo(
+            $info,
+            'Webs',
+            'Web',
+            'Controllers/Webs',
+            'Controllers/Web',
+            'Controller/Webs',
+            'Controller/Web',
+            'Controllers',
+            'Controller'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -143,12 +153,18 @@ class Make extends Cmd
     private function createMiddleware(string $name): void
     {
         $info = $this->getInfo($name, 'Middleware', 'MiddlewareTemplate');
-        $this->smartInfo($info,
-            'Controllers/Middlewares', 'Controllers/Middleware',
-            'Controller/Middlewares', 'Controller/Middleware',
-            'Utils/Middlewares', 'Utils/Middleware',
-            'Util/Middlewares', 'Util/Middleware',
-            'Middlewares', 'Middleware'
+        $this->smartInfo(
+            $info,
+            'Controllers/Middlewares',
+            'Controllers/Middleware',
+            'Controller/Middlewares',
+            'Controller/Middleware',
+            'Utils/Middlewares',
+            'Utils/Middleware',
+            'Util/Middlewares',
+            'Util/Middleware',
+            'Middlewares',
+            'Middleware'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -186,10 +202,14 @@ class Make extends Cmd
     private function createModel(string $name): void
     {
         $info = $this->getInfo($name, 'Model', 'ModelTemplate');
-        $this->smartInfo($info,
-            'Entity/Models', 'Entity/Model',
-            'Entities/Models', 'Entities/Model',
-            'Models', 'Model'
+        $this->smartInfo(
+            $info,
+            'Entity/Models',
+            'Entity/Model',
+            'Entities/Models',
+            'Entities/Model',
+            'Models',
+            'Model'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -200,9 +220,13 @@ class Make extends Cmd
     private function createDto(string $name): void
     {
         $info = $this->getInfo($name, 'Dto', 'DtoTemplate');
-        $this->smartInfo($info,
-            'Entity/Dto', 'Entities/Dto', 'Dto',
-            'Entity', 'Entities'
+        $this->smartInfo(
+            $info,
+            'Entity/Dto',
+            'Entities/Dto',
+            'Dto',
+            'Entity',
+            'Entities'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -213,10 +237,16 @@ class Make extends Cmd
     private function createRequest(string $name): void
     {
         $info = $this->getInfo($name, 'Request', 'RequestTemplate');
-        $this->smartInfo($info,
-            'Entity/Requests', 'Entity/Request',
-            'Entities/Requests', 'Entities/Request',
-            'Requests', 'Request', 'Entity', 'Entities'
+        $this->smartInfo(
+            $info,
+            'Entity/Requests',
+            'Entity/Request',
+            'Entities/Requests',
+            'Entities/Request',
+            'Requests',
+            'Request',
+            'Entity',
+            'Entities'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -227,11 +257,16 @@ class Make extends Cmd
     private function createResponse(string $name): void
     {
         $info = $this->getInfo($name, '', 'ResponseTemplate');
-        $this->smartInfo($info,
-            'Controllers', 'Controller',
-            'Utils/Responses', 'Utils/Response',
-            'Util/Responses', 'Util/Response',
-            'Responses', 'Response'
+        $this->smartInfo(
+            $info,
+            'Controllers',
+            'Controller',
+            'Utils/Responses',
+            'Utils/Response',
+            'Util/Responses',
+            'Util/Response',
+            'Responses',
+            'Response'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -242,11 +277,16 @@ class Make extends Cmd
     private function createJob(string $name): void
     {
         $info = $this->getInfo($name, 'Job', 'JobTemplate');
-        $this->smartInfo($info,
-            'Threads/Jobs', 'Threads/Job',
-            'Thread/Jobs', 'Thread/Job',
-            'Jobs', 'Job',
-            'Threads', 'Thread'
+        $this->smartInfo(
+            $info,
+            'Threads/Jobs',
+            'Threads/Job',
+            'Thread/Jobs',
+            'Thread/Job',
+            'Jobs',
+            'Job',
+            'Threads',
+            'Thread'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -257,11 +297,16 @@ class Make extends Cmd
     private function createProcess(string $name): void
     {
         $info = $this->getInfo($name, 'Process', 'ProcessTemplate');
-        $this->smartInfo($info,
-            'Threads/Processes', 'Threads/Process',
-            'Thread/Processes', 'Thread/Process',
-            'Processes', 'Process',
-            'Threads', 'Thread'
+        $this->smartInfo(
+            $info,
+            'Threads/Processes',
+            'Threads/Process',
+            'Thread/Processes',
+            'Thread/Process',
+            'Processes',
+            'Process',
+            'Threads',
+            'Thread'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -272,11 +317,16 @@ class Make extends Cmd
     private function createCluster(string $name): void
     {
         $info = $this->getInfo($name, 'Cluster', 'ClusterTemplate');
-        $this->smartInfo($info,
-            'Threads/Clusters', 'Threads/Cluster',
-            'Thread/Clusters', 'Thread/Cluster',
-            'Clusters', 'Cluster',
-            'Threads', 'Thread'
+        $this->smartInfo(
+            $info,
+            'Threads/Clusters',
+            'Threads/Cluster',
+            'Thread/Clusters',
+            'Thread/Cluster',
+            'Clusters',
+            'Cluster',
+            'Threads',
+            'Thread'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -287,11 +337,16 @@ class Make extends Cmd
     private function createWebSocket(string $name): void
     {
         $info = $this->getInfo($name, 'WebSocket', 'WebSocketTemplate');
-        $this->smartInfo($info,
-            'Threads/WebSockets', 'Threads/WebSocket',
-            'Thread/WebSockets', 'Thread/WebSocket',
-            'WebSockets', 'WebSocket',
-            'Threads', 'Thread'
+        $this->smartInfo(
+            $info,
+            'Threads/WebSockets',
+            'Threads/WebSocket',
+            'Thread/WebSockets',
+            'Thread/WebSocket',
+            'WebSockets',
+            'WebSocket',
+            'Threads',
+            'Thread'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);
@@ -302,9 +357,12 @@ class Make extends Cmd
     private function createConfig(string $name): void
     {
         $info = $this->getInfo($name, 'DbConfig', 'DbConfigTemplate');
-        $this->smartInfo($info,
-            'Configs/Databases', 'Config/Database',
-            'Configs', 'Config'
+        $this->smartInfo(
+            $info,
+            'Configs/Databases',
+            'Config/Database',
+            'Configs',
+            'Config'
         );
         $code = file_get_contents($info['template']);
         $code = str_replace("__namespace__", $info['namespace'], $code);

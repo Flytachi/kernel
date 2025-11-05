@@ -49,7 +49,9 @@ trait ClusterStatement
     {
         $store = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false);
         $status = $store->read("_{$threadPid}_");
-        if (!$status) return null;
+        if (!$status) {
+            return null;
+        }
 
         return new ProcessInfo(
             status: $status,

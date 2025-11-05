@@ -15,8 +15,7 @@ final class ProcessStats
         public int $rssKb,
         public string $etime,
         public string $command,
-    )
-    {
+    ) {
     }
 
     public static function ofPid(int $pid): ?self
@@ -48,7 +47,8 @@ final class ProcessStats
         );
     }
 
-    public function rssMb(): float {
+    public function rssMb(): float
+    {
         return $this->rssKb / 1024;
     }
 }

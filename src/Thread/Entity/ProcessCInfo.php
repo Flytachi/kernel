@@ -8,8 +8,7 @@ final class ProcessCInfo
 {
     public function __construct(
         public ProcessCStatus $status,
-        public ?ProcessStats  $stats = null
-    )
-    {
+        public ?ProcessStats $stats = null
+    ) {
     }
 }
