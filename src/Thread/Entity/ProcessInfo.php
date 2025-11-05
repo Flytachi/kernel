@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Thread\Entity;
 
-final class CInfo
+final class ProcessInfo
 {
     public function __construct(
-        public CStatus      $status,
+        public ProcessStatus $status,
         public ?ProcessStats $stats = null
     )
     {

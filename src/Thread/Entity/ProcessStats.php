@@ -37,12 +37,12 @@ final class ProcessStats
 
         list($pid, $ppid, $user, $cpu, $mem, $rss, $etime, $command) = $parts;
         return new self(
-            pid: $pid,
-            ppid: $ppid,
+            pid: (int) $pid,
+            ppid: (int) $ppid,
             user: $user,
-            cpu: $cpu,
-            mem: $mem,
-            rssKb: $rss,
+            cpu: (float) $cpu,
+            mem: (float) $mem,
+            rssKb: (int) $rss,
             etime: $etime,
             command: $command
         );

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Thread\Entity;
 
-final class CStatus
+final class ProcessStatus
 {
     public function __construct(
-        public int       $pid,
-        public string    $className,
-        public Condition $condition,
-        public int       $startedAt,
-        public ?int      $balancer = null,
-        public array     $info = []
+        public int              $pid,
+        public ProcessCondition $condition,
+        public int              $startedAt,
+        public array            $info = []
     )
     {
     }

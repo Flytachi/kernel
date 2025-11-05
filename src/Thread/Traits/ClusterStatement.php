@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Thread\Traits;
 
 use Flytachi\Kernel\Extra;
-use Flytachi\Kernel\Src\Thread\Entity\Condition;
-use Flytachi\Kernel\Src\Thread\Entity\CStatus;
-use Flytachi\Kernel\Src\Thread\Entity\Status;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessCInfo;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessCondition;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessCStatus;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessInfo;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessStats;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessStatus;
 
 trait ClusterStatement
 {
@@ -25,6 +28,24 @@ trait ClusterStatement
         return $keys;
     }
 
+    /**
+     * @param bool $showStats
+     * @return ProcessInfo[]
+     */
+    public static function threadListInfo(bool $showStats = false): array
+    {
+        $store = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false);
+        $keys = $store->keys();
+        foreach ($keys as $key => $path) {
+            $pid = (int) trim($path, '_');
+            $keys[$key] = new ProcessInfo(
+                status: $store->read($path),
+                stats: $showStats ? ProcessStats::ofPid($pid) : null
+            );
+        }
+        return $keys;
+    }
+
     public static function threadQty(): int
     {
         $keys = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
@@ -35,9 +56,9 @@ trait ClusterStatement
     final protected function prepare(int $balancer = 1): void
     {
         // start
-        /** @var CStatus $status */
+        /** @var ProcessCStatus $status */
         $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
-        $status->condition = Condition::PREPARATION;
+        $status->condition = ProcessCondition::PREPARATION;
         Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
         $this->logger?->debug("set condition => " . $status->condition->name);
 
@@ -50,16 +71,16 @@ trait ClusterStatement
         $this->preparation();
 
         // end
-        /** @var CStatus $status */
+        /** @var ProcessCStatus $status */
         $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
-        $status->condition = Condition::ACTIVE;
+        $status->condition = ProcessCondition::ACTIVE;
         Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
         $this->logger?->debug("set condition => " . $status->condition->name);
     }
 
-    final protected function setCondition(Condition $newCondition): void
+    final protected function setCondition(ProcessCondition $newCondition): void
     {
-        /** @var CStatus $status */
+        /** @var ProcessCStatus $status */
         $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
         $status->condition = $newCondition;
         Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
@@ -68,7 +89,7 @@ trait ClusterStatement
 
     final protected function setInfo(array $newInfo): void
     {
-        /** @var CStatus $status */
+        /** @var ProcessCStatus $status */
         $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
         $status->info = $newInfo;
         Extra::store(static::$EC_MAIN)->write(static::stmName(), $status);
@@ -78,9 +99,9 @@ trait ClusterStatement
     protected function preparationThreadBefore(int $pid): void
     {
         Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
-            ->write("_{$pid}_", new Status(
+            ->write("_{$pid}_", new ProcessStatus(
                 pid: $pid,
-                condition: Condition::ACTIVE,
+                condition: ProcessCondition::ACTIVE,
                 startedAt: time()
             ));
         $this->logger?->debug("started");

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Thread\Entity;
 
-enum Condition: int
+enum ProcessCondition: int
 {
     case STARTED = 0;
     case ACTIVE = 1;

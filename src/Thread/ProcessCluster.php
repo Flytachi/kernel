@@ -8,9 +8,9 @@ use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Http\HttpCode;
 use Flytachi\Kernel\Src\Thread\Dispatcher\Dispatcher;
 use Flytachi\Kernel\Src\Thread\Dispatcher\DispatcherInterface;
-use Flytachi\Kernel\Src\Thread\Entity\CInfo;
-use Flytachi\Kernel\Src\Thread\Entity\Condition;
-use Flytachi\Kernel\Src\Thread\Entity\CStatus;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessCInfo;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessCondition;
+use Flytachi\Kernel\Src\Thread\Entity\ProcessCStatus;
 use Flytachi\Kernel\Src\Thread\Entity\ProcessStats;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterHandler;
 use Flytachi\Kernel\Src\Thread\Traits\ClusterStatement;
@@ -89,10 +89,10 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
                 $this->signTermination();
             });
             cli_set_process_title('extra process ' . static::class);
-            Extra::store(static::$EC_MAIN)->write(static::stmName(), new CStatus(
+            Extra::store(static::$EC_MAIN)->write(static::stmName(), new ProcessCStatus(
                 pid: $this->pid,
                 className: static::class,
-                condition: Condition::STARTED,
+                condition: ProcessCondition::STARTED,
                 startedAt: time(),
                 balancer: $this->balancer,
                 info: []
@@ -162,10 +162,10 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
         }
     }
 
-    public static function status(bool $showStats = false): ?CInfo
+    public static function status(bool $showStats = false): ?ProcessCInfo
     {
         try {
-            /** @var ?CStatus $status */
+            /** @var ?ProcessCStatus $status */
             $status = Extra::store(static::$EC_MAIN)->read(static::stmName());
             if (!$status) {
                 return null;
@@ -176,7 +176,7 @@ abstract class ProcessCluster extends Dispatcher implements DispatcherInterface
                 return null;
             }
 
-            return new CInfo(
+            return new ProcessCInfo(
                 status: $status,
                 stats: $showStats ? ProcessStats::ofPid($status->pid) : null
             );
