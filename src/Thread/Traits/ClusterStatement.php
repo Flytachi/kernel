@@ -17,7 +17,7 @@ trait ClusterStatement
     {
     }
 
-    public static function threadList(): array
+    final public static function threadList(): array
     {
         $keys = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
             ->keys();
@@ -31,7 +31,7 @@ trait ClusterStatement
      * @param bool $showStats
      * @return ProcessInfo[]
      */
-    public static function threadListInfo(bool $showStats = false): array
+    final public static function threadListInfo(bool $showStats = false): array
     {
         $store = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false);
         $keys = $store->keys();
@@ -45,7 +45,7 @@ trait ClusterStatement
         return $keys;
     }
 
-    public static function threadInfo(int $threadPid, bool $showStats = false): ?ProcessInfo
+    final public static function threadInfo(int $threadPid, bool $showStats = false): ?ProcessInfo
     {
         $store = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false);
         $status = $store->read("_{$threadPid}_");
@@ -57,7 +57,7 @@ trait ClusterStatement
         );
     }
 
-    final protected function threadSetCondition(int $threadPid, ProcessCondition $newCondition): void
+    final public static function threadSetCondition(int $threadPid, ProcessCondition $newCondition): void
     {
         $store = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false);
         /** @var ProcessStatus $status */
@@ -67,7 +67,7 @@ trait ClusterStatement
         $this->logger?->debug("set condition => " . $newCondition->name);
     }
 
-    public static function threadQty(): int
+    final public static function threadQty(): int
     {
         $keys = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
             ->keys();
