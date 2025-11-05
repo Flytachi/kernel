@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Flytachi\Kernel\Src\Thread\Traits;
 
 use Flytachi\Kernel\Extra;
-use Flytachi\Kernel\Src\Thread\Entity\ProcessCInfo;
 use Flytachi\Kernel\Src\Thread\Entity\ProcessCondition;
 use Flytachi\Kernel\Src\Thread\Entity\ProcessCStatus;
 use Flytachi\Kernel\Src\Thread\Entity\ProcessInfo;
@@ -44,6 +43,18 @@ trait ClusterStatement
             );
         }
         return $keys;
+    }
+
+    public static function threadInfo(int $threadPid, bool $showStats = false): ?ProcessInfo
+    {
+        $store = Extra::store(static::$EC_THREADS . '/' . static::stmName(), false);
+        $status = $store->read("_{$threadPid}_");
+        if (!$status) return null;
+
+        return new ProcessInfo(
+            status: $status,
+            stats: $showStats ? ProcessStats::ofPid($threadPid) : null
+        );
     }
 
     public static function threadQty(): int
@@ -101,7 +112,7 @@ trait ClusterStatement
         Extra::store(static::$EC_THREADS . '/' . static::stmName(), false)
             ->write("_{$pid}_", new ProcessStatus(
                 pid: $pid,
-                condition: ProcessCondition::ACTIVE,
+                condition: ProcessCondition::STARTED,
                 startedAt: time()
             ));
         $this->logger?->debug("started");
