@@ -63,8 +63,7 @@ trait ClusterStatement
         /** @var ProcessStatus $status */
         $status = $store->read("_{$threadPid}_");
         $status->condition = $newCondition;
-        $store->write(static::stmName(), $status);
-        $this->logger?->debug("set condition => " . $newCondition->name);
+        $store->write("_{$threadPid}_", $status);
     }
 
     final public static function threadQty(): int
