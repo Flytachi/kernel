@@ -41,13 +41,13 @@ trait ValidateTrait
      *        - String-based rules: 'boolean', 'numeric', 'array', 'string', 'range:1,100'.
      *        - Custom rules: anonymous functions that accept the property value
      *          and return `true` (if validation passes) or `false`.
-     * @param bool $checkIfNull If false, validation is skipped for null or non-existent fields.
+     * @param bool $required If false, validation is skipped for null or non-existent fields.
      *
      * @return static Returns `$this` to allow method chaining.
      */
-    final protected function validate(string $field, array $rules, bool $checkIfNull = true): static
+    final protected function validate(string $field, array $rules, bool $required = true): static
     {
-        if (!$checkIfNull && (!property_exists($this, $field) || $this->$field === null)) {
+        if (!$required && (!property_exists($this, $field) || $this->$field === null)) {
             return $this;
         }
 
@@ -65,7 +65,7 @@ trait ValidateTrait
 
         $value = $this->validateDataGet($this, $field);
 
-        if (!$checkIfNull && ($value === null)) {
+        if (!$required && ($value === null)) {
             return $this;
         }
 
