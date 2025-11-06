@@ -9,7 +9,7 @@ RUN apk update && apk add --no-cache php83 \
     php83-posix php83-mbstring php83-simplexml \
     php83-iconv php83-pdo php83-fpm php83-curl \
     php83-openssl php83-sockets php83-opcache \
-    curl nginx runit
+    curl nginx runit procps
 
 #  =>  PostgreSql
 RUN apk add --no-cache php83-pgsql php83-pdo_pgsql
