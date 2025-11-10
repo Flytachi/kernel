@@ -51,16 +51,16 @@ trait ProcessEasyHandler
 
     protected function asInterrupt(): void
     {
-        $this->logger?->alert("INTERRUPTED");
+        $this->logger?->notice("INTERRUPTED");
     }
 
     protected function asTermination(): void
     {
-        $this->logger?->critical("TERMINATION");
+        $this->logger?->warning("TERMINATION");
     }
 
     protected function asClose(): void
     {
-        $this->logger?->alert("CLOSE");
+        $this->logger?->notice("CLOSE");
     }
 }

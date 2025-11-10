@@ -84,34 +84,34 @@ trait ClusterHandler
 
     protected function asInterrupt(): void
     {
-        $this->logger?->alert("INTERRUPTED");
+        $this->logger?->notice("INTERRUPTED");
     }
 
     protected function asTermination(): void
     {
-        $this->logger?->critical("TERMINATION");
+        $this->logger?->warning("TERMINATION");
     }
 
     protected function asClose(): void
     {
-        $this->logger?->alert("CLOSE");
+        $this->logger?->notice("CLOSE");
     }
 
     protected function asChildInterrupt(): void
     {
         $this->preparationThreadAfter($this->pid);
-        $this->logger?->alert("INTERRUPTED CHILD");
+        $this->logger?->notice("INTERRUPTED CHILD");
     }
 
     protected function asChildTermination(): void
     {
         $this->preparationThreadAfter($this->pid);
-        $this->logger?->critical("TERMINATION CHILD");
+        $this->logger?->warning("TERMINATION CHILD");
     }
 
     protected function asChildClose(): void
     {
         $this->preparationThreadAfter($this->pid);
-        $this->logger?->alert("CLOSE CHILD");
+        $this->logger?->notice("CLOSE CHILD");
     }
 }
