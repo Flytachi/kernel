@@ -7,27 +7,36 @@ namespace Flytachi\Kernel\Src\Factory\Error;
 use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Http\Header;
 use Flytachi\Kernel\Src\Http\HttpCode;
+use Flytachi\Kernel\Src\Http\Response\AcceptHeaderParser;
+use Flytachi\Kernel\Src\Http\Response\ContentType;
 use Flytachi\Kernel\Src\Unit\File\XML;
 
 abstract class ExceptionWrapper
 {
     private static $instance = self::class;
+    private static $headers = [];
 
     public static function getHeader(): array
     {
-        $accept = Header::getHeader('Accept');
-        if (str_contains($accept, 'text/html')) {
-            return ['Content-Type' => 'text/html; charset=utf-8'];
-        } else {
-            return ['Content-Type' => $accept];
-        }
+        return self::$headers;
+    }
+
+    final public static function addHeader(string $key, string $value): void
+    {
+        self::$headers[$key] = $value;
     }
 
     public static function getBody(\Throwable $throwable): string
     {
-        return match (Header::getHeader('Accept')) {
-            'application/json' => self::constructJson($throwable),
-            'application/xml' => self::constructXml($throwable),
+        $contentType = AcceptHeaderParser::getBestMatch(
+            Header::getHeader('Accept')
+        );
+        if ($contentType !== ContentType::UNDEFINED) {
+            self::addHeader('Content-Type', $contentType->headerFullValue());
+        }
+        return match ($contentType) {
+            ContentType::JSON => self::constructJson($throwable),
+            ContentType::XML => self::constructXml($throwable),
             default => self::constructDefault($throwable)
         };
     }
