@@ -262,6 +262,6 @@ if (!function_exists('trans')) {
      */
     function trans(string $key, ?array $params = null): string
     {
-        return \Flytachi\Kernel\Src\Http\Locale::translate($key, $params);
+        return \Flytachi\Kernel\Src\Localization\Locale::translate($key, $params);
     }
 }

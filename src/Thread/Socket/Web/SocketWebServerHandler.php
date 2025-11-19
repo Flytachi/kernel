@@ -52,7 +52,7 @@ trait SocketWebServerHandler
     protected function asInterrupt(): void
     {
         $this->socketClose();
-        $this->logger?->alert("INTERRUPTED");
+        $this->logger?->notice("INTERRUPTED");
     }
 
     protected function asTermination(): void
@@ -64,6 +64,6 @@ trait SocketWebServerHandler
     protected function asClose(): void
     {
         $this->socketClose();
-        $this->logger?->alert("CLOSE");
+        $this->logger?->notice("CLOSE");
     }
 }

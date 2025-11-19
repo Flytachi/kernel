@@ -103,17 +103,17 @@ abstract class SocketWebServer extends Dispatcher implements DispatcherInterface
 
     protected function handle(Resource &$resource, Msg $msg): void
     {
-        $this->logger?->alert("handle: {$resource} => Send {$msg}");
+        $this->logger?->notice("handle: {$resource} => Send {$msg}");
     }
 
     protected function handleConnect(Resource &$resource): void
     {
-        $this->logger?->alert("handleConnect: {$resource} => New connection accepted");
+        $this->logger?->notice("handleConnect: {$resource} => New connection accepted");
     }
 
     protected function handleDisconnect(Resource &$resource): void
     {
-        $this->logger?->alert("handleDisconnect: {$resource} => Connection closing");
+        $this->logger?->notice("handleDisconnect: {$resource} => Connection closing");
     }
 
     final protected function socketStart(int $rps = 2, int $timeWorkLimit = 0): void

@@ -2,57 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Flytachi\Kernel\Src\Http;
+namespace Flytachi\Kernel\Src\Localization;
 
-use Flytachi\Kernel\Extra;
 use Flytachi\Kernel\Src\Unit\Tool;
 
-final class Locale
+class LocaleService
 {
-    private static ?Locale $locale = null;
-    private string $path;
-    private string $lang;
+    private string $langPath;
+    private string $currentLang;
+    private array $dictionary = [];
+    private bool $isLoaded = false;
 
-    final public function __construct(
-        string $path,
-        string $lang = 'en'
-    ) {
-        $this->path = $path;
-        $this->lang = $lang;
+    public function __construct(string $langPath, string $currentLang)
+    {
+        $this->langPath = rtrim($langPath, '/');
+        $this->currentLang = $currentLang;
     }
 
-    private static function init(): void
+    public function getLang(): string
     {
-        if (self::$locale === null) {
-            self::$locale = new Locale(
-                Extra::$pathRoot . '/lang',
-                Header::getHeader('Accept-Language') ?: 'en'
-            );
-        }
+        return $this->currentLang;
     }
 
-    public static function setPath(string $path): void
+    public function getPath(): string
     {
-        self::init();
-        self::$locale->path = rtrim($path, '/');
-    }
-
-    public static function setLang(string $lang): void
-    {
-        self::init();
-        self::$locale->lang = trim($lang, '/');
-    }
-
-    public static function getPath(): string
-    {
-        self::init();
-        return self::$locale->path;
-    }
-
-    public static function getLang(): string
-    {
-        self::init();
-        return self::$locale->lang;
+        return $this->langPath;
     }
 
     /**
@@ -86,21 +60,24 @@ final class Locale
      *
      * @return string The translated string or the key if no translation is found.
      */
-    public static function translate(string $key, ?array $params = null): string
+    public function translate(string $key, ?array $params = null): string
     {
-        self::init();
-        // include
-        if (!isset($GLOBALS['DICTIONARY'])) {
-            $path = self::$locale->path . '/' . self::$locale->lang . '.php';
-            $GLOBALS['DICTIONARY'] = file_exists($path) ? include $path : [];
-        }
-        // return
-        $value = Tool::arrayNestedValue($GLOBALS['DICTIONARY'], explode('.', $key));
+        $this->loadDictionary();
+        $value = Tool::arrayNestedValue($this->dictionary, explode('.', $key));
 
         if (is_string($value) && !empty($value)) {
             return empty($params) ? $value : sprintf($value, ...$params);
-        } else {
-            return $key;
         }
+        return $key;
+    }
+
+    private function loadDictionary(): void
+    {
+        if ($this->isLoaded) {
+            return;
+        }
+        $path = "{$this->langPath}/{$this->currentLang}.php";
+        $this->dictionary = file_exists($path) ? (include $path) : [];
+        $this->isLoaded = true;
     }
 }

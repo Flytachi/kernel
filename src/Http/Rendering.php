@@ -23,20 +23,20 @@ final class Rendering
     {
         if ($resource instanceof ResponseInterface) {
             $this->httpCode = $resource->getHttpCode();
-            $this->header = $resource->getHeader();
             $this->body = $resource->getBody();
+            $this->header = $resource->getHeader();
         } elseif ($resource instanceof ResponseFileContentInterface) {
             $this->httpCode = $resource->getHttpCode();
-            $this->header = $resource->getHeader();
             $this->body = $resource->getBody();
             $this->resource = $resource->getFileName();
             $this->action = 2;
+            $this->header = $resource->getHeader();
         } elseif ($resource instanceof ViewInterface) {
             $this->httpCode = $resource->getHttpCode();
-            $this->header = $resource->getHeader();
             $this->resource = $resource->getResource();
             $this->body = $resource->getData();
             $this->action = 1;
+            $this->header = $resource->getHeader();
             ResourceTree::init(
                 $resource->getCallClass(),
                 $resource->getCallClassMethod(),
@@ -46,8 +46,8 @@ final class Rendering
         } elseif ($resource instanceof \Throwable) {
             $this->httpCode = HttpCode::tryFrom((int) $resource->getCode()) ?: HttpCode::UNKNOWN_ERROR;
             $this->logging($resource);
-            $this->header = ExceptionWrapper::wrapHeader();
             $this->body = ExceptionWrapper::wrapBody($resource);
+            $this->header = ExceptionWrapper::wrapHeader();
         } else {
             $this->httpCode = empty($resource) ? HttpCode::NO_CONTENT : HttpCode::OK;
             $this->body = $resource;
