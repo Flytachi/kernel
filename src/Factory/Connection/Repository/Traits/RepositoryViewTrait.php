@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Flytachi\Kernel\Src\Factory\Connection\Repository\Traits;
 
+use Flytachi\Kernel\Src\Errors\ClientError;
 use Flytachi\Kernel\Src\Factory\Connection\Qb;
 use Flytachi\Kernel\Src\Factory\Connection\Repository\RepositoryException;
+use Flytachi\Kernel\Src\Http\HttpCode;
 use PDO;
 use stdClass;
 
@@ -111,16 +113,17 @@ trait RepositoryViewTrait
      * @param string $message The error message to be thrown if the record is not found. Defaults to 'Object not found'.
      *
      * @return object Returns the found record if it exists.
-     * @throws RepositoryException
+     * @throws ClientError|RepositoryException
      */
     final public static function findByIdOrThrow(
         int|string $id,
         ?string $modelClassName = null,
-        string $message = 'Object not found'
+        string $message = 'Object not found',
+        HttpCode $httpCode = HttpCode::NOT_FOUND
     ): object {
-        $obj = static::findById($id);
+        $obj = static::findById($id, $modelClassName);
         if (!$obj) {
-            throw new RepositoryException($message);
+            throw new ClientError($message, $httpCode->value);
         }
         return $obj;
     }
@@ -147,16 +150,17 @@ trait RepositoryViewTrait
      * @param string $message The error message to throw if the record is not found. Defaults to 'Object not found'.
      *
      * @return object Returns the found record if it exists, or throws
-     * @throws RepositoryException
+     * @throws ClientError|RepositoryException
      */
     final public static function findByOrThrow(
         Qb $qb,
         ?string $modelClassName = null,
-        string $message = 'Object not found'
+        string $message = 'Object not found',
+        HttpCode $httpCode = HttpCode::NOT_FOUND
     ): object {
-        $obj = static::findBy($qb);
+        $obj = static::findBy($qb, $modelClassName);
         if (!$obj) {
-            throw new RepositoryException($message);
+            throw new ClientError($message, $httpCode->value);
         }
         return $obj;
     }

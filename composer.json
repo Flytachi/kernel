@@ -3,7 +3,7 @@
     "description": "Extra Framework kernel",
     "type": "library",
     "license": "MIT",
-    "version": "5.8.1",
+    "version": "5.8.2",
     "autoload": {
         "psr-4": {
             "Flytachi\\Kernel\\": "/",
